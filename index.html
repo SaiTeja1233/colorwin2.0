@@ -1,1778 +1,767 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>WinGo Pattern Pro</title>
-        <link rel="stylesheet" href="styles.css" />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-            rel="stylesheet"
-        />
-        <!-- Font Awesome for copy icon -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
-            /* Add CSS for toast notifications */
-            .toast-notification {
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%) translateY(100px);
-                background: var(--card-bg);
-                color: var(--text-primary);
-                padding: 12px 24px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                z-index: 1000;
-                font-size: 14px;
-                font-weight: 500;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                opacity: 0;
-                transition: all 0.3s ease;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>WINGO UNEXPECTED PATTERN PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Inter", sans-serif;
+            background: #0a0c12;
+            color: white;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .header h1 {
+            font-family: "Orbitron";
+            font-size: 0.9rem;
+            text-align: center;
+            background: linear-gradient(135deg, #a855f7, #ec489a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .gaming-card {
+            background: rgba(18, 22, 35, 0.9);
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            background: rgba(139, 92, 246, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 {
+            font-family: "Orbitron";
+            font-size: 0.55rem;
+            color: #a855f7;
+            text-transform: uppercase;
+        }
+        .card-content {
+            padding: 8px;
+        }
+        .prediction-box {
+            background: rgba(250, 204, 21, 0.08);
+            border: 1px solid #facc15;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: none;
+        }
+        .prediction-box.active {
+            display: block;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.2);
+        }
+        .pred-range {
+            font-family: "Orbitron";
+            font-size: 0.5rem;
+            color: #c084fc;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .pred-value {
+            font-family: "Orbitron";
+            font-size: 1.3rem;
+            color: #facc15;
+            font-weight: 900;
+        }
+        .pred-numbers {
+            font-family: "Orbitron";
+            font-size: 1rem;
+            color: #ffb347;
+            margin-top: 5px;
+        }
+        .period-display-gaming {
+            background: #05060a;
+            border-radius: 8px;
+            padding: 6px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .next-period-value {
+            font-family: "Orbitron";
+            font-size: 1.1rem;
+            color: #facc15;
+            font-weight: bold;
+        }
+        .input-area {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+        .gaming-input {
+            flex: 1;
+            background: #000;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px;
+            color: white;
+            font-family: "Orbitron";
+            text-align: center;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+        .gaming-input:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+        .gaming-btn {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: "Orbitron";
+            font-size: 0.6rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.1s;
+        }
+        .btn-primary-gaming {
+            background: #8b5cf6;
+            color: white;
+        }
+        .btn-predict {
+            background: #facc15;
+            color: #0a0c12;
+            margin-top: 6px;
+            width: 100%;
+        }
+        .btn-predict:active {
+            transform: scale(0.97);
+        }
+        .gaming-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.65rem;
+        }
+        .gaming-table th {
+            padding: 5px 3px;
+            font-family: "Orbitron";
+            font-size: 0.45rem;
+            color: #a855f7;
+            border-bottom: 1px solid #333;
+        }
+        .gaming-table td {
+            padding: 5px 3px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .number-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Orbitron";
+            font-weight: 900;
+            font-size: 0.65rem;
+            color: white;
+            margin: 0 auto;
+        }
+        .number-even {
+            background: #ff3131;
+            box-shadow: 0 0 3px #ff3131;
+        }
+        .number-odd {
+            background: #00ff88;
+            color: #05060a;
+            box-shadow: 0 0 3px #00ff88;
+        }
+        .win-text {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 0.55rem;
+        }
+        .loss-text {
+            color: #ff3131;
+            font-weight: bold;
+            font-size: 0.55rem;
+        }
+        .range-text {
+            font-size: 0.5rem;
+            color: #8b9bb0;
+            font-family: "Orbitron";
+        }
+        .view-toggle {
+            display: flex;
+            background: #05060a;
+            border-radius: 20px;
+            padding: 3px;
+            margin: 10px 0;
+            border: 1px solid #333;
+        }
+        .tab-item {
+            flex: 1;
+            padding: 5px;
+            font-family: "Orbitron";
+            font-size: 0.5rem;
+            color: #6b7280;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 16px;
+        }
+        .tab-item.active {
+            background: #8b5cf6;
+            color: white;
+        }
+        .chaos-badge {
+            font-size: 0.4rem;
+            background: #ec489a20;
+            color: #f472b6;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .status-msg {
+            font-size: 0.45rem;
+            color: #8b5cf6;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header"><h1>WINGO UNEXPECTED PATTERN PRO</h1></div>
 
-            .toast-notification.show {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
+    <div id="setupArea" class="gaming-card">
+        <div class="card-content" style="text-align: center; padding: 15px">
+            <p style="font-size: 0.55rem; color: #8b9bb0; margin-bottom: 10px; font-family: 'Orbitron';">SET STARTING PERIOD</p>
+            <input type="text" id="initPeriod" class="gaming-input" style="width: 120px; margin-bottom: 10px" placeholder="001" value="001" />
+            <button class="gaming-btn btn-primary-gaming" style="width: 100%" onclick="startSystem()">START ANALYZER</button>
+        </div>
+    </div>
 
-            /* Add CSS for pattern break styling */
-            .pattern-break {
-                color: #FF9800 !important;
-                font-weight: 600;
-            }
+    <div id="mainEngine" style="display: none">
+        <div class="prediction-box" id="pBox">
+            <div class="pred-range" id="pRange">ANALYZING UNEXPECTED PATTERN...</div>
+            <div class="pred-value" id="pVal">---</div>
+            <div class="pred-numbers" id="pNumbers"></div>
+            <div class="chaos-badge" id="chaosBadge"></div>
+        </div>
 
-            .pattern-loss-recovery {
-                color: #FF5722 !important;
-                font-weight: 700;
-            }
-
-            /* Add CSS for period input placeholder */
-            .period-input::placeholder {
-                color: #666;
-                font-style: italic;
-            }
-
-            /* Loss streak indicator */
-            .loss-streak {
-                background: linear-gradient(135deg, #FF5722, #FF9800);
-                color: white;
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-size: 0.7rem;
-                font-weight: bold;
-                margin-left: 5px;
-            }
-            
-            /* Pattern count badge */
-            .pattern-count-badge {
-                background: linear-gradient(135deg, #8b5cf6, #6366f1);
-                color: white;
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                margin-left: 10px;
-            }
-            
-            /* Confidence 100% special styling */
-            .confidence-100 {
-                color: #ffcc00;
-                font-weight: 800;
-                text-shadow: 0 0 10px rgba(255,204,0,0.5);
-            }
-
-            /* Enhanced trend indicators */
-            .trend-badge {
-                display: inline-block;
-                padding: 2px 8px;
-                border-radius: 12px;
-                font-size: 0.7rem;
-                font-weight: 600;
-                margin-left: 5px;
-            }
-            .trend-big { background: #ffcc00; color: black; }
-            .trend-small { background: #8b5cf6; color: white; }
-            .trend-red { background: #ff4444; color: white; }
-            .trend-green { background: #00ff88; color: black; }
-
-            /* Size prediction badge */
-            .size-badge {
-                background: linear-gradient(135deg, #ffcc00, #ff9900);
-                color: black;
-                padding: 2px 8px;
-                border-radius: 12px;
-                font-size: 0.7rem;
-                font-weight: bold;
-                margin-left: 5px;
-            }
-            
-            /* Color prediction badge (rare) */
-            .color-badge-rare {
-                background: linear-gradient(135deg, #ff4444, #ff8888);
-                color: white;
-                padding: 2px 8px;
-                border-radius: 12px;
-                font-size: 0.7rem;
-                font-weight: bold;
-                margin-left: 5px;
-                animation: pulse 1.5s infinite;
-            }
-
-            @keyframes pulse {
-                0% { opacity: 0.8; }
-                50% { opacity: 1; transform: scale(1.05); }
-                100% { opacity: 0.8; }
-            }
-
-            /* Top 4 Numbers Vertical Table */
-            .top4-vertical-container {
-                background: rgba(26, 26, 46, 0.8);
-                backdrop-filter: blur(10px);
-                border-radius: 15px;
-                padding: 15px;
-                margin: 10px 0 20px 0;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .top4-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .top4-header h3 {
-                color: #ffcc00;
-                font-size: 1rem;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-
-            .pattern-suggestion {
-                background: rgba(255, 204, 0, 0.15);
-                color: #ffcc00;
-                padding: 5px 12px;
-                border-radius: 20px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                border: 1px solid rgba(255, 204, 0, 0.3);
-            }
-
-            .top4-table {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .top4-row {
-                display: flex;
-                align-items: center;
-                background: rgba(0, 0, 0, 0.2);
-                border-radius: 10px;
-                padding: 8px 12px;
-                border-left: 4px solid transparent;
-                transition: all 0.2s ease;
-            }
-
-            .top4-row.size-streak {
-                border-left-color: #ffcc00;
-                background: rgba(255, 204, 0, 0.1);
-            }
-
-            .top4-row.color-streak {
-                border-left-color: #ff4444;
-                background: rgba(255, 68, 68, 0.1);
-            }
-
-            .top4-position {
-                width: 30px;
-                color: #888;
-                font-size: 0.8rem;
-                font-weight: 600;
-            }
-
-            .top4-number {
-                width: 45px;
-                height: 45px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.3rem;
-                font-weight: 700;
-                margin: 0 10px;
-            }
-
-            .top4-number.red {
-                background: linear-gradient(135deg, #ff4444, #cc0000);
-                color: white;
-            }
-
-            .top4-number.green {
-                background: linear-gradient(135deg, #00ff88, #00cc66);
-                color: black;
-            }
-
-            .top4-number.red-violet {
-                background: linear-gradient(135deg, #ff4444 40%, #8b5cf6 100%);
-                color: white;
-            }
-
-            .top4-number.green-violet {
-                background: linear-gradient(135deg, #00ff88 40%, #8b5cf6 100%);
-                color: black;
-            }
-
-            .top4-details {
-                flex: 1;
-                display: flex;
-                gap: 15px;
-                margin-left: 10px;
-            }
-
-            .top4-color {
-                font-size: 0.8rem;
-                padding: 3px 10px;
-                border-radius: 15px;
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            .top4-color.red-text { color: #ff4444; }
-            .top4-color.green-text { color: #00ff88; }
-
-            .top4-size {
-                font-size: 0.8rem;
-                padding: 3px 10px;
-                border-radius: 15px;
-                background: rgba(255, 255, 255, 0.05);
-            }
-
-            .top4-size.big-text { color: #ffcc00; }
-            .top4-size.small-text { color: #8b5cf6; }
-
-            .pattern-indicator {
-                font-size: 0.7rem;
-                padding: 2px 8px;
-                border-radius: 12px;
-                background: rgba(255, 255, 255, 0.1);
-                color: #888;
-                margin-left: 5px;
-            }
-
-            .break-suggestion-container {
-                margin-top: 15px;
-                padding: 12px;
-                background: rgba(0, 0, 0, 0.3);
-                border-radius: 10px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border: 1px solid rgba(255, 204, 0, 0.3);
-            }
-
-            .break-text {
-                color: #888;
-                font-size: 0.9rem;
-            }
-
-            .break-text strong {
-                color: #ffcc00;
-                font-size: 1.1rem;
-                margin: 0 5px;
-            }
-
-            .break-prediction {
-                background: linear-gradient(135deg, #ffcc00, #ff9900);
-                color: black;
-                padding: 8px 20px;
-                border-radius: 25px;
-                font-weight: 700;
-                font-size: 1.1rem;
-                border: none;
-                box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
-            }
-
-            .break-prediction.size { background: linear-gradient(135deg, #ffcc00, #ff9900); }
-            .break-prediction.color { background: linear-gradient(135deg, #ff4444, #ff8888); color: white; }
-
-            /* Responsive */
-            @media (max-width: 480px) {
-                .top4-details {
-                    gap: 8px;
-                    flex-wrap: wrap;
-                }
-                .top4-number {
-                    width: 35px;
-                    height: 35px;
-                    font-size: 1.1rem;
-                }
-                .break-suggestion-container {
-                    flex-direction: column;
-                    gap: 10px;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <!-- Animated falling numbers background -->
-        <div class="falling-numbers" id="fallingNumbers"></div>
-
-        <div class="container">
-            <!-- Login Screen -->
-            <div id="login" class="login-box">
-                <div class="header">
-                    <h1 class="login-title">WinGo Pattern Pro</h1>
-                    <p style="color: var(--text-secondary); margin-bottom: 25px;">
-                        Advanced Pattern Recognition System
-                    </p>
+        <div class="gaming-card">
+            <div class="card-content">
+                <div class="period-display-gaming">
+                    <span style="font-family: 'Orbitron'; font-size: 0.5rem; color: #8b9bb0;">UPCOMING PERIOD</span>
+                    <div class="next-period-value" id="dispPeriod">---</div>
                 </div>
-                
-                <div class="input-group">
-                    <input
-                        type="password"
-                        id="keyInput"
-                        class="login-input"
-                        placeholder="●●●●●●"
-                        autocomplete="off"
-                        autofocus
-                        maxlength="6"
-                    />
+                <div class="input-area">
+                    <input type="text" id="numInput" class="gaming-input" placeholder="0 1 2 3" inputmode="numeric" />
+                    <button class="gaming-btn btn-primary-gaming" onclick="processBulkInput()">ADD</button>
                 </div>
-                
-                <!-- Single Enter Button for Login -->
-                <div style="display: flex; justify-content: center; margin-top: 15px;">
-                    <button class="btn btn-primary" onclick="checkKey()" style="min-width: 150px;">
-                        ENTER
-                    </button>
+                <div class="flex-col">
+                    <button class="gaming-btn btn-predict" onclick="generateUnexpectedPrediction()">🎲 PREDICT UNEXPECTED</button>
                 </div>
-                
-                <div id="error" class="error-message"></div>
-            </div>
-
-            <!-- Main App (Hidden until login) -->
-            <div id="app" style="display: none">
-                <div class="header">
-                    <h1>Pattern Analysis</h1>
-                    <div id="periodDisplay" class="period-display">
-                        <span class="period-label">PERIOD:</span>
-                        <span id="periodNumber" class="period-number">Enter period No</span>
-                    </div>
-                </div>
-
-                <!-- Top 4 Numbers Vertical Table with Color and Size -->
-                <div class="top4-vertical-container" id="top4Container" style="display: none;">
-                    <div class="top4-header">
-                        <h3>📊 TOP 4 PATTERN ANALYSIS</h3>
-                        <div class="pattern-suggestion" id="patternSuggestion">Analyzing...</div>
-                    </div>
-                    <div class="top4-table" id="top4Table"></div>
-                    <div class="break-suggestion-container" id="breakSuggestion">
-                        <span class="break-text">Pattern Break Suggestion:</span>
-                        <div class="break-prediction" id="breakPrediction">WAITING</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="input-controls">
-                        <div class="input-with-buttons">
-                            <div class="input-row">
-                                <input
-                                    id="periodInput"
-                                    class="period-input"
-                                    placeholder="Enter period number"
-                                    autocomplete="off"
-                                    maxlength="3"
-                                />
-                                <input
-                                    id="batchInput"
-                                    class="batch-input"
-                                    placeholder="Enter numbers 0-9"
-                                    autocomplete="off"
-                                />
-                            </div>
-                            <div class="action-buttons">
-                                <button
-                                    class="btn btn-secondary"
-                                    onclick="processBatch()"
-                                >
-                                    Add Numbers
-                                </button>
-                                <button
-                                    class="btn btn-danger"
-                                    onclick="clearData()"
-                                >
-                                    Clear All
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="circles-container" id="circles"></div>
-
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Period</th>
-                                <th>Num</th>
-                                <th>Color</th>
-                                <th>Size</th>
-                                <th>Prediction</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyBody"></tbody>
-                    </table>
-                </div>
+                <p id="statusMsg" class="status-msg">📊 ADD 15+ NUMBERS TO DETECT UNEXPECTED PATTERN</p>
             </div>
         </div>
 
-        <!-- SINGLE PREDICTION BUTTON (Fixed at bottom) -->
-        <button
-            id="prediction-btn"
-            class="btn-prediction"
-            onclick="showPrediction()"
-        >
-            🔮 TOP 4 PATTERN BREAK
-        </button>
-
-        <!-- Copy Button (Sticky at bottom right) -->
-        <button id="copyButton" class="copy-button" onclick="copyPrediction()">
-            <i class="fas fa-copy"></i>
-        </button>
-
-        <!-- Enhanced Fixed Bottom Prediction Modal -->
-        <div id="predictionModal" class="prediction-modal">
-            <button class="close-btn" onclick="closePrediction()">×</button>
-
-            <div class="prediction-content">
-                <div class="prediction-header">
-                    <div class="prediction-period">PERIOD: <span id="modalPeriodNumber">250</span></div>
-                    <div id="patternCountDisplay" class="pattern-count-badge">0 PATTERNS</div>
-                </div>
-                
-                <div class="prediction-main-container">
-                    <!-- Color/Size Prediction -->
-                    <div id="modalPredictionMain" class="prediction-main">
-                        <div class="main-prediction-title">🎯 PATTERN BREAK PREDICTION</div>
-                        <div class="main-prediction-value">BIG</div>
-                        <div id="predictionStrategy" class="main-prediction-subtitle">ANALYZING TOP 4 PATTERNS</div>
-                        <div id="predictionTypeBadge" class="size-badge">SIZE</div>
-                    </div>
-                    
-                    <!-- Number Predictions -->
-                    <div class="number-predictions">
-                        <div class="number-prediction-title">NUMBER PREDICTIONS</div>
-                        <div class="number-prediction-row">
-                            <div id="numberPrediction1" class="number-prediction-box">
-                                <div class="number-value-small">5</div>
-                                <div class="number-type">Big</div>
-                            </div>
-                            <div id="numberPrediction2" class="number-prediction-box">
-                                <div class="number-value-small">7</div>
-                                <div class="number-type">Big</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="patternInfo" class="pattern-info">
-                    ✅ ANALYZING TOP 4 PATTERNS
-                </div>
-
-                <div class="countdown-timer">
-                    <span>Auto close:</span>
-                    <span id="countdown" class="countdown-number">10</span>
-                    <span>sec</span>
-                </div>
-            </div>
+        <div class="view-toggle">
+            <div class="tab-item active" id="btnLive" onclick="switchView('live')">LIVE FEED</div>
+            <div class="tab-item" id="btnHistory" onclick="switchView('history')">PREDICTION LOG</div>
         </div>
 
-        <script>
-            let allData = [];
-            let predictionHistory = [];
-            let countdownTimer;
-            let countdownValue = 10;
-            const slotOrder = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
-            let animationInterval;
-            let periodCounter = 0;
-            let currentBatchStartPeriod = 0;
-            let currentPeriod = 0;
-            let currentPrediction = null;
-            let consecutiveLosses = 0;
-            let lastLossPatternType = null;
-            let lastLossPredictionType = null;
-            let lastPredictionWasSize = true;
-            let predictionSuccessRate = { size: { wins: 0, losses: 0 }, color: { wins: 0, losses: 0 } };
+        <div class="gaming-card">
+            <div class="card-header">
+                <h3 id="viewTitle">LIVE FEED</h3>
+                <span id="counter" style="font-size: 0.45rem; color: #8b5cf6">0/20</span>
+            </div>
+            <div class="card-content" style="max-height: 360px; overflow-y: auto;">
+                <table class="gaming-table">
+                    <thead id="tHead"></thead>
+                    <tbody id="tBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
-            // ============= PATTERN DEFINITIONS =============
-            const colorPatterns = [
-                { name: "ABAB", pattern: ["red", "green", "red", "green"], breakPrediction: "red", confidence: 100 },
-                { name: "BABA", pattern: ["green", "red", "green", "red"], breakPrediction: "green", confidence: 100 },
-                { name: "AAB", pattern: ["red", "red", "green"], breakPrediction: "green", confidence: 100 },
-                { name: "BBA", pattern: ["green", "green", "red"], breakPrediction: "red", confidence: 100 },
-                { name: "ABB", pattern: ["red", "green", "green"], breakPrediction: "red", confidence: 100 },
-                { name: "BAA", pattern: ["green", "red", "red"], breakPrediction: "green", confidence: 100 },
-                { name: "AAAA", pattern: ["red", "red", "red", "red"], breakPrediction: "green", confidence: 100 },
-                { name: "BBBB", pattern: ["green", "green", "green", "green"], breakPrediction: "red", confidence: 100 }
-            ];
+<script>
+    // ========== GLOBAL STATE ==========
+    let history = [];        // chronological order (oldest first)
+    let curPeriod = 0;
+    let activeView = "live";
+    let currentPrediction = null;   // { predictedType, predictedValue, numbers, period }
 
-            const sizePatterns = [
-                { name: "ABAB", pattern: ["small", "big", "small", "big"], breakPrediction: "small", confidence: 100 },
-                { name: "BABA", pattern: ["big", "small", "big", "small"], breakPrediction: "big", confidence: 100 },
-                { name: "AAB", pattern: ["small", "small", "big"], breakPrediction: "big", confidence: 100 },
-                { name: "BBA", pattern: ["big", "big", "small"], breakPrediction: "small", confidence: 100 },
-                { name: "ABB", pattern: ["small", "big", "big"], breakPrediction: "small", confidence: 100 },
-                { name: "BAA", pattern: ["big", "small", "small"], breakPrediction: "big", confidence: 100 },
-                { name: "AAAA", pattern: ["small", "small", "small", "small"], breakPrediction: "big", confidence: 100 },
-                { name: "BBBB", pattern: ["big", "big", "big", "big"], breakPrediction: "small", confidence: 100 }
-            ];
-            // ============= END PATTERN DEFINITIONS =============
+    // Helper functions
+    function getSize(num) { return num <= 4 ? "SMALL" : "BIG"; }
+    function getColor(num) { return num % 2 === 0 ? "RED" : "GREEN"; }
 
-            // Function to update top 4 vertical table
-            function updateTop4Table() {
-                const top4Container = document.getElementById('top4Container');
-                const top4Table = document.getElementById('top4Table');
-                const patternSuggestion = document.getElementById('patternSuggestion');
-                const breakPrediction = document.getElementById('breakPrediction');
-                
-                const actualResults = allData.filter((item) => !item.isWaiting);
-                const topFour = actualResults.slice(0, 4);
-                
-                if (topFour.length === 4) {
-                    top4Container.style.display = 'block';
-                    top4Table.innerHTML = '';
-                    
-                    // Get colors and sizes for analysis
-                    const colors = topFour.map(item => item.color);
-                    const sizes = topFour.map(item => item.size);
-                    
-                    // Analyze patterns
-                    const colorAnalysis = analyzeTop4Colors(colors);
-                    const sizeAnalysis = analyzeTop4Sizes(sizes);
-                    
-                    // Determine pattern suggestion
-                    let suggestion = '';
-                    let breakValue = '';
-                    let breakType = '';
-                    
-                    if (sizeAnalysis.streak >= 3) {
-                        suggestion = `📏 SIZE STREAK: ${sizeAnalysis.streak} ${sizeAnalysis.streakType.toUpperCase()}`;
-                        breakValue = sizeAnalysis.streakType === 'big' ? 'SMALL' : 'BIG';
-                        breakType = 'size';
-                    } else if (colorAnalysis.streak >= 3) {
-                        suggestion = `🎨 COLOR STREAK: ${colorAnalysis.streak} ${colorAnalysis.streakType.toUpperCase()}`;
-                        breakValue = colorAnalysis.streakType === 'red' ? 'GREEN' : 'RED';
-                        breakType = 'color';
-                    } else if (sizeAnalysis.pattern) {
-                        suggestion = `📏 PATTERN: ${sizeAnalysis.patternName}`;
-                        breakValue = sizeAnalysis.breakPrediction.toUpperCase();
-                        breakType = 'size';
-                    } else if (colorAnalysis.pattern) {
-                        suggestion = `🎨 PATTERN: ${colorAnalysis.patternName}`;
-                        breakValue = colorAnalysis.breakPrediction.toUpperCase();
-                        breakType = 'color';
-                    } else if (sizeAnalysis.dominant !== 'equal') {
-                        suggestion = `📏 SIZE DOMINANCE: ${sizeAnalysis.dominantCount}/4 ${sizeAnalysis.dominant.toUpperCase()}`;
-                        breakValue = sizeAnalysis.dominant === 'big' ? 'SMALL' : 'BIG';
-                        breakType = 'size';
-                    } else if (colorAnalysis.dominant !== 'equal') {
-                        suggestion = `🎨 COLOR DOMINANCE: ${colorAnalysis.dominantCount}/4 ${colorAnalysis.dominant.toUpperCase()}`;
-                        breakValue = colorAnalysis.dominant === 'red' ? 'GREEN' : 'RED';
-                        breakType = 'color';
-                    } else {
-                        suggestion = `⚖️ BALANCED - Using alternation`;
-                        breakValue = lastPredictionWasSize ? (sizes[0] === 'big' ? 'SMALL' : 'BIG') : (colors[0] === 'red' ? 'GREEN' : 'RED');
-                        breakType = lastPredictionWasSize ? 'size' : 'color';
-                    }
-                    
-                    patternSuggestion.textContent = suggestion;
-                    breakPrediction.textContent = breakValue;
-                    breakPrediction.className = `break-prediction ${breakType}`;
-                    
-                    // Create rows for each number
-                    topFour.forEach((item, index) => {
-                        const num = parseInt(item.num);
-                        let numberClass = '';
-                        let colorClass = '';
-                        let sizeClass = '';
-                        
-                        if (num === 0) {
-                            numberClass = 'red-violet';
-                            colorClass = 'red-text';
-                        } else if (num === 5) {
-                            numberClass = 'green-violet';
-                            colorClass = 'green-text';
-                        } else if (num % 2 === 0) {
-                            numberClass = 'red';
-                            colorClass = 'red-text';
-                        } else {
-                            numberClass = 'green';
-                            colorClass = 'green-text';
-                        }
-                        
-                        sizeClass = item.size === 'big' ? 'big-text' : 'small-text';
-                        
-                        // Check if this row is part of a streak
-                        let rowClass = 'top4-row';
-                        if (index < sizeAnalysis.streak && sizeAnalysis.streak >= 2) {
-                            rowClass += ' size-streak';
-                        } else if (index < colorAnalysis.streak && colorAnalysis.streak >= 2) {
-                            rowClass += ' color-streak';
-                        }
-                        
-                        const row = document.createElement('div');
-                        row.className = rowClass;
-                        row.innerHTML = `
-                            <div class="top4-position">#${index + 1}</div>
-                            <div class="top4-number ${numberClass}">${item.num}</div>
-                            <div class="top4-details">
-                                <span class="top4-color ${colorClass}">${item.color.toUpperCase()}</span>
-                                <span class="top4-size ${sizeClass}">${item.size.toUpperCase()}</span>
-                                ${index === 0 && sizeAnalysis.streak >= 2 ? '<span class="pattern-indicator">STREAK</span>' : ''}
-                                ${index === 0 && colorAnalysis.streak >= 2 ? '<span class="pattern-indicator">STREAK</span>' : ''}
-                            </div>
-                        `;
-                        
-                        top4Table.appendChild(row);
-                    });
+    // ========== ANALYZE UNEXPECTED PATTERN (CHAOS / ALTERNATION) ==========
+    // This analyzes how "unexpected" the recent entries are and predicts matching unpredictable outcome
+    function analyzeUnexpectedPattern() {
+        if (history.length < 5) {
+            return { chaosLevel: 0.3, isUnexpected: false, sizeAlt: 0, colorAlt: 0, lastSize: "BIG", lastColor: "RED", recentNumbers: [] };
+        }
+        
+        // Get last 12 entries for analysis (or all if less)
+        const recent = [...history].slice(-Math.min(15, history.length));
+        const sizeSeq = recent.map(h => h.size);
+        const colorSeq = recent.map(h => h.color);
+        const valueSeq = recent.map(h => h.value);
+        
+        // Calculate ALTERNATION RATE (how much it switches = unexpectedness)
+        let sizeChanges = 0;
+        for (let i = 0; i < sizeSeq.length - 1; i++) {
+            if (sizeSeq[i] !== sizeSeq[i+1]) sizeChanges++;
+        }
+        let sizeAlt = sizeSeq.length > 1 ? sizeChanges / (sizeSeq.length - 1) : 0;
+        
+        let colorChanges = 0;
+        for (let i = 0; i < colorSeq.length - 1; i++) {
+            if (colorSeq[i] !== colorSeq[i+1]) colorChanges++;
+        }
+        let colorAlt = colorSeq.length > 1 ? colorChanges / (colorSeq.length - 1) : 0;
+        
+        // Calculate STREAK LENGTHS (long streaks = less unexpected)
+        let lastSize = sizeSeq[sizeSeq.length - 1];
+        let lastColor = colorSeq[colorSeq.length - 1];
+        let sizeStreak = 1;
+        for (let i = sizeSeq.length - 2; i >= 0; i--) {
+            if (sizeSeq[i] === lastSize) sizeStreak++;
+            else break;
+        }
+        let colorStreak = 1;
+        for (let i = colorSeq.length - 2; i >= 0; i--) {
+            if (colorSeq[i] === lastColor) colorStreak++;
+            else break;
+        }
+        
+        // UNEXPECTEDNESS SCORE: high alternation = high unexpected
+        let unexpectedScore = (sizeAlt * 0.5 + colorAlt * 0.5);
+        // Reduce score if there are long streaks
+        if (sizeStreak > 2) unexpectedScore -= 0.15;
+        if (colorStreak > 2) unexpectedScore -= 0.15;
+        unexpectedScore = Math.min(0.95, Math.max(0.2, unexpectedScore));
+        
+        // Frequency analysis for numbers
+        let freq = [0,0,0,0,0,0,0,0,0,0];
+        for (let v of valueSeq) freq[v]++;
+        
+        // Find numbers that appeared less frequently (cold numbers - more unexpected)
+        let coldNumbers = [];
+        for (let i = 0; i <= 9; i++) {
+            if (freq[i] === 0) coldNumbers.push(i);
+        }
+        if (coldNumbers.length < 2) {
+            for (let i = 0; i <= 9; i++) {
+                if (freq[i] <= 1) coldNumbers.push(i);
+            }
+        }
+        
+        return {
+            chaosLevel: unexpectedScore,
+            isUnexpected: unexpectedScore > 0.55,
+            sizeAlt: sizeAlt,
+            colorAlt: colorAlt,
+            sizeStreak: sizeStreak,
+            colorStreak: colorStreak,
+            lastSize: lastSize,
+            lastColor: lastColor,
+            recentNumbers: valueSeq.slice(-5),
+            coldNumbers: coldNumbers,
+            freq: freq
+        };
+    }
+    
+    // ========== GENERATE UNEXPECTED PREDICTION ==========
+    // Predicts based on the unexpected pattern from latest entries
+    function generateUnexpectedPrediction() {
+        if (history.length === 0) {
+            // Fallback prediction
+            let defaultSize = (curPeriod % 2 === 0) ? "SMALL" : "BIG";
+            let num1 = curPeriod % 10;
+            let num2 = (curPeriod * 7) % 10;
+            if (num1 === num2) num2 = (num1 + 2) % 10;
+            currentPrediction = {
+                period: curPeriod,
+                predictedType: "size",
+                predictedValue: defaultSize,
+                numbers: [num1, num2],
+                displayText: `${defaultSize}  ${num1}/${num2}`,
+                chaosLevel: 0.3
+            };
+            updatePredictionUI(currentPrediction);
+            document.getElementById("statusMsg").innerHTML = `🔮 Prediction: ${defaultSize} ${num1}/${num2}`;
+            setTimeout(() => updateStatusMsg(), 1500);
+            return;
+        }
+        
+        const analysis = analyzeUnexpectedPattern();
+        
+        // DECISION: Based on unexpectedness, choose prediction domain
+        let useSizePrediction = true;
+        let predictedValue = "";
+        let numbers = [];
+        
+        // HIGH UNEXPECTEDNESS (>0.6): randomize domain choice to match chaos
+        if (analysis.chaosLevel > 0.65) {
+            useSizePrediction = Math.random() < 0.5;
+        } 
+        // MEDIUM UNEXPECTEDNESS: use domain with higher alternation
+        else if (analysis.chaosLevel > 0.45) {
+            useSizePrediction = analysis.sizeAlt >= analysis.colorAlt;
+        }
+        // LOW UNEXPECTEDNESS: use streak breaker
+        else {
+            if (analysis.sizeStreak >= 3) useSizePrediction = true;
+            else if (analysis.colorStreak >= 3) useSizePrediction = false;
+            else useSizePrediction = analysis.sizeAlt <= analysis.colorAlt;
+        }
+        
+        // Add random flip for unpredictability (scaled by chaos)
+        if (Math.random() < (analysis.chaosLevel * 0.4)) {
+            useSizePrediction = !useSizePrediction;
+        }
+        
+        // --- PREDICT VALUE (SIZE or COLOR) ---
+        if (useSizePrediction) {
+            // SIZE prediction that matches unexpected pattern
+            if (analysis.chaosLevel > 0.7) {
+                // Highly unexpected: completely random size
+                predictedValue = Math.random() < 0.5 ? "SMALL" : "BIG";
+            } else if (analysis.sizeStreak >= 3) {
+                predictedValue = analysis.lastSize === "SMALL" ? "BIG" : "SMALL";
+            } else if (analysis.sizeAlt > 0.6) {
+                predictedValue = analysis.lastSize === "SMALL" ? "BIG" : "SMALL";
+            } else {
+                // Look for imbalance in last 6
+                let last6Sizes = analysis.recentNumbers.slice(-6).map(n => getSize(n));
+                let bigCount = last6Sizes.filter(s => s === "BIG").length;
+                let smallCount = last6Sizes.filter(s => s === "SMALL").length;
+                if (bigCount >= 4) predictedValue = "SMALL";
+                else if (smallCount >= 4) predictedValue = "BIG";
+                else predictedValue = analysis.lastSize === "SMALL" ? "BIG" : "SMALL";
+            }
+            
+            // Extra chaos injection
+            if (Math.random() < analysis.chaosLevel * 0.35) {
+                predictedValue = predictedValue === "SMALL" ? "BIG" : "SMALL";
+            }
+            
+            // Generate 2 NUMBERS based on predicted SIZE + cold numbers (unexpected)
+            const sizeRange = predictedValue === "SMALL" ? [0,1,2,3,4] : [5,6,7,8,9];
+            
+            if (analysis.chaosLevel > 0.65 && analysis.coldNumbers.length >= 2) {
+                // High chaos: pick cold numbers that may be outside size range (unexpected!)
+                let coldInRange = analysis.coldNumbers.filter(n => sizeRange.includes(n));
+                if (coldInRange.length >= 2) {
+                    numbers = [coldInRange[0], coldInRange[1]];
                 } else {
-                    top4Container.style.display = 'none';
-                }
-            }
-
-            // Analyze top 4 colors
-            function analyzeTop4Colors(colors) {
-                let streak = 1;
-                let streakType = colors[0];
-                for (let i = 1; i < colors.length; i++) {
-                    if (colors[i] === streakType) streak++;
-                    else break;
-                }
-                
-                let pattern = null;
-                let patternName = '';
-                let breakPrediction = '';
-                
-                // Check for patterns
-                for (const pattern of colorPatterns) {
-                    if (pattern.pattern.length <= colors.length) {
-                        const segment = colors.slice(0, pattern.pattern.length);
-                        let isMatch = true;
-                        for (let i = 0; i < pattern.pattern.length; i++) {
-                            if (segment[i] !== pattern.pattern[i]) {
-                                isMatch = false;
-                                break;
-                            }
-                        }
-                        if (isMatch) {
-                            patternName = pattern.name;
-                            breakPrediction = pattern.breakPrediction;
-                            break;
-                        }
+                    // Mix: one cold, one random from range
+                    let shuffled = [...sizeRange];
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                     }
+                    let coldPick = analysis.coldNumbers[0] !== undefined ? analysis.coldNumbers[0] : shuffled[0];
+                    numbers = [coldPick, shuffled[1]];
                 }
-                
-                const redCount = colors.filter(c => c === 'red').length;
-                const greenCount = colors.filter(c => c === 'green').length;
-                const dominant = redCount > greenCount ? 'red' : greenCount > redCount ? 'green' : 'equal';
-                const dominantCount = Math.max(redCount, greenCount);
-                
-                return {
-                    streak,
-                    streakType,
-                    pattern: patternName !== '',
-                    patternName,
-                    breakPrediction,
-                    redCount,
-                    greenCount,
-                    dominant,
-                    dominantCount
-                };
+            } else {
+                // Normal: pick less frequent numbers from size range
+                let candidates = [...sizeRange].sort((a,b) => analysis.freq[a] - analysis.freq[b]);
+                numbers = [candidates[0], candidates.length > 1 ? candidates[1] : (candidates[0] === sizeRange[0] ? sizeRange[1] : sizeRange[0])];
             }
-
-            // Analyze top 4 sizes
-            function analyzeTop4Sizes(sizes) {
-                let streak = 1;
-                let streakType = sizes[0];
-                for (let i = 1; i < sizes.length; i++) {
-                    if (sizes[i] === streakType) streak++;
-                    else break;
-                }
-                
-                let pattern = null;
-                let patternName = '';
-                let breakPrediction = '';
-                
-                // Check for patterns
-                for (const pattern of sizePatterns) {
-                    if (pattern.pattern.length <= sizes.length) {
-                        const segment = sizes.slice(0, pattern.pattern.length);
-                        let isMatch = true;
-                        for (let i = 0; i < pattern.pattern.length; i++) {
-                            if (segment[i] !== pattern.pattern[i]) {
-                                isMatch = false;
-                                break;
-                            }
-                        }
-                        if (isMatch) {
-                            patternName = pattern.name;
-                            breakPrediction = pattern.breakPrediction;
-                            break;
-                        }
-                    }
-                }
-                
-                const bigCount = sizes.filter(s => s === 'big').length;
-                const smallCount = sizes.filter(s => s === 'small').length;
-                const dominant = bigCount > smallCount ? 'big' : smallCount > bigCount ? 'small' : 'equal';
-                const dominantCount = Math.max(bigCount, smallCount);
-                
-                return {
-                    streak,
-                    streakType,
-                    pattern: patternName !== '',
-                    patternName,
-                    breakPrediction,
-                    bigCount,
-                    smallCount,
-                    dominant,
-                    dominantCount
-                };
+        } 
+        else {
+            // COLOR prediction
+            if (analysis.chaosLevel > 0.7) {
+                predictedValue = Math.random() < 0.5 ? "RED" : "GREEN";
+            } else if (analysis.colorStreak >= 3) {
+                predictedValue = analysis.lastColor === "RED" ? "GREEN" : "RED";
+            } else if (analysis.colorAlt > 0.6) {
+                predictedValue = analysis.lastColor === "RED" ? "GREEN" : "RED";
+            } else {
+                let last6Colors = analysis.recentNumbers.slice(-6).map(n => getColor(n));
+                let redCount = last6Colors.filter(c => c === "RED").length;
+                let greenCount = last6Colors.filter(c => c === "GREEN").length;
+                if (redCount >= 4) predictedValue = "GREEN";
+                else if (greenCount >= 4) predictedValue = "RED";
+                else predictedValue = analysis.lastColor === "RED" ? "GREEN" : "RED";
             }
-
-            // Create falling numbers animation
-            function createFallingNumbers() {
-                const container = document.getElementById('fallingNumbers');
-                const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-                const colors = ['red', 'green', 'purple', 'teal', 'yellow'];
-                
-                container.innerHTML = '';
-                
-                for (let i = 0; i < 25; i++) {
-                    const number = document.createElement('div');
-                    number.className = `falling-number ${colors[Math.floor(Math.random() * colors.length)]}`;
-                    number.textContent = numbers[Math.floor(Math.random() * numbers.length)];
-                    
-                    const left = Math.random() * 100;
-                    const duration = 15 + Math.random() * 10;
-                    const delay = Math.random() * 5;
-                    const size = 0.8 + Math.random() * 0.4;
-                    
-                    number.style.left = `${left}%`;
-                    number.style.fontSize = `${size}rem`;
-                    number.style.animationDuration = `${duration}s`;
-                    number.style.animationDelay = `${delay}s`;
-                    
-                    number.style.animationTimingFunction = `cubic-bezier(${Math.random()}, ${Math.random()}, ${Math.random()}, ${Math.random()})`;
-                    
-                    container.appendChild(number);
-                }
+            
+            if (Math.random() < analysis.chaosLevel * 0.35) {
+                predictedValue = predictedValue === "RED" ? "GREEN" : "RED";
             }
-
-            function updateFallingNumbers() {
-                if (animationInterval) {
-                    clearInterval(animationInterval);
-                }
-                
-                createFallingNumbers();
-                
-                animationInterval = setInterval(() => {
-                    const numbers = document.querySelectorAll('.falling-number');
-                    const numberOptions = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-                    
-                    numbers.forEach(num => {
-                        if (Math.random() > 0.7) {
-                            num.textContent = numberOptions[Math.floor(Math.random() * numberOptions.length)];
-                        }
-                    });
-                }, 30000);
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                updateFallingNumbers();
-                
-                document.addEventListener('visibilitychange', function() {
-                    const numbers = document.querySelectorAll('.falling-number');
-                    if (document.hidden) {
-                        numbers.forEach(num => {
-                            num.style.animationPlayState = 'paused';
-                        });
-                    } else {
-                        numbers.forEach(num => {
-                            num.style.animationPlayState = 'running';
-                        });
-                    }
-                });
-
-                const periodInput = document.getElementById('periodInput');
-                periodInput.value = "";
-                periodInput.placeholder = "Enter period number";
-                updatePeriodDisplay();
-                updateCopyButton();
-            });
-
-            function updatePeriodDisplay() {
-                const periodDisplay = document.getElementById('periodNumber');
-                const modalPeriodDisplay = document.getElementById('modalPeriodNumber');
-                
-                if (currentPeriod === 0) {
-                    periodDisplay.textContent = "Enter period No";
-                    modalPeriodDisplay.textContent = "---";
+            
+            // Generate numbers based on predicted COLOR
+            const colorRange = predictedValue === "RED" ? [0,2,4,6,8] : [1,3,5,7,9];
+            
+            if (analysis.chaosLevel > 0.65 && analysis.coldNumbers.length >= 2) {
+                let coldInRange = analysis.coldNumbers.filter(n => colorRange.includes(n));
+                if (coldInRange.length >= 2) {
+                    numbers = [coldInRange[0], coldInRange[1]];
                 } else {
-                    periodDisplay.textContent = currentPeriod.toString().padStart(3, '0');
-                    modalPeriodDisplay.textContent = currentPeriod.toString().padStart(3, '0');
+                    let shuffled = [...colorRange];
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+                    let coldPick = analysis.coldNumbers[0] !== undefined ? analysis.coldNumbers[0] : shuffled[0];
+                    numbers = [coldPick, shuffled[1]];
                 }
-                
-                const actualResults = allData.filter((item) => !item.isWaiting);
-                const periodInput = document.getElementById('periodInput');
-                if (actualResults.length >= 10) {
-                    periodInput.style.display = 'none';
-                } else {
-                    periodInput.style.display = 'block';
-                }
+            } else {
+                let candidates = [...colorRange].sort((a,b) => analysis.freq[a] - analysis.freq[b]);
+                numbers = [candidates[0], candidates.length > 1 ? candidates[1] : (candidates[0] === colorRange[0] ? colorRange[1] : colorRange[0])];
             }
-
-            function updateCopyButton() {
-                const copyButton = document.getElementById('copyButton');
-                const waitingPrediction = allData.find(item => item.isWaiting);
-                
-                if (waitingPrediction) {
-                    copyButton.style.display = 'flex';
-                } else {
-                    copyButton.style.display = 'none';
-                }
+        }
+        
+        // Ensure numbers are valid and distinct
+        numbers = numbers.map(n => Math.min(9, Math.max(0, n)));
+        if (numbers[0] === numbers[1]) {
+            numbers[1] = (numbers[0] + 3) % 10;
+            if (useSizePrediction) {
+                let range = predictedValue === "SMALL" ? [0,1,2,3,4] : [5,6,7,8,9];
+                if (!range.includes(numbers[1])) numbers[1] = range[0] === numbers[0] ? range[1] : range[0];
+            } else {
+                let range = predictedValue === "RED" ? [0,2,4,6,8] : [1,3,5,7,9];
+                if (!range.includes(numbers[1])) numbers[1] = range[0] === numbers[0] ? range[1] : range[0];
             }
-
-            function copyPrediction() {
-                const waitingPrediction = allData.find(item => item.isWaiting);
-                
-                if (!waitingPrediction) {
-                    showToast('No active prediction to copy!');
-                    return;
-                }
-                
-                const period = waitingPrediction.period || '---';
-                const shortPeriod = period.slice(-3);
-                const prediction = waitingPrediction.prediction ? waitingPrediction.prediction.toUpperCase() : 'N/A';
-                const numbers = waitingPrediction.predictedNumbers || [];
-                const numbersText = numbers.length === 2 ? `[ ${numbers[0]},${numbers[1]} ]` : '[ --,-- ]';
-                
-                const textToCopy = `1MN WINGO\n╰──⍟ ${shortPeriod}: ${prediction} ${numbersText}`;
-                
-                const textarea = document.createElement('textarea');
-                textarea.value = textToCopy;
-                document.body.appendChild(textarea);
-                textarea.select();
-                textarea.setSelectionRange(0, 99999);
-                
-                try {
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        showToast('Prediction copied to clipboard!');
-                        
-                        const copyButton = document.getElementById('copyButton');
-                        copyButton.innerHTML = '<i class="fas fa-check"></i>';
-                        copyButton.classList.add('copy-success');
-                        
-                        setTimeout(() => {
-                            copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-                            copyButton.classList.remove('copy-success');
-                        }, 2000);
-                    } else {
-                        showToast('Failed to copy prediction!');
-                    }
-                } catch (err) {
-                    showToast('Error copying prediction!');
-                    console.error('Copy failed:', err);
-                }
-                
-                document.body.removeChild(textarea);
+        }
+        
+        const displayType = predictedValue;
+        const displayNumbers = `${numbers[0]}/${numbers[1]}`;
+        const chaosPercent = Math.round(analysis.chaosLevel * 100);
+        
+        currentPrediction = {
+            period: curPeriod,
+            predictedType: useSizePrediction ? "size" : "color",
+            predictedValue: predictedValue,
+            numbers: numbers,
+            displayText: `${displayType}  ${displayNumbers}`,
+            chaosLevel: analysis.chaosLevel
+        };
+        
+        updatePredictionUI(currentPrediction);
+        
+        let chaosText = analysis.chaosLevel > 0.65 ? "🔥 HIGH UNEXPECTED" : (analysis.chaosLevel > 0.45 ? "⚡ MODERATE" : "📊 LOW");
+        document.getElementById("statusMsg").innerHTML = `🎲 Unexpectedness: ${chaosPercent}% ${chaosText} → ${displayType} ${displayNumbers}`;
+        setTimeout(() => updateStatusMsg(), 2500);
+    }
+    
+    function updatePredictionUI(pred) {
+        const pBox = document.getElementById("pBox");
+        const pRange = document.getElementById("pRange");
+        const pVal = document.getElementById("pVal");
+        const pNumbers = document.getElementById("pNumbers");
+        const chaosBadge = document.getElementById("chaosBadge");
+        
+        pBox.classList.add("active");
+        
+        const chaosPercent = pred.chaosLevel ? Math.round(pred.chaosLevel * 100) : 0;
+        pRange.innerHTML = `🎯 UNEXPECTED PATTERN MATCH | CHAOS: ${chaosPercent}%`;
+        pVal.innerHTML = pred.predictedValue;
+        pNumbers.innerHTML = `🎲 ${pred.numbers[0]} / ${pred.numbers[1]}`;
+        chaosBadge.innerHTML = pred.chaosLevel > 0.6 ? "⚡ HIGH ALTERNATION" : (pred.chaosLevel > 0.4 ? "🌀 UNSTABLE" : "📈 TRENDING");
+    }
+    
+    function clearPrediction() {
+        currentPrediction = null;
+        const pBox = document.getElementById("pBox");
+        pBox.classList.remove("active");
+        document.getElementById("pRange").innerHTML = "ANALYZING UNEXPECTED PATTERN...";
+        document.getElementById("pVal").innerHTML = "---";
+        document.getElementById("pNumbers").innerHTML = "";
+        document.getElementById("chaosBadge").innerHTML = "";
+    }
+    
+    function updateStatusMsg() {
+        const len = history.length;
+        const msg = document.getElementById("statusMsg");
+        if (len >= 15) {
+            const analysis = analyzeUnexpectedPattern();
+            msg.innerHTML = `✅ Unexpectedness: ${Math.round(analysis.chaosLevel * 100)}% | Click PREDICT`;
+        } else {
+            msg.innerHTML = `📊 Need ${15 - len} more entries to detect unexpected pattern (${len}/15)`;
+        }
+    }
+    
+    // ========== DATA MANAGEMENT ==========
+    function parseMultiNumbers(inputStr) {
+        let trimmed = inputStr.trim();
+        if (trimmed === "") return [];
+        let numbers = [];
+        let digits = trimmed.match(/\d/g);
+        if (digits) {
+            numbers = digits.map(d => parseInt(d)).filter(n => n >= 0 && n <= 9);
+        }
+        return numbers;
+    }
+    
+    function addEntry(val) {
+        if (isNaN(val) || val < 0 || val > 9) return false;
+        
+        const size = getSize(val);
+        const color = getColor(val);
+        let resultDisplay = "-";
+        let predictedInfo = "---";
+        
+        // Evaluate against current prediction
+        if (currentPrediction) {
+            const isHit = (val === currentPrediction.numbers[0] || val === currentPrediction.numbers[1]);
+            let typeMatch = false;
+            if (currentPrediction.predictedType === "size") {
+                typeMatch = (size === currentPrediction.predictedValue);
+            } else {
+                typeMatch = (color === currentPrediction.predictedValue);
             }
-
-            function showToast(message) {
-                const existingToast = document.querySelector('.toast-notification');
-                if (existingToast) {
-                    existingToast.remove();
-                }
-                
-                const toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                toast.textContent = message;
-                document.body.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.classList.add('show');
-                }, 10);
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => {
-                        if (toast.parentNode) {
-                            toast.remove();
-                        }
-                    }, 300);
-                }, 3000);
+            
+            if (isHit && typeMatch) {
+                resultDisplay = `<span class="win-text">✓ WIN (${val})</span>`;
+            } else if (isHit && !typeMatch) {
+                resultDisplay = `<span class="win-text">⚠️ NUM HIT</span>`;
+            } else if (!isHit && typeMatch) {
+                resultDisplay = `<span class="loss-text">✗ TYPE OK</span>`;
+            } else {
+                resultDisplay = `<span class="loss-text">✗ LOSS</span>`;
             }
-
-            document
-                .getElementById("keyInput")
-                .addEventListener("keydown", function (e) {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        checkKey();
-                    }
-                });
-
-            function checkKey() {
-                const key = document.getElementById("keyInput").value.trim();
-                const errorEl = document.getElementById("error");
-
-                if (key === "152535") {
-                    document.getElementById("login").style.display = "none";
-                    document.getElementById("app").style.display = "block";
-                    document.getElementById("periodInput").focus();
-                    initCircles();
-                    updatePredictionButton();
-                    createFallingNumbers();
-                } else {
-                    errorEl.textContent = "Invalid access key";
-                    document.getElementById("keyInput").value = "";
-                    document.getElementById("keyInput").focus();
-                    
-                    document.getElementById("keyInput").style.animation = "shake 0.5s";
-                    setTimeout(() => {
-                        document.getElementById("keyInput").style.animation = "";
-                    }, 500);
-                }
+            predictedInfo = `${currentPrediction.predictedValue} ${currentPrediction.numbers[0]}/${currentPrediction.numbers[1]}`;
+        }
+        
+        // Store in chronological order (push to end = newest)
+        history.push({
+            period: curPeriod,
+            value: val,
+            size: size,
+            color: color,
+            predicted: predictedInfo,
+            result: resultDisplay
+        });
+        
+        curPeriod++;
+        
+        // Clear prediction after each entry
+        clearPrediction();
+        
+        return true;
+    }
+    
+    function processBulkInput() {
+        const inputEl = document.getElementById("numInput");
+        const raw = inputEl.value;
+        if (!raw.trim()) {
+            document.getElementById("statusMsg").innerHTML = "⚠️ Enter numbers (e.g., 2 4 5 6)";
+            setTimeout(() => updateStatusMsg(), 1500);
+            return;
+        }
+        
+        const numbers = parseMultiNumbers(raw);
+        if (numbers.length === 0) {
+            document.getElementById("statusMsg").innerHTML = "⚠️ No valid digits 0-9!";
+            setTimeout(() => updateStatusMsg(), 1500);
+            return;
+        }
+        
+        for (let n of numbers) {
+            addEntry(n);
+        }
+        
+        inputEl.value = "";
+        updateUI();
+        
+        document.getElementById("statusMsg").innerHTML = `✅ Added ${numbers.length} number(s) — prediction cleared`;
+        setTimeout(() => updateStatusMsg(), 2000);
+    }
+    
+    function startSystem() {
+        curPeriod = parseInt(document.getElementById("initPeriod").value) || 1;
+        history = [];
+        currentPrediction = null;
+        document.getElementById("setupArea").style.display = "none";
+        document.getElementById("mainEngine").style.display = "block";
+        clearPrediction();
+        updateUI();
+        document.getElementById("numInput").focus();
+    }
+    
+    function updateUI() {
+        document.getElementById("dispPeriod").textContent = curPeriod;
+        const len = history.length;
+        document.getElementById("counter").textContent = `${len}/20`;
+        updateStatusMsg();
+        
+        const tHead = document.getElementById("tHead");
+        const tBody = document.getElementById("tBody");
+        
+        if (activeView === "live") {
+            tHead.innerHTML = `<tr><th>PERIOD</th><th>NUM</th><th>SIZE</th><th>COLOR</th></tr>`;
+            // Show newest first
+            const displayHistory = [...history].reverse();
+            tBody.innerHTML = displayHistory.map(h => `
+                <tr>
+                    <td><span class="range-text">${h.period}</span></td>
+                    <td><div class="number-circle ${h.value % 2 === 0 ? 'number-even' : 'number-odd'}">${h.value}</div></span></td>
+                    <td><span style="font-size:0.55rem;">${h.size}</span></td>
+                    <td><span style="font-size:0.55rem; ${h.color === 'RED' ? 'color:#ff7b7b' : 'color:#6fef9e'}">${h.color}</span></span></td>
+                </tr>
+            `).join("");
+        } else {
+            tHead.innerHTML = `<tr><th>PREDICTION</th><th>RESULT</th></tr>`;
+            const logs = [...history].filter(h => h.predicted !== "---").reverse();
+            if (logs.length === 0) {
+                tBody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#6b7280; padding:12px;">No predictions yet → click PREDICT UNEXPECTED</td></td>`;
+            } else {
+                tBody.innerHTML = logs.map(h => `
+                    <tr>
+                        <td><span class="range-text" style="font-size:0.55rem;">${h.predicted}</span></td>
+                        <td>${h.result}</td>
+                    </tr>
+                `).join("");
             }
-
-            const periodInput = document.getElementById("periodInput");
-            periodInput.addEventListener("focus", function (e) {
-                if (this.value === "" && this.placeholder === "Enter period number") {
-                    this.value = "";
-                }
-            });
-
-            periodInput.addEventListener("input", function (e) {
-                let val = this.value.replace(/[^0-9]/g, "");
-                if (val.length > 3) {
-                    val = val.slice(0, 3);
-                }
-                this.value = val;
-                
-                if (val.length === 3) {
-                    periodCounter = parseInt(val);
-                    currentBatchStartPeriod = periodCounter;
-                    currentPeriod = periodCounter;
-                    periodCounter = 0;
-                    updatePeriodDisplay();
-                    document.getElementById("batchInput").focus();
-                }
-            });
-
-            periodInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    if (periodInput.value.length === 3) {
-                        document.getElementById("batchInput").focus();
-                    }
-                }
-            });
-
-            const input = document.getElementById("batchInput");
-            input.addEventListener("input", function (e) {
-                let val = this.value.replace(/[^0-9\s]/g, "");
-                val = val.replace(/\s+/g, " ").trimStart();
-                let newVal = "";
-                for (let char of val) {
-                    if (
-                        /[0-9]/.test(char) &&
-                        newVal.length > 0 &&
-                        !newVal.endsWith(" ")
-                    ) {
-                        newVal += " ";
-                    }
-                    newVal += char;
-                }
-                if (
-                    newVal.endsWith(" ") &&
-                    e.inputType === "deleteContentBackward"
-                ) {
-                    newVal = newVal.trimEnd();
-                }
-                this.value = newVal;
-                this.setSelectionRange(this.value.length, this.value.length);
-            });
-
-            input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    processBatch();
-                }
-            });
-
-            function processBatch() {
-                const raw = input.value.trim();
-                if (!raw) return;
-
-                const numbers = raw
-                    .split(/\s+/)
-                    .filter((n) => /^[0-9]$/.test(n));
-                if (numbers.length === 0) return;
-
-                numbers.forEach((n) => {
-                    if (!isNaN(n) && n >= 0 && n <= 9) {
-                        addEntry(n);
-                    }
-                });
-
-                input.value = "";
-                input.focus();
-            }
-
-            function addEntry(numberStr) {
-                const num = parseInt(numberStr);
-                let tableColorClass, circleColorClass, size, actualColor, actualSize;
-
-                if (num === 0) {
-                    tableColorClass = "red";
-                    actualColor = "red";
-                } else if (num === 5) {
-                    tableColorClass = "green";
-                    actualColor = "green";
-                } else if (num % 2 === 0) {
-                    tableColorClass = "red";
-                    actualColor = "red";
-                } else {
-                    tableColorClass = "green";
-                    actualColor = "green";
-                }
-
-                if (num === 0) {
-                    circleColorClass = "red-violet";
-                } else if (num === 5) {
-                    circleColorClass = "green-violet";
-                } else if (num % 2 === 0) {
-                    circleColorClass = "red";
-                } else {
-                    circleColorClass = "green";
-                }
-
-                actualSize = num >= 5 ? "big" : "small";
-                size = num >= 5 ? "Big" : "Small";
-
-                const entryPeriod = currentBatchStartPeriod + periodCounter;
-                periodCounter++;
-
-                currentPeriod = entryPeriod;
-                updatePeriodDisplay();
-
-                if (allData.length > 0 && allData[0] && allData[0].isWaiting) {
-                    const waitingPrediction = allData[0];
-
-                    const isWin = checkPredictionWin(
-                        waitingPrediction.prediction,
-                        actualColor,
-                        actualSize,
-                    );
-
-                    // Update success rate tracking
-                    if (waitingPrediction.predictionType === 'size') {
-                        if (isWin) {
-                            predictionSuccessRate.size.wins++;
-                        } else {
-                            predictionSuccessRate.size.losses++;
-                        }
-                    } else {
-                        if (isWin) {
-                            predictionSuccessRate.color.wins++;
-                        } else {
-                            predictionSuccessRate.color.losses++;
-                        }
-                    }
-
-                    if (!isWin) {
-                        consecutiveLosses++;
-                        lastLossPatternType = waitingPrediction.patternType;
-                        lastLossPredictionType = waitingPrediction.predictionType;
-                        showToast(`❌ Prediction lost! Loss streak: ${consecutiveLosses}`);
-                    } else {
-                        consecutiveLosses = 0;
-                        lastLossPatternType = null;
-                        lastLossPredictionType = null;
-                        showToast(`✅ Prediction won!`);
-                    }
-
-                    allData[0] = {
-                        period: waitingPrediction.period,
-                        num: numberStr,
-                        color: actualColor,
-                        size: actualSize,
-                        tableCss: tableColorClass,
-                        circleCss: circleColorClass,
-                        hasPrediction: true,
-                        prediction: waitingPrediction.prediction,
-                        predictedNumbers: waitingPrediction.predictedNumbers,
-                        predictionResult: isWin ? "win" : "loss",
-                        isWaiting: false,
-                        patternUsed: waitingPrediction.patternUsed || null,
-                        confidence: waitingPrediction.confidence || 0,
-                        patternType: waitingPrediction.patternType || 'break',
-                        predictionType: waitingPrediction.predictionType || null,
-                        lossStreak: consecutiveLosses
-                    };
-                } else {
-                    const newEntry = {
-                        period: entryPeriod.toString().padStart(3, '0'),
-                        num: numberStr,
-                        color: actualColor,
-                        size: actualSize,
-                        tableCss: tableColorClass,
-                        circleCss: circleColorClass,
-                        hasPrediction: false,
-                        isWaiting: false,
-                        patternUsed: null,
-                        patternType: null,
-                        predictionType: null
-                    };
-
-                    allData.unshift(newEntry);
-
-                    if (allData.length > 10) {
-                        allData = allData.slice(0, 10);
-                    }
-                }
-
-                renderTable();
-                updateCircles();
-                updateTop4Table();
-                updatePredictionButton();
-                updateCopyButton();
-            }
-
-            function checkPredictionWin(prediction, actualColor, actualSize) {
-                prediction = prediction.toLowerCase();
-
-                if (prediction === "red" || prediction === "green") {
-                    return prediction === actualColor;
-                } else if (prediction === "big" || prediction === "small") {
-                    return prediction === actualSize;
-                }
-
-                return false;
-            }
-
-            // Calculate success rates
-            function getSuccessRates() {
-                const sizeTotal = predictionSuccessRate.size.wins + predictionSuccessRate.size.losses;
-                const colorTotal = predictionSuccessRate.color.wins + predictionSuccessRate.color.losses;
-                
-                return {
-                    sizeRate: sizeTotal > 0 ? (predictionSuccessRate.size.wins / sizeTotal) * 100 : 50,
-                    colorRate: colorTotal > 0 ? (predictionSuccessRate.color.wins / colorTotal) * 100 : 50,
-                    sizeTotal,
-                    colorTotal
-                };
-            }
-
-            // TOP 4 PREDICTION FUNCTION
-            function generateTop4Prediction() {
-                const actualResults = allData.filter((item) => !item.isWaiting);
-                if (actualResults.length < 4) {
-                    return { success: false, message: "Need at least 4 results for prediction" };
-                }
-
-                // Get top 4 only (most recent)
-                const colors = actualResults.slice(0, 4).map((d) => d.color);
-                const sizes = actualResults.slice(0, 4).map((d) => d.size);
-                const nums = actualResults.slice(0, 4).map((d) => parseInt(d.num));
-                
-                // Analyze top 4 patterns
-                const colorAnalysis = analyzeTop4Colors(colors);
-                const sizeAnalysis = analyzeTop4Sizes(sizes);
-                const successRates = getSuccessRates();
-                
-                let predictedValue = null;
-                let predictionType = 'size';
-                let detectedPattern = null;
-                let confidence = 85;
-                let strategy = 'TOP 4 PATTERN';
-
-                // Check if we need to switch due to consecutive losses
-                if (consecutiveLosses >= 2) {
-                    // Force switch to opposite type
-                    if (lastLossPredictionType === 'size') {
-                        predictionType = 'color';
-                        strategy = `🔄 SWITCH: ${consecutiveLosses} losses on SIZE`;
-                        // Use color analysis from top 4
-                        if (colorAnalysis.streak >= 2) {
-                            predictedValue = colorAnalysis.streakType === 'red' ? 'green' : 'red';
-                            detectedPattern = `Break ${colorAnalysis.streak}-color streak`;
-                        } else if (colorAnalysis.pattern) {
-                            predictedValue = colorAnalysis.breakPrediction;
-                            detectedPattern = `Pattern ${colorAnalysis.patternName}`;
-                        } else if (colorAnalysis.dominant !== 'equal') {
-                            predictedValue = colorAnalysis.dominant === 'red' ? 'green' : 'red';
-                            detectedPattern = `${colorAnalysis.dominantCount}/4 ${colorAnalysis.dominant.toUpperCase()}`;
-                        } else {
-                            predictedValue = colors[0] === 'red' ? 'green' : 'red';
-                            detectedPattern = 'Balanced - alternating';
-                        }
-                        confidence = 80;
-                    } else {
-                        predictionType = 'size';
-                        strategy = `🔄 SWITCH: ${consecutiveLosses} losses on COLOR`;
-                        // Use size analysis from top 4
-                        if (sizeAnalysis.streak >= 2) {
-                            predictedValue = sizeAnalysis.streakType === 'big' ? 'small' : 'big';
-                            detectedPattern = `Break ${sizeAnalysis.streak}-size streak`;
-                        } else if (sizeAnalysis.pattern) {
-                            predictedValue = sizeAnalysis.breakPrediction;
-                            detectedPattern = `Pattern ${sizeAnalysis.patternName}`;
-                        } else if (sizeAnalysis.dominant !== 'equal') {
-                            predictedValue = sizeAnalysis.dominant === 'big' ? 'small' : 'big';
-                            detectedPattern = `${sizeAnalysis.dominantCount}/4 ${sizeAnalysis.dominant.toUpperCase()}`;
-                        } else {
-                            predictedValue = sizes[0] === 'big' ? 'small' : 'big';
-                            detectedPattern = 'Balanced - alternating';
-                        }
-                        confidence = 85;
-                    }
-                }
-                // Normal prediction logic - only using top 4
-                else {
-                    // Try size prediction first from top 4
-                    if (sizeAnalysis.streak >= 2) {
-                        predictedValue = sizeAnalysis.streakType === "big" ? "small" : "big";
-                        predictionType = 'size';
-                        detectedPattern = `Break ${sizeAnalysis.streak}-${sizeAnalysis.streakType} streak`;
-                        strategy = `TOP 4 STREAK BREAKER`;
-                        confidence = 95;
-                    }
-                    else if (sizeAnalysis.pattern) {
-                        predictedValue = sizeAnalysis.breakPrediction;
-                        predictionType = 'size';
-                        detectedPattern = `Pattern ${sizeAnalysis.patternName}`;
-                        strategy = `TOP 4 SIZE PATTERN`;
-                        confidence = 90;
-                    }
-                    else if (sizeAnalysis.dominantCount >= 3) {
-                        predictedValue = sizeAnalysis.dominant === 'big' ? 'small' : 'big';
-                        predictionType = 'size';
-                        detectedPattern = `${sizeAnalysis.dominantCount}/4 ${sizeAnalysis.dominant.toUpperCase()} - break`;
-                        strategy = `TOP 4 SIZE DOMINANCE`;
-                        confidence = 90;
-                    }
-                    
-                    // If no size prediction, try color from top 4
-                    if (predictedValue === null) {
-                        if (colorAnalysis.streak >= 2) {
-                            predictedValue = colorAnalysis.streakType === "red" ? "green" : "red";
-                            predictionType = 'color';
-                            detectedPattern = `Break ${colorAnalysis.streak}-${colorAnalysis.streakType} color streak`;
-                            strategy = `TOP 4 COLOR STREAK`;
-                            confidence = 85;
-                        }
-                        else if (colorAnalysis.pattern) {
-                            predictedValue = colorAnalysis.breakPrediction;
-                            predictionType = 'color';
-                            detectedPattern = `Color pattern ${colorAnalysis.patternName}`;
-                            strategy = `TOP 4 COLOR PATTERN`;
-                            confidence = 85;
-                        }
-                        else if (colorAnalysis.dominantCount >= 3) {
-                            predictedValue = colorAnalysis.dominant === 'red' ? 'green' : 'red';
-                            predictionType = 'color';
-                            detectedPattern = `${colorAnalysis.dominantCount}/4 ${colorAnalysis.dominant.toUpperCase()} - break`;
-                            strategy = `TOP 4 COLOR DOMINANCE`;
-                            confidence = 80;
-                        }
-                        else {
-                            // Last resort - alternate based on last prediction
-                            if (lastPredictionWasSize) {
-                                predictedValue = colors[0] === "red" ? "green" : "red";
-                                predictionType = 'color';
-                                detectedPattern = `Alternating to color`;
-                                strategy = `TOP 4 ALTERNATING`;
-                                confidence = 70;
-                            } else {
-                                predictedValue = sizes[0] === "big" ? "small" : "big";
-                                predictionType = 'size';
-                                detectedPattern = `Alternating to size`;
-                                strategy = `TOP 4 ALTERNATING`;
-                                confidence = 70;
-                            }
-                        }
-                    }
-                }
-
-                // Update last prediction type
-                lastPredictionWasSize = (predictionType === 'size');
-                
-                return {
-                    success: true,
-                    predictedValue,
-                    predictionType,
-                    detectedPattern,
-                    confidence,
-                    strategy,
-                    colors,
-                    sizes,
-                    nums,
-                    patternStats: {
-                        colorAnalysis,
-                        sizeAnalysis,
-                        consecutiveLosses,
-                        successRates
-                    }
-                };
-            }
-
-            // Generate numbers based on prediction
-            function generateNumbers(predictionType, predictedValue, lastNumbers) {
-                let numberPool = [];
-                let numbers = [];
-                
-                if (predictionType === "size") {
-                    if (predictedValue === "big") {
-                        numberPool = [5, 6, 7, 8, 9];
-                    } else if (predictedValue === "small") {
-                        numberPool = [0, 1, 2, 3, 4];
-                    }
-                } else if (predictionType === "color") {
-                    if (predictedValue === "green") {
-                        numberPool = [1, 3, 7, 9];
-                    } else if (predictedValue === "red") {
-                        numberPool = [0, 2, 4, 6, 8];
-                    }
-                }
-                
-                const recentNumbers = lastNumbers.slice(0, 3);
-                const availableNumbers = numberPool.filter(n => !recentNumbers.includes(n));
-                
-                const finalPool = availableNumbers.length >= 2 ? availableNumbers : numberPool;
-                
-                const shuffled = [...finalPool].sort(() => 0.5 - Math.random());
-                numbers = shuffled.slice(0, 2);
-                
-                while (numbers.length < 2) {
-                    const fallback = Math.floor(Math.random() * 10);
-                    if (!numbers.includes(fallback) && 
-                        (predictionType === "size" ? 
-                            (predictedValue === "big" ? fallback >= 5 : fallback <= 4) :
-                            (predictedValue === "green" ? fallback % 2 !== 0 : fallback % 2 === 0)
-                        )) {
-                        numbers.push(fallback);
-                    }
-                }
-                
-                return numbers;
-            }
-
-            // Show prediction - uses top 4 logic
-            function showPrediction() {
-                const actualResults = allData.filter((item) => !item.isWaiting);
-                if (actualResults.length < 4) {
-                    alert("Need at least 4 results for prediction!");
-                    return;
-                }
-
-                if (allData.length > 0 && allData[0] && allData[0].isWaiting) {
-                    alert("Please enter the result for the current prediction first!");
-                    return;
-                }
-
-                const predictionResult = generateTop4Prediction();
-                
-                if (!predictionResult.success) {
-                    alert(predictionResult.message);
-                    return;
-                }
-
-                const {
-                    predictedValue,
-                    predictionType,
-                    detectedPattern,
-                    confidence,
-                    strategy,
-                    nums,
-                    patternStats
-                } = predictionResult;
-
-                const predictedNumbers = generateNumbers(predictionType, predictedValue, nums);
-                const predictionPeriod = currentBatchStartPeriod + periodCounter;
-
-                currentPrediction = {
-                    period: predictionPeriod.toString().padStart(3, '0'),
-                    prediction: predictedValue,
-                    predictedNumbers: predictedNumbers,
-                    strategy: strategy
-                };
-
-                predictionHistory.push({
-                    period: predictionPeriod.toString().padStart(3, '0'),
-                    prediction: predictedValue,
-                    predictedNumbers: predictedNumbers,
-                    predictionType: predictionType,
-                    timestamp: Date.now(),
-                    patternUsed: detectedPattern,
-                    confidence: confidence,
-                    patternType: 'top4',
-                    predictionStrategy: strategy,
-                    evaluated: false,
-                    patternStats: patternStats
-                });
-
-                if (predictionHistory.length > 20) {
-                    predictionHistory.shift();
-                }
-
-                allData.unshift({
-                    period: predictionPeriod.toString().padStart(3, '0'),
-                    num: null,
-                    color: null,
-                    size: null,
-                    tableCss: null,
-                    circleCss: null,
-                    hasPrediction: true,
-                    prediction: predictedValue,
-                    predictedNumbers: predictedNumbers,
-                    predictionResult: null,
-                    isWaiting: true,
-                    patternUsed: detectedPattern,
-                    confidence: confidence,
-                    patternType: 'top4',
-                    predictionType: predictionType,
-                    predictionStrategy: strategy,
-                    lossStreak: consecutiveLosses
-                });
-
-                if (allData.length > 10) {
-                    allData = allData.slice(0, 10);
-                }
-
-                // Update modal content
-                const modal = document.getElementById("predictionModal");
-                const mainPrediction = document.getElementById("modalPredictionMain");
-                const patternInfo = document.getElementById("patternInfo");
-                const strategyElement = document.getElementById("predictionStrategy");
-                const numberPrediction1 = document.getElementById("numberPrediction1");
-                const numberPrediction2 = document.getElementById("numberPrediction2");
-                const patternCountDisplay = document.getElementById("patternCountDisplay");
-                const typeBadge = document.getElementById("predictionTypeBadge");
-
-                document.getElementById('modalPeriodNumber').textContent = predictionPeriod.toString().padStart(3, '0');
-                
-                if (patternStats) {
-                    if (patternStats.consecutiveLosses >= 2) {
-                        patternCountDisplay.textContent = `SWITCH MODE`;
-                        patternCountDisplay.style.background = 'linear-gradient(135deg, #ff4444, #ff9800)';
-                    } else {
-                        patternCountDisplay.textContent = `TOP 4`;
-                        patternCountDisplay.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                    }
-                }
-
-                if (predictionType === 'size') {
-                    typeBadge.textContent = 'SIZE';
-                    typeBadge.className = 'size-badge';
-                } else {
-                    typeBadge.textContent = 'COLOR';
-                    typeBadge.className = 'color-badge-rare';
-                }
-
-                let predictionClass = "prediction-green";
-                let displayText = predictedValue.toUpperCase();
-                
-                if (predictedValue === "red") {
-                    predictionClass = "prediction-red";
-                } else if (predictedValue === "green") {
-                    predictionClass = "prediction-green";
-                } else if (predictedValue === "big") {
-                    predictionClass = "prediction-blue";
-                    displayText = "BIG";
-                } else if (predictedValue === "small") {
-                    predictionClass = "prediction-blue";
-                    displayText = "SMALL";
-                }
-
-                mainPrediction.querySelector('.main-prediction-title').textContent = 
-                    "🎯 PATTERN BREAK PREDICTION";
-                mainPrediction.querySelector('.main-prediction-value').textContent = displayText;
-                mainPrediction.querySelector('.main-prediction-value').className = `main-prediction-value ${predictionClass}`;
-                
-                strategyElement.textContent = strategy;
-                if (confidence >= 90) {
-                    strategyElement.style.color = "#ffcc00";
-                    strategyElement.style.fontWeight = "bold";
-                } else {
-                    strategyElement.style.color = "";
-                    strategyElement.style.fontWeight = "";
-                }
-                
-                if (predictedNumbers.length >= 2) {
-                    const getNumberType = (num) => {
-                        if (num === 0 || num === 5) return "Violet";
-                        if (num % 2 === 0) return "Even";
-                        return "Odd";
-                    };
-                    
-                    const getNumberColorClass = (num) => {
-                        if (num === 0) return "number-red";
-                        if (num === 5) return "number-green";
-                        if (num % 2 === 0) return "number-red";
-                        return "number-green";
-                    };
-                    
-                    const getSizeText = (num) => {
-                        return num >= 5 ? "Big" : "Small";
-                    };
-                    
-                    numberPrediction1.querySelector('.number-value-small').textContent = predictedNumbers[0];
-                    numberPrediction1.querySelector('.number-value-small').className = `number-value-small ${getNumberColorClass(predictedNumbers[0])}`;
-                    numberPrediction1.querySelector('.number-type').textContent = predictionType === 'size' ? getSizeText(predictedNumbers[0]) : getNumberType(predictedNumbers[0]);
-                    
-                    numberPrediction2.querySelector('.number-value-small').textContent = predictedNumbers[1];
-                    numberPrediction2.querySelector('.number-value-small').className = `number-value-small ${getNumberColorClass(predictedNumbers[1])}`;
-                    numberPrediction2.querySelector('.number-type').textContent = predictionType === 'size' ? getSizeText(predictedNumbers[1]) : getNumberType(predictedNumbers[1]);
-                }
-
-                const confidenceText = confidence >= 90 ? '✅ HIGH CONFIDENCE' : `${confidence}% confidence`;
-                patternInfo.textContent = `${confidenceText}: ${detectedPattern}`;
-                patternInfo.className = `pattern-info ${confidence === 100 ? 'confidence-100' : ''}`;
-                if (confidence === 100) {
-                    patternInfo.style.background = 'rgba(255,204,0,0.15)';
-                    patternInfo.style.border = '1px solid #ffcc00';
-                }
-
-                modal.style.display = "block";
-                setTimeout(() => {
-                    modal.classList.add("show");
-                }, 10);
-
-                startCountdown();
-
-                renderTable();
-                updateCircles();
-                updateTop4Table();
-                updatePredictionButton();
-                updateCopyButton();
-                
-                showToast(`🔮 TOP 4 ${predictionType.toUpperCase()} break: ${predictedValue.toUpperCase()}`);
-            }
-
-            function renderTable() {
-                const tbody = document.getElementById("historyBody");
-                tbody.innerHTML = "";
-
-                allData.forEach((item, index) => {
-                    const row = tbody.insertRow();
-
-                    if (item.isWaiting) {
-                        row.className = "empty-row";
-                        row.insertCell(0).innerHTML =
-                            `<span style='color:#666;font-size:0.75rem;'>${item.period || '---'}</span>`;
-                        row.insertCell(1).innerHTML =
-                            "<span style='color:#666;font-size:0.75rem;'>Waiting...</span>";
-                        row.insertCell(2).innerHTML =
-                            "<span style='color:#666;font-size:0.75rem;'>-</span>";
-                        row.insertCell(3).innerHTML =
-                            "<span style='color:#666;font-size:0.75rem;'>-</span>";
-
-                        const predCell = row.insertCell(4);
-                        let predictionText = item.prediction ? item.prediction.toUpperCase() : '---';
-                        
-                        if (item.predictedNumbers && item.predictedNumbers.length === 2) {
-                            predictionText += ` [${item.predictedNumbers[0]}, ${item.predictedNumbers[1]}]`;
-                        }
-                        
-                        const confidenceText = item.confidence ? ` [${item.confidence}%]` : '';
-                        const typeIndicator = item.predictionType === 'size' ? '📏' : '🎨';
-                        
-                        if (item.confidence === 100) {
-                            predCell.innerHTML = `<span class="prediction-cell" style="color:#ffcc00;font-weight:800;">${typeIndicator} ${predictionText}${item.patternUsed ? ' (' + item.patternUsed + ')' : ''}${confidenceText}</span>`;
-                        } else {
-                            predCell.innerHTML = `<span class="prediction-cell pattern-break">${typeIndicator} ${predictionText}${item.patternUsed ? ' (' + item.patternUsed + ')' : ''}${confidenceText}</span>`;
-                        }
-                        
-                        if (consecutiveLosses > 0) {
-                            predCell.innerHTML += `<span class="loss-streak">Loss: ${consecutiveLosses}</span>`;
-                        }
-                        
-                    } else if (item.hasPrediction) {
-                        row.insertCell(0).textContent = item.period;
-
-                        const numCell = row.insertCell(1);
-                        numCell.textContent = item.num;
-                        numCell.className = item.tableCss;
-
-                        const colorCell = row.insertCell(2);
-                        colorCell.innerHTML = `<span class="${item.tableCss}">${item.color.toUpperCase()}</span>`;
-
-                        row.insertCell(3).textContent = item.size.toUpperCase();
-
-                        const predCell = row.insertCell(4);
-                        let predictionText = item.prediction.toUpperCase();
-                        
-                        if (item.predictedNumbers && item.predictedNumbers.length === 2) {
-                            predictionText += ` [${item.predictedNumbers[0]}, ${item.predictedNumbers[1]}]`;
-                        }
-                        
-                        let patternText = item.patternUsed ? ` <small style="color:#999;font-size:0.7rem;">(${item.patternUsed})</small>` : '';
-                        let confidenceText = item.confidence ? ` <small style="color:#999;font-size:0.7rem;">[${item.confidence}%]</small>` : '';
-                        const typeIndicator = item.predictionType === 'size' ? '📏' : '🎨';
-                        
-                        if (item.predictionResult === "win") {
-                            predCell.innerHTML = `<span class="prediction-win">${typeIndicator} ${predictionText}</span>${patternText}${confidenceText}`;
-                        } else {
-                            predCell.innerHTML = `<span class="prediction-loss">${typeIndicator} ${predictionText}</span>${patternText}${confidenceText}`;
-                        }
-                    } else {
-                        row.insertCell(0).textContent = item.period;
-
-                        const numCell = row.insertCell(1);
-                        numCell.textContent = item.num;
-                        numCell.className = item.tableCss;
-
-                        const colorCell = row.insertCell(2);
-                        colorCell.innerHTML = `<span class="${item.tableCss}">${item.color.toUpperCase()}</span>`;
-
-                        row.insertCell(3).textContent = item.size.toUpperCase();
-                        row.insertCell(4).textContent = "-";
-                    }
-                });
-            }
-
-            function initCircles() {
-                const container = document.getElementById("circles");
-                container.innerHTML = "";
-
-                for (let i = 0; i < 10; i++) {
-                    const circle = document.createElement("div");
-                    circle.className = "circle";
-                    circle.dataset.index = i;
-
-                    const numberArea = document.createElement("div");
-                    numberArea.textContent = "–";
-                    numberArea.style.fontWeight = "700";
-                    circle.appendChild(numberArea);
-
-                    container.appendChild(circle);
-                }
-            }
-
-            function updateCircles() {
-                const circles = document.querySelectorAll("#circles .circle");
-                if (circles.length !== 10) return;
-
-                circles.forEach((c) => {
-                    c.querySelector("div").textContent = "–";
-                    c.className = "circle";
-                });
-
-                const actualResults = allData.filter((item) => !item.isWaiting);
-                const recent = actualResults.slice(0, 10);
-
-                recent
-                    .slice()
-                    .reverse()
-                    .forEach((item, fillIdx) => {
-                        const circleIndex = slotOrder[fillIdx];
-                        if (circleIndex !== undefined && item.num) {
-                            const circle = circles[circleIndex];
-                            circle.querySelector("div").textContent = item.num;
-                            circle.querySelector("div").style.fontWeight = "700";
-                            circle.className = `circle filled ${item.circleCss}`;
-                        }
-                    });
-            }
-
-            function updatePredictionButton() {
-                const btn = document.getElementById("prediction-btn");
-                const actualResults = allData.filter((item) => !item.isWaiting);
-                const waitingPrediction = allData.find(item => item.isWaiting);
-                
-                if (actualResults.length >= 4 && !waitingPrediction) {
-                    btn.style.display = "block";
-                } else {
-                    btn.style.display = "none";
-                }
-            }
-
-            function clearData() {
-                if (allData.length === 0) return;
-
-                if (confirm("Clear all data and predictions?")) {
-                    allData = [];
-                    predictionHistory = [];
-                    periodCounter = 0;
-                    currentBatchStartPeriod = 0;
-                    currentPeriod = 0;
-                    consecutiveLosses = 0;
-                    lastLossPatternType = null;
-                    lastLossPredictionType = null;
-                    lastPredictionWasSize = true;
-                    predictionSuccessRate = { size: { wins: 0, losses: 0 }, color: { wins: 0, losses: 0 } };
-                    
-                    const periodInput = document.getElementById('periodInput');
-                    periodInput.style.display = 'block';
-                    periodInput.value = "";
-                    periodInput.placeholder = "Enter period number";
-                    
-                    updatePeriodDisplay();
-                    updateCopyButton();
-                    updateTop4Table();
-
-                    renderTable();
-                    updateCircles();
-                    updatePredictionButton();
-
-                    closePrediction();
-                }
-            }
-
-            function closePrediction() {
-                const modal = document.getElementById("predictionModal");
-                modal.classList.remove("show");
-                setTimeout(() => {
-                    modal.style.display = "none";
-                }, 400);
-                clearInterval(countdownTimer);
-                countdownValue = 10;
-                document.getElementById("countdown").textContent = "10";
-            }
-
-            function startCountdown() {
-                countdownValue = 10;
-                const countdownElement = document.getElementById("countdown");
-                countdownElement.textContent = countdownValue;
-
-                clearInterval(countdownTimer);
-
-                countdownTimer = setInterval(() => {
-                    countdownValue--;
-                    countdownElement.textContent = countdownValue;
-
-                    if (countdownValue <= 0) {
-                        closePrediction();
-                    }
-                }, 1000);
-            }
-
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes shake {
-                    0%, 100% {transform: translateX(0);}
-                    10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
-                    20%, 40%, 60%, 80% {transform: translateX(5px);}
-                }
-            `;
-            document.head.appendChild(style);
-        </script>
-    </body>
+        }
+    }
+    
+    function switchView(v) {
+        activeView = v;
+        document.querySelectorAll(".tab-item").forEach(btn => btn.classList.remove("active"));
+        document.getElementById(v === "live" ? "btnLive" : "btnHistory").classList.add("active");
+        document.getElementById("viewTitle").textContent = v === "live" ? "LIVE FEED" : "PREDICTION LOG";
+        updateUI();
+    }
+    
+    // Event listeners
+    const inputField = document.getElementById("numInput");
+    if (inputField) {
+        inputField.addEventListener("input", function() {
+            this.value = this.value.replace(/\D/g, "").split("").join(" ");
+        });
+        inputField.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") processBulkInput();
+        });
+    }
+    
+    window.onload = () => {
+        const initField = document.getElementById("initPeriod");
+        if (initField) initField.value = "001";
+    };
+</script>
+</body>
 </html>
