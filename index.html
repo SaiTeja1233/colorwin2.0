@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <title>WINGO UNEXPECTED PATTERN PRO</title>
+    <title>WINGO PATTERN PRO - AUTO RE-ANALYZE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
     <style>
         * {
@@ -63,11 +63,14 @@
             padding: 12px;
             margin-bottom: 10px;
             text-align: center;
-            display: none;
-        }
-        .prediction-box.active {
             display: block;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.2);
+        }
+        .prediction-box.waiting {
+            border-color: #6b7280;
+            background: rgba(107, 114, 128, 0.08);
+        }
+        .prediction-box.waiting .pred-value {
+            color: #6b7280;
         }
         .pred-range {
             font-family: "Orbitron";
@@ -78,15 +81,9 @@
         }
         .pred-value {
             font-family: "Orbitron";
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             color: #facc15;
             font-weight: 900;
-        }
-        .pred-numbers {
-            font-family: "Orbitron";
-            font-size: 1rem;
-            color: #ffb347;
-            margin-top: 5px;
         }
         .period-display-gaming {
             background: #05060a;
@@ -245,11 +242,41 @@
             flex-direction: column;
             gap: 6px;
         }
+        .win-rate {
+            font-size: 0.45rem;
+            background: #1a1c2a;
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .latest-badge {
+            background: #facc1520;
+            color: #facc15;
+            font-size: 0.35rem;
+            padding: 2px 4px;
+            border-radius: 8px;
+            margin-left: 5px;
+        }
+        .auto-badge {
+            font-size: 0.4rem;
+            background: #10b98120;
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-left: 5px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="header"><h1>WINGO UNEXPECTED PATTERN PRO</h1></div>
+    <div class="header"><h1>WINGO PATTERN PRO</h1></div>
 
     <div id="setupArea" class="gaming-card">
         <div class="card-content" style="text-align: center; padding: 15px">
@@ -261,37 +288,34 @@
 
     <div id="mainEngine" style="display: none">
         <div class="prediction-box" id="pBox">
-            <div class="pred-range" id="pRange">ANALYZING UNEXPECTED PATTERN...</div>
+            <div class="pred-range" id="pRange">📊 ANALYZING DATA...</div>
             <div class="pred-value" id="pVal">---</div>
-            <div class="pred-numbers" id="pNumbers"></div>
             <div class="chaos-badge" id="chaosBadge"></div>
         </div>
 
         <div class="gaming-card">
             <div class="card-content">
                 <div class="period-display-gaming">
-                    <span style="font-family: 'Orbitron'; font-size: 0.5rem; color: #8b9bb0;">UPCOMING PERIOD</span>
+                    <span style="font-family: 'Orbitron'; font-size: 0.5rem; color: #8b9bb0;">NEXT PERIOD</span>
                     <div class="next-period-value" id="dispPeriod">---</div>
                 </div>
                 <div class="input-area">
                     <input type="text" id="numInput" class="gaming-input" placeholder="0 1 2 3" inputmode="numeric" />
-                    <button class="gaming-btn btn-primary-gaming" onclick="processBulkInput()">ADD</button>
+                    <button class="gaming-btn btn-primary-gaming" onclick="processBulkInput()">ADD RESULT</button>
                 </div>
-                <div class="flex-col">
-                    <button class="gaming-btn btn-predict" onclick="generateUnexpectedPrediction()">🎲 PREDICT UNEXPECTED</button>
-                </div>
-                <p id="statusMsg" class="status-msg">📊 ADD 15+ NUMBERS TO DETECT UNEXPECTED PATTERN</p>
+                <p id="statusMsg" class="status-msg">📊 Add results → Auto re-analyzes & predicts</p>
+                <div id="winRateDisplay" class="win-rate"></div>
             </div>
         </div>
 
         <div class="view-toggle">
-            <div class="tab-item active" id="btnLive" onclick="switchView('live')">LIVE FEED</div>
+            <div class="tab-item active" id="btnLive" onclick="switchView('live')">GAME HISTORY</div>
             <div class="tab-item" id="btnHistory" onclick="switchView('history')">PREDICTION LOG</div>
         </div>
 
         <div class="gaming-card">
             <div class="card-header">
-                <h3 id="viewTitle">LIVE FEED</h3>
+                <h3 id="viewTitle">GAME HISTORY</h3>
                 <span id="counter" style="font-size: 0.45rem; color: #8b5cf6">0/20</span>
             </div>
             <div class="card-content" style="max-height: 460px; overflow-y: auto;">
@@ -306,301 +330,305 @@
 
 <script>
     // ========== GLOBAL STATE ==========
-    let history = [];        // chronological order (oldest first)
+    let history = [];        // chronological order (newest FIRST for display)
     let curPeriod = 0;
     let activeView = "live";
-    let currentPrediction = null;   // { predictedType, predictedValue, numbers, period }
+    let currentPrediction = null;
+    let predictionStats = { wins: 0, losses: 0, total: 0 };
+    let lastPredictionWasWin = null;
 
-    // Helper functions
     function getSize(num) { return num <= 4 ? "SMALL" : "BIG"; }
     function getColor(num) { return num % 2 === 0 ? "RED" : "GREEN"; }
 
-    // ========== ANALYZE UNEXPECTED PATTERN (CHAOS / ALTERNATION) ==========
-    // This analyzes how "unexpected" the recent entries are and predicts matching unpredictable outcome
-    function analyzeUnexpectedPattern() {
-        if (history.length < 5) {
-            return { chaosLevel: 0.3, isUnexpected: false, sizeAlt: 0, colorAlt: 0, lastSize: "BIG", lastColor: "RED", recentNumbers: [] };
-        }
-        
-        // Get last 12 entries for analysis (or all if less)
-        const recent = [...history].slice(-Math.min(15, history.length));
-        const sizeSeq = recent.map(h => h.size);
-        const colorSeq = recent.map(h => h.color);
-        const valueSeq = recent.map(h => h.value);
-        
-        // Calculate ALTERNATION RATE (how much it switches = unexpectedness)
-        let sizeChanges = 0;
-        for (let i = 0; i < sizeSeq.length - 1; i++) {
-            if (sizeSeq[i] !== sizeSeq[i+1]) sizeChanges++;
-        }
-        let sizeAlt = sizeSeq.length > 1 ? sizeChanges / (sizeSeq.length - 1) : 0;
-        
-        let colorChanges = 0;
-        for (let i = 0; i < colorSeq.length - 1; i++) {
-            if (colorSeq[i] !== colorSeq[i+1]) colorChanges++;
-        }
-        let colorAlt = colorSeq.length > 1 ? colorChanges / (colorSeq.length - 1) : 0;
-        
-        // Calculate STREAK LENGTHS (long streaks = less unexpected)
-        let lastSize = sizeSeq[sizeSeq.length - 1];
-        let lastColor = colorSeq[colorSeq.length - 1];
-        let sizeStreak = 1;
-        for (let i = sizeSeq.length - 2; i >= 0; i--) {
-            if (sizeSeq[i] === lastSize) sizeStreak++;
+    // ========== COLOR PREDICTION LOGIC ==========
+    const getColorPrediction = (historyArray) => {
+        if (historyArray.length < 3) return { type: "WAIT", reason: "Need more data", predict: null, confidence: "LOW" };
+
+        const lastResults = historyArray.slice(0, 10);
+        const colors = lastResults.map(r => r.color);
+
+        // 1. Dragon Trend Detection
+        let currentStreak = 1;
+        for (let i = 0; i < colors.length - 1; i++) {
+            if (colors[i] === colors[i + 1]) currentStreak++;
             else break;
         }
-        let colorStreak = 1;
-        for (let i = colorSeq.length - 2; i >= 0; i--) {
-            if (colorSeq[i] === lastColor) colorStreak++;
-            else break;
-        }
-        
-        // UNEXPECTEDNESS SCORE: high alternation = high unexpected
-        let unexpectedScore = (sizeAlt * 0.5 + colorAlt * 0.5);
-        // Reduce score if there are long streaks
-        if (sizeStreak > 2) unexpectedScore -= 0.15;
-        if (colorStreak > 2) unexpectedScore -= 0.15;
-        unexpectedScore = Math.min(0.95, Math.max(0.2, unexpectedScore));
-        
-        // Frequency analysis for numbers
-        let freq = [0,0,0,0,0,0,0,0,0,0];
-        for (let v of valueSeq) freq[v]++;
-        
-        // Find numbers that appeared less frequently (cold numbers - more unexpected)
-        let coldNumbers = [];
-        for (let i = 0; i <= 9; i++) {
-            if (freq[i] === 0) coldNumbers.push(i);
-        }
-        if (coldNumbers.length < 2) {
-            for (let i = 0; i <= 9; i++) {
-                if (freq[i] <= 1) coldNumbers.push(i);
-            }
-        }
-        
-        return {
-            chaosLevel: unexpectedScore,
-            isUnexpected: unexpectedScore > 0.55,
-            sizeAlt: sizeAlt,
-            colorAlt: colorAlt,
-            sizeStreak: sizeStreak,
-            colorStreak: colorStreak,
-            lastSize: lastSize,
-            lastColor: lastColor,
-            recentNumbers: valueSeq.slice(-5),
-            coldNumbers: coldNumbers,
-            freq: freq
-        };
-    }
-    
-    // ========== GENERATE UNEXPECTED PREDICTION ==========
-    // Predicts based on the unexpected pattern from latest entries
-    function generateUnexpectedPrediction() {
-        if (history.length === 0) {
-            // Fallback prediction
-            let defaultSize = (curPeriod % 2 === 0) ? "SMALL" : "BIG";
-            let num1 = curPeriod % 10;
-            let num2 = (curPeriod * 7) % 10;
-            if (num1 === num2) num2 = (num1 + 2) % 10;
-            currentPrediction = {
-                period: curPeriod,
-                predictedType: "size",
-                predictedValue: defaultSize,
-                numbers: [num1, num2],
-                displayText: `${defaultSize}  ${num1}/${num2}`,
-                chaosLevel: 0.3
+
+        if (currentStreak >= 3) {
+            return { 
+                predict: colors[0] === "RED" ? "GREEN" : "RED",
+                type: "DRAGON_BREAK", 
+                confidence: "HIGH",
+                reason: `${colors[0]} streak of ${currentStreak} - expecting opposite`
             };
-            updatePredictionUI(currentPrediction);
-            document.getElementById("statusMsg").innerHTML = `🔮 Prediction: ${defaultSize} ${num1}/${num2}`;
-            setTimeout(() => updateStatusMsg(), 1500);
-            return;
+        }
+
+        // 2. Mirror Trend Detection
+        if (colors.length >= 4 && colors[0] !== colors[1] && colors[1] === colors[2] && colors[2] !== colors[3]) {
+            return { 
+                predict: colors[1] === "RED" ? "GREEN" : "RED",
+                type: "MIRROR", 
+                confidence: "MEDIUM",
+                reason: "AB-AB mirror pattern - expecting opposite"
+            };
+        }
+
+        // 3. Imbalance correction
+        const redCount = colors.filter(c => c === 'RED').length;
+        const greenCount = colors.filter(c => c === 'GREEN').length;
+        
+        if (redCount >= 7) {
+            return { 
+                predict: 'GREEN', 
+                type: 'CORRECTION', 
+                confidence: 'HIGH',
+                reason: `RED overload (${redCount}/10) → expecting GREEN`
+            };
+        }
+        if (greenCount >= 7) {
+            return { 
+                predict: 'RED', 
+                type: 'CORRECTION', 
+                confidence: 'HIGH',
+                reason: `GREEN overload (${greenCount}/10) → expecting RED`
+            };
+        }
+
+        // 4. Alternating pattern
+        let alternations = 0;
+        for (let i = 0; i < colors.length - 1; i++) {
+            if (colors[i] !== colors[i + 1]) alternations++;
+        }
+        const altRate = colors.length > 1 ? alternations / (colors.length - 1) : 0;
+        
+        if (altRate > 0.7) {
+            const lastColor = colors[0];
+            return {
+                predict: lastColor === "RED" ? "GREEN" : "RED",
+                type: "ALTERNATING",
+                confidence: "MEDIUM",
+                reason: "High alternation pattern"
+            };
+        }
+
+        // Default: Opposite of most frequent in last 5
+        const last5Colors = colors.slice(0, 5);
+        const freq = {};
+        for (let c of last5Colors) {
+            freq[c] = (freq[c] || 0) + 1;
+        }
+        let mostFrequent = last5Colors[0];
+        for (let c in freq) {
+            if (freq[c] > freq[mostFrequent]) mostFrequent = c;
         }
         
-        const analysis = analyzeUnexpectedPattern();
-        
-        // DECISION: Based on unexpectedness, choose prediction domain
-        let useSizePrediction = true;
-        let predictedValue = "";
-        let numbers = [];
-        
-        // HIGH UNEXPECTEDNESS (>0.6): randomize domain choice to match chaos
-        if (analysis.chaosLevel > 0.65) {
-            useSizePrediction = Math.random() < 0.5;
-        } 
-        // MEDIUM UNEXPECTEDNESS: use domain with higher alternation
-        else if (analysis.chaosLevel > 0.45) {
-            useSizePrediction = analysis.sizeAlt >= analysis.colorAlt;
-        }
-        // LOW UNEXPECTEDNESS: use streak breaker
-        else {
-            if (analysis.sizeStreak >= 3) useSizePrediction = true;
-            else if (analysis.colorStreak >= 3) useSizePrediction = false;
-            else useSizePrediction = analysis.sizeAlt <= analysis.colorAlt;
-        }
-        
-        // Add random flip for unpredictability (scaled by chaos)
-        if (Math.random() < (analysis.chaosLevel * 0.4)) {
-            useSizePrediction = !useSizePrediction;
-        }
-        
-        // --- PREDICT VALUE (SIZE or COLOR) ---
-        if (useSizePrediction) {
-            // SIZE prediction that matches unexpected pattern
-            if (analysis.chaosLevel > 0.7) {
-                // Highly unexpected: completely random size
-                predictedValue = Math.random() < 0.5 ? "SMALL" : "BIG";
-            } else if (analysis.sizeStreak >= 3) {
-                predictedValue = analysis.lastSize === "SMALL" ? "BIG" : "SMALL";
-            } else if (analysis.sizeAlt > 0.6) {
-                predictedValue = analysis.lastSize === "SMALL" ? "BIG" : "SMALL";
-            } else {
-                // Look for imbalance in last 6
-                let last6Sizes = analysis.recentNumbers.slice(-6).map(n => getSize(n));
-                let bigCount = last6Sizes.filter(s => s === "BIG").length;
-                let smallCount = last6Sizes.filter(s => s === "SMALL").length;
-                if (bigCount >= 4) predictedValue = "SMALL";
-                else if (smallCount >= 4) predictedValue = "BIG";
-                else predictedValue = analysis.lastSize === "SMALL" ? "BIG" : "SMALL";
-            }
-            
-            // Extra chaos injection
-            if (Math.random() < analysis.chaosLevel * 0.35) {
-                predictedValue = predictedValue === "SMALL" ? "BIG" : "SMALL";
-            }
-            
-            // Generate 2 NUMBERS based on predicted SIZE + cold numbers (unexpected)
-            const sizeRange = predictedValue === "SMALL" ? [0,1,2,3,4] : [5,6,7,8,9];
-            
-            if (analysis.chaosLevel > 0.65 && analysis.coldNumbers.length >= 2) {
-                // High chaos: pick cold numbers that may be outside size range (unexpected!)
-                let coldInRange = analysis.coldNumbers.filter(n => sizeRange.includes(n));
-                if (coldInRange.length >= 2) {
-                    numbers = [coldInRange[0], coldInRange[1]];
-                } else {
-                    // Mix: one cold, one random from range
-                    let shuffled = [...sizeRange];
-                    for (let i = shuffled.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                    }
-                    let coldPick = analysis.coldNumbers[0] !== undefined ? analysis.coldNumbers[0] : shuffled[0];
-                    numbers = [coldPick, shuffled[1]];
-                }
-            } else {
-                // Normal: pick less frequent numbers from size range
-                let candidates = [...sizeRange].sort((a,b) => analysis.freq[a] - analysis.freq[b]);
-                numbers = [candidates[0], candidates.length > 1 ? candidates[1] : (candidates[0] === sizeRange[0] ? sizeRange[1] : sizeRange[0])];
-            }
-        } 
-        else {
-            // COLOR prediction
-            if (analysis.chaosLevel > 0.7) {
-                predictedValue = Math.random() < 0.5 ? "RED" : "GREEN";
-            } else if (analysis.colorStreak >= 3) {
-                predictedValue = analysis.lastColor === "RED" ? "GREEN" : "RED";
-            } else if (analysis.colorAlt > 0.6) {
-                predictedValue = analysis.lastColor === "RED" ? "GREEN" : "RED";
-            } else {
-                let last6Colors = analysis.recentNumbers.slice(-6).map(n => getColor(n));
-                let redCount = last6Colors.filter(c => c === "RED").length;
-                let greenCount = last6Colors.filter(c => c === "GREEN").length;
-                if (redCount >= 4) predictedValue = "GREEN";
-                else if (greenCount >= 4) predictedValue = "RED";
-                else predictedValue = analysis.lastColor === "RED" ? "GREEN" : "RED";
-            }
-            
-            if (Math.random() < analysis.chaosLevel * 0.35) {
-                predictedValue = predictedValue === "RED" ? "GREEN" : "RED";
-            }
-            
-            // Generate numbers based on predicted COLOR
-            const colorRange = predictedValue === "RED" ? [0,2,4,6,8] : [1,3,5,7,9];
-            
-            if (analysis.chaosLevel > 0.65 && analysis.coldNumbers.length >= 2) {
-                let coldInRange = analysis.coldNumbers.filter(n => colorRange.includes(n));
-                if (coldInRange.length >= 2) {
-                    numbers = [coldInRange[0], coldInRange[1]];
-                } else {
-                    let shuffled = [...colorRange];
-                    for (let i = shuffled.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-                    }
-                    let coldPick = analysis.coldNumbers[0] !== undefined ? analysis.coldNumbers[0] : shuffled[0];
-                    numbers = [coldPick, shuffled[1]];
-                }
-            } else {
-                let candidates = [...colorRange].sort((a,b) => analysis.freq[a] - analysis.freq[b]);
-                numbers = [candidates[0], candidates.length > 1 ? candidates[1] : (candidates[0] === colorRange[0] ? colorRange[1] : colorRange[0])];
-            }
-        }
-        
-        // Ensure numbers are valid and distinct
-        numbers = numbers.map(n => Math.min(9, Math.max(0, n)));
-        if (numbers[0] === numbers[1]) {
-            numbers[1] = (numbers[0] + 3) % 10;
-            if (useSizePrediction) {
-                let range = predictedValue === "SMALL" ? [0,1,2,3,4] : [5,6,7,8,9];
-                if (!range.includes(numbers[1])) numbers[1] = range[0] === numbers[0] ? range[1] : range[0];
-            } else {
-                let range = predictedValue === "RED" ? [0,2,4,6,8] : [1,3,5,7,9];
-                if (!range.includes(numbers[1])) numbers[1] = range[0] === numbers[0] ? range[1] : range[0];
-            }
-        }
-        
-        const displayType = predictedValue;
-        const displayNumbers = `${numbers[0]}/${numbers[1]}`;
-        const chaosPercent = Math.round(analysis.chaosLevel * 100);
-        
-        currentPrediction = {
-            period: curPeriod,
-            predictedType: useSizePrediction ? "size" : "color",
-            predictedValue: predictedValue,
-            numbers: numbers,
-            displayText: `${displayType}  ${displayNumbers}`,
-            chaosLevel: analysis.chaosLevel
+        return { 
+            predict: mostFrequent === "RED" ? "GREEN" : "RED",
+            type: "REVERSAL", 
+            confidence: "MEDIUM",
+            reason: `Most frequent ${mostFrequent} → expecting opposite`
         };
+    };
+
+    // ========== SIZE PREDICTION LOGIC ==========
+    const getSizePrediction = (historyArray) => {
+        if (historyArray.length < 3) return { type: "WAIT", reason: "Need more data", predict: null, confidence: "LOW" };
+
+        const lastResults = historyArray.slice(0, 10);
+        const sizes = lastResults.map(r => r.size);
+
+        // 1. Dragon streak break
+        let currentStreak = 1;
+        for (let i = 0; i < sizes.length - 1; i++) {
+            if (sizes[i] === sizes[i + 1]) currentStreak++;
+            else break;
+        }
+
+        if (currentStreak >= 3) {
+            return { 
+                predict: sizes[0] === "SMALL" ? "BIG" : "SMALL",
+                type: "STREAK_BREAK", 
+                confidence: "HIGH",
+                reason: `${sizes[0]} streak of ${currentStreak} - expecting opposite`
+            };
+        }
+
+        // 2. Alternating pattern
+        let alternations = 0;
+        for (let i = 0; i < sizes.length - 1; i++) {
+            if (sizes[i] !== sizes[i + 1]) alternations++;
+        }
+        const altRate = sizes.length > 1 ? alternations / (sizes.length - 1) : 0;
+
+        if (altRate > 0.7) {
+            const lastSize = sizes[0];
+            return {
+                predict: lastSize === "SMALL" ? "BIG" : "SMALL",
+                type: "ALTERNATING",
+                confidence: "MEDIUM",
+                reason: "High alternation pattern"
+            };
+        }
+
+        // 3. Imbalance correction
+        const bigCount = sizes.filter(s => s === "BIG").length;
+        const smallCount = sizes.filter(s => s === "SMALL").length;
         
-        updatePredictionUI(currentPrediction);
+        if (bigCount >= 7) {
+            return {
+                predict: "SMALL",
+                type: "CORRECTION",
+                confidence: "HIGH",
+                reason: `BIG overload (${bigCount}/10) → expecting SMALL`
+            };
+        }
+        if (smallCount >= 7) {
+            return {
+                predict: "BIG",
+                type: "CORRECTION",
+                confidence: "HIGH",
+                reason: `SMALL overload (${smallCount}/10) → expecting BIG`
+            };
+        }
+
+        // Default: Opposite of most frequent in last 5
+        const last5Sizes = sizes.slice(0, 5);
+        const freq = {};
+        for (let s of last5Sizes) {
+            freq[s] = (freq[s] || 0) + 1;
+        }
+        let mostFrequent = last5Sizes[0];
+        for (let s in freq) {
+            if (freq[s] > freq[mostFrequent]) mostFrequent = s;
+        }
         
-        let chaosText = analysis.chaosLevel > 0.65 ? "🔥 HIGH UNEXPECTED" : (analysis.chaosLevel > 0.45 ? "⚡ MODERATE" : "📊 LOW");
-        document.getElementById("statusMsg").innerHTML = `🎲 Unexpectedness: ${chaosPercent}% ${chaosText} → ${displayType} ${displayNumbers}`;
-        setTimeout(() => updateStatusMsg(), 2500);
+        return { 
+            predict: mostFrequent === "SMALL" ? "BIG" : "SMALL",
+            type: "REVERSAL", 
+            confidence: "MEDIUM",
+            reason: `Most frequent ${mostFrequent} → expecting opposite`
+        };
+    };
+
+    // ========== DECIDE PREDICTION TYPE ==========
+    function decidePredictionType(historyArray) {
+        if (historyArray.length < 3) return { type: "size", reason: "Need more data" };
+        
+        const sizePrediction = getSizePrediction(historyArray);
+        const colorPrediction = getColorPrediction(historyArray);
+        
+        // If last prediction was a loss, force switch to the other type
+        if (lastPredictionWasWin === false) {
+            const previousType = currentPrediction?.predictedType;
+            if (previousType === "size") {
+                return { type: "color", reason: "LAST PREDICTION LOST → switching to COLOR" };
+            } else if (previousType === "color") {
+                return { type: "size", reason: "LAST PREDICTION LOST → switching to SIZE" };
+            }
+        }
+        
+        // If SIZE has HIGH confidence, use SIZE
+        if (sizePrediction.confidence === "HIGH") {
+            return { type: "size", reason: "SIZE has HIGH confidence" };
+        }
+        
+        // If COLOR has HIGH confidence, use COLOR
+        if (colorPrediction.confidence === "HIGH") {
+            return { type: "color", reason: "COLOR has HIGH confidence" };
+        }
+        
+        // Alternate between SIZE and COLOR for variety
+        const shouldUseSize = Math.random() < 0.5;
+        return { 
+            type: shouldUseSize ? "size" : "color", 
+            reason: shouldUseSize ? "Random selection - SIZE" : "Random selection - COLOR"
+        };
     }
-    
-    function updatePredictionUI(pred) {
+
+    // ========== MAIN PREDICTION FUNCTION - Analyzes ALL data from oldest to newest ==========
+    function generatePredictionFromFullHistory() {
+        // Create analysis history from oldest to newest (reverse of display order)
+        const analysisHistory = [...history].reverse().map(h => ({
+            period: h.period,
+            color: h.color,
+            size: h.size,
+            number: h.value
+        }));
+        
         const pBox = document.getElementById("pBox");
         const pRange = document.getElementById("pRange");
         const pVal = document.getElementById("pVal");
-        const pNumbers = document.getElementById("pNumbers");
         const chaosBadge = document.getElementById("chaosBadge");
         
-        pBox.classList.add("active");
+        if (analysisHistory.length < 3) {
+            pBox.classList.remove("waiting");
+            pRange.innerHTML = "⚠️ INSUFFICIENT DATA";
+            pVal.innerHTML = "---";
+            chaosBadge.innerHTML = `Need ${3 - analysisHistory.length} more entries`;
+            currentPrediction = null;
+            return;
+        }
         
-        const chaosPercent = pred.chaosLevel ? Math.round(pred.chaosLevel * 100) : 0;
-        pRange.innerHTML = `🎯 UNEXPECTED PATTERN MATCH | CHAOS: ${chaosPercent}%`;
-        pVal.innerHTML = pred.predictedValue;
-        pNumbers.innerHTML = `🎲 ${pred.numbers[0]} / ${pred.numbers[1]}`;
-        chaosBadge.innerHTML = pred.chaosLevel > 0.6 ? "⚡ HIGH ALTERNATION" : (pred.chaosLevel > 0.4 ? "🌀 UNSTABLE" : "📈 TRENDING");
-    }
-    
-    function clearPrediction() {
-        currentPrediction = null;
-        const pBox = document.getElementById("pBox");
-        pBox.classList.remove("active");
-        document.getElementById("pRange").innerHTML = "ANALYZING UNEXPECTED PATTERN...";
-        document.getElementById("pVal").innerHTML = "---";
-        document.getElementById("pNumbers").innerHTML = "";
-        document.getElementById("chaosBadge").innerHTML = "";
+        const decision = decidePredictionType(analysisHistory);
+        let predictionResult;
+        let predictedType;
+        
+        if (decision.type === "size") {
+            predictionResult = getSizePrediction(analysisHistory);
+            predictedType = "size";
+        } else {
+            predictionResult = getColorPrediction(analysisHistory);
+            predictedType = "color";
+        }
+        
+        if (!predictionResult.predict) {
+            predictionResult = { predict: predictedType === "size" ? "SMALL" : "RED", type: "DEFAULT", confidence: "LOW", reason: "Using default prediction" };
+        }
+        
+        currentPrediction = {
+            period: curPeriod,
+            predictedType: predictedType,
+            predictedValue: predictionResult.predict,
+            predictionMeta: {
+                type: predictionResult.type,
+                confidence: predictionResult.confidence,
+                reason: predictionResult.reason || "",
+                switchReason: decision.reason || "",
+                dataPoints: analysisHistory.length
+            }
+        };
+        
+        // Update UI
+        pBox.classList.remove("waiting");
+        const modeText = predictedType === "size" ? "📏 SIZE" : "🎨 COLOR";
+        const confidenceEmoji = predictionResult.confidence === "HIGH" ? "🔥" : (predictionResult.confidence === "MEDIUM" ? "⚡" : "📊");
+        pRange.innerHTML = `${modeText} ${confidenceEmoji} ${predictionResult.type} | ${predictionResult.confidence} | ${analysisHistory.length} entries`;
+        pVal.innerHTML = predictionResult.predict;
+        
+        let badgeHtml = `📊 ${predictionResult.reason || "Analyzing patterns"}`;
+        if (decision.reason && decision.reason !== predictionResult.reason) {
+            badgeHtml = `🔄 ${decision.reason}<br>📊 ${predictionResult.reason || ""}`;
+        }
+        chaosBadge.innerHTML = badgeHtml;
+        
+        // Update status message
+        document.getElementById("statusMsg").innerHTML = `🔄 Auto-reanalyzed ${analysisHistory.length} entries | Predicting: ${predictionResult.predict}`;
+        
+        return currentPrediction;
     }
     
     function updateStatusMsg() {
         const len = history.length;
         const msg = document.getElementById("statusMsg");
-        if (len >= 15) {
-            const analysis = analyzeUnexpectedPattern();
-            msg.innerHTML = `✅ Unexpectedness: ${Math.round(analysis.chaosLevel * 100)}% | Click PREDICT`;
+        const winRateDiv = document.getElementById("winRateDisplay");
+        
+        if (len >= 3) {
+            const winRate = predictionStats.total > 0 ? Math.round((predictionStats.wins / predictionStats.total) * 100) : 0;
+            msg.innerHTML = `✅ ${len} entries | Auto-reanalyzing after each entry | Win Rate: ${winRate}%`;
+            winRateDiv.innerHTML = `🏆 WIN RATE: ${winRate}% (${predictionStats.wins}W / ${predictionStats.losses}L) | Total: ${predictionStats.total}`;
         } else {
-            msg.innerHTML = `📊 Need ${15 - len} more entries to detect unexpected pattern (${len}/15)`;
+            msg.innerHTML = `📊 Table has ${len}/3 entries | Add ${3 - len} more results for predictions`;
+            winRateDiv.innerHTML = `⏳ Add ${3 - len} more results → Auto prediction will start`;
         }
     }
     
@@ -623,10 +651,10 @@
         const color = getColor(val);
         let resultDisplay = "-";
         let predictedInfo = "---";
+        let wasWin = false;
         
-        // Evaluate against current prediction
+        // Evaluate against current prediction BEFORE adding new entry
         if (currentPrediction) {
-            const isHit = (val === currentPrediction.numbers[0] || val === currentPrediction.numbers[1]);
             let typeMatch = false;
             if (currentPrediction.predictedType === "size") {
                 typeMatch = (size === currentPrediction.predictedValue);
@@ -634,32 +662,40 @@
                 typeMatch = (color === currentPrediction.predictedValue);
             }
             
-            if (isHit && typeMatch) {
-                resultDisplay = `<span class="win-text">✓ WIN (${val})</span>`;
-            } else if (isHit && !typeMatch) {
-                resultDisplay = `<span class="win-text">⚠️ NUM HIT</span>`;
-            } else if (!isHit && typeMatch) {
-                resultDisplay = `<span class="loss-text">✗ TYPE OK</span>`;
+            wasWin = typeMatch;
+            
+            if (wasWin) {
+                resultDisplay = `<span class="win-text">✓ WIN (${val} → ${size} / ${color})</span>`;
+                predictionStats.wins++;
             } else {
-                resultDisplay = `<span class="loss-text">✗ LOSS</span>`;
+                resultDisplay = `<span class="loss-text">✗ LOSS (${val} → ${size} / ${color})</span>`;
+                predictionStats.losses++;
             }
-            predictedInfo = `${currentPrediction.predictedValue} ${currentPrediction.numbers[0]}/${currentPrediction.numbers[1]}`;
+            predictionStats.total++;
+            predictedInfo = `${currentPrediction.predictedValue}`;
         }
         
-        // Store in chronological order (push to end = newest)
-        history.push({
+        // Set last prediction result for next decision
+        lastPredictionWasWin = wasWin;
+        
+        // Add to history at the BEGINNING (newest first for display)
+        history.unshift({
             period: curPeriod,
             value: val,
             size: size,
             color: color,
             predicted: predictedInfo,
-            result: resultDisplay
+            result: resultDisplay,
+            wasWin: wasWin
         });
         
         curPeriod++;
         
-        // Clear prediction after each entry
-        clearPrediction();
+        // Update UI
+        updateUI();
+        
+        // CRITICAL: Re-analyze ALL data from oldest to newest and generate NEW prediction
+        generatePredictionFromFullHistory();
         
         return true;
     }
@@ -685,21 +721,22 @@
         }
         
         inputEl.value = "";
-        updateUI();
         
-        document.getElementById("statusMsg").innerHTML = `✅ Added ${numbers.length} number(s) — prediction cleared`;
-        setTimeout(() => updateStatusMsg(), 2000);
+        document.getElementById("statusMsg").innerHTML = `✅ Added ${numbers.length} result(s) | Auto-reanalyzed with new data`;
+        setTimeout(() => updateStatusMsg(), 2500);
     }
     
     function startSystem() {
         curPeriod = parseInt(document.getElementById("initPeriod").value) || 1;
         history = [];
         currentPrediction = null;
+        predictionStats = { wins: 0, losses: 0, total: 0 };
+        lastPredictionWasWin = null;
         document.getElementById("setupArea").style.display = "none";
         document.getElementById("mainEngine").style.display = "block";
-        clearPrediction();
         updateUI();
         document.getElementById("numInput").focus();
+        generatePredictionFromFullHistory();
     }
     
     function updateUI() {
@@ -712,27 +749,26 @@
         const tBody = document.getElementById("tBody");
         
         if (activeView === "live") {
-            tHead.innerHTML = `<tr><th>PERIOD</th><th>NUM</th><th>SIZE</th><th>COLOR</th></tr>`;
-            // Show newest first
-            const displayHistory = [...history].reverse();
-            tBody.innerHTML = displayHistory.map(h => `
+            tHead.innerHTML = `<tr><th>PERIOD</th><th>NUMBER</th><th>SIZE</th><th>COLOR</th><th>RESULT</th></tr>`;
+            tBody.innerHTML = history.map((h, index) => `
                 <tr>
-                    <td><span class="range-text">${h.period}</span></td>
+                    <td><span class="range-text">${h.period}${index === 0 ? ' <span class="latest-badge">LATEST</span>' : ''}</span></td>
                     <td><div class="number-circle ${h.value % 2 === 0 ? 'number-even' : 'number-odd'}">${h.value}</div></span></td>
-                    <td><span style="font-size:0.55rem;">${h.size}</span></td>
-                    <td><span style="font-size:0.55rem; ${h.color === 'RED' ? 'color:#ff7b7b' : 'color:#6fef9e'}">${h.color}</span></span></td>
+                    <td><span style="font-size:0.55rem; font-weight:bold;">${h.size}</span></td>
+                    <td><span style="font-size:0.55rem; font-weight:bold; ${h.color === 'RED' ? 'color:#ff7b7b' : 'color:#6fef9e'}">${h.color}</span></span></td>
+                    <td>${h.result}</span></td>
                 </tr>
             `).join("");
         } else {
             tHead.innerHTML = `<tr><th>PREDICTION</th><th>RESULT</th></tr>`;
-            const logs = [...history].filter(h => h.predicted !== "---").reverse();
+            const logs = history.filter(h => h.predicted !== "---");
             if (logs.length === 0) {
-                tBody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#6b7280; padding:12px;">No predictions yet → click PREDICT UNEXPECTED</td></td>`;
+                tBody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#6b7280; padding:12px;">No predictions yet → Add results to start auto-prediction</td></tr>`;
             } else {
                 tBody.innerHTML = logs.map(h => `
                     <tr>
-                        <td><span class="range-text" style="font-size:0.55rem;">${h.predicted}</span></td>
-                        <td>${h.result}</td>
+                        <td><span class="range-text" style="font-size:0.55rem;">${h.predicted}</span></span></td>
+                        <td>${h.result}</span></td>
                     </tr>
                 `).join("");
             }
@@ -743,11 +779,811 @@
         activeView = v;
         document.querySelectorAll(".tab-item").forEach(btn => btn.classList.remove("active"));
         document.getElementById(v === "live" ? "btnLive" : "btnHistory").classList.add("active");
-        document.getElementById("viewTitle").textContent = v === "live" ? "LIVE FEED" : "PREDICTION LOG";
+        document.getElementById("viewTitle").textContent = v === "live" ? "GAME HISTORY" : "PREDICTION LOG";
         updateUI();
     }
     
-    // Event listeners
+    const inputField = document.getElementById("numInput");
+    if (inputField) {
+        inputField.addEventListener("input", function() {
+            this.value = this.value.replace(/\D/g, "").split("").join(" ");
+        });
+        inputField.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") processBulkInput();
+        });
+    }
+    
+    window.onload = () => {
+        const initField = document.getElementById("initPeriod");
+        if (initField) initField.value = "001";
+    };
+</script>
+</body>
+</html><!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>WINGO PATTERN PRO - AUTO RE-ANALYZE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Inter", sans-serif;
+            background: #0a0c12;
+            color: white;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .header h1 {
+            font-family: "Orbitron";
+            font-size: 0.9rem;
+            text-align: center;
+            background: linear-gradient(135deg, #a855f7, #ec489a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .gaming-card {
+            background: rgba(18, 22, 35, 0.9);
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 6px 12px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            background: rgba(139, 92, 246, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 {
+            font-family: "Orbitron";
+            font-size: 0.55rem;
+            color: #a855f7;
+            text-transform: uppercase;
+        }
+        .card-content {
+            padding: 8px;
+        }
+        .prediction-box {
+            background: rgba(250, 204, 21, 0.08);
+            border: 1px solid #facc15;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: block;
+        }
+        .prediction-box.waiting {
+            border-color: #6b7280;
+            background: rgba(107, 114, 128, 0.08);
+        }
+        .prediction-box.waiting .pred-value {
+            color: #6b7280;
+        }
+        .pred-range {
+            font-family: "Orbitron";
+            font-size: 0.5rem;
+            color: #c084fc;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .pred-value {
+            font-family: "Orbitron";
+            font-size: 1.5rem;
+            color: #facc15;
+            font-weight: 900;
+        }
+        .period-display-gaming {
+            background: #05060a;
+            border-radius: 8px;
+            padding: 6px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .next-period-value {
+            font-family: "Orbitron";
+            font-size: 1.1rem;
+            color: #facc15;
+            font-weight: bold;
+        }
+        .input-area {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 5px;
+        }
+        .gaming-input {
+            flex: 1;
+            background: #000;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px;
+            color: white;
+            font-family: "Orbitron";
+            text-align: center;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+        .gaming-input:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+        .gaming-btn {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: "Orbitron";
+            font-size: 0.6rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.1s;
+        }
+        .btn-primary-gaming {
+            background: #8b5cf6;
+            color: white;
+        }
+        .btn-predict {
+            background: #facc15;
+            color: #0a0c12;
+            margin-top: 6px;
+            width: 100%;
+        }
+        .btn-predict:active {
+            transform: scale(0.97);
+        }
+        .gaming-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.65rem;
+        }
+        .gaming-table th {
+            padding: 5px 3px;
+            font-family: "Orbitron";
+            font-size: 0.45rem;
+            color: #a855f7;
+            border-bottom: 1px solid #333;
+        }
+        .gaming-table td {
+            padding: 5px 3px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .number-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Orbitron";
+            font-weight: 900;
+            font-size: 0.65rem;
+            color: white;
+            margin: 0 auto;
+        }
+        .number-even {
+            background: #ff3131;
+            box-shadow: 0 0 3px #ff3131;
+        }
+        .number-odd {
+            background: #00ff88;
+            color: #05060a;
+            box-shadow: 0 0 3px #00ff88;
+        }
+        .win-text {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 0.55rem;
+        }
+        .loss-text {
+            color: #ff3131;
+            font-weight: bold;
+            font-size: 0.55rem;
+        }
+        .range-text {
+            font-size: 0.5rem;
+            color: #8b9bb0;
+            font-family: "Orbitron";
+        }
+        .view-toggle {
+            display: flex;
+            background: #05060a;
+            border-radius: 20px;
+            padding: 3px;
+            margin: 10px 0;
+            border: 1px solid #333;
+        }
+        .tab-item {
+            flex: 1;
+            padding: 5px;
+            font-family: "Orbitron";
+            font-size: 0.5rem;
+            color: #6b7280;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 16px;
+        }
+        .tab-item.active {
+            background: #8b5cf6;
+            color: white;
+        }
+        .chaos-badge {
+            font-size: 0.4rem;
+            background: #ec489a20;
+            color: #f472b6;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .status-msg {
+            font-size: 0.45rem;
+            color: #8b5cf6;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .win-rate {
+            font-size: 0.45rem;
+            background: #1a1c2a;
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .latest-badge {
+            background: #facc1520;
+            color: #facc15;
+            font-size: 0.35rem;
+            padding: 2px 4px;
+            border-radius: 8px;
+            margin-left: 5px;
+        }
+        .auto-badge {
+            font-size: 0.4rem;
+            background: #10b98120;
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-left: 5px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header"><h1>WINGO PATTERN PRO</h1></div>
+
+    <div id="setupArea" class="gaming-card">
+        <div class="card-content" style="text-align: center; padding: 15px">
+            <p style="font-size: 0.55rem; color: #8b9bb0; margin-bottom: 10px; font-family: 'Orbitron';">SET STARTING PERIOD</p>
+            <input type="text" id="initPeriod" class="gaming-input" style="width: 120px; margin-bottom: 10px" placeholder="001" value="001" />
+            <button class="gaming-btn btn-primary-gaming" style="width: 100%" onclick="startSystem()">START ANALYZER</button>
+        </div>
+    </div>
+
+    <div id="mainEngine" style="display: none">
+        <div class="prediction-box" id="pBox">
+            <div class="pred-range" id="pRange">📊 ANALYZING DATA...</div>
+            <div class="pred-value" id="pVal">---</div>
+            <div class="chaos-badge" id="chaosBadge"></div>
+        </div>
+
+        <div class="gaming-card">
+            <div class="card-content">
+                <div class="period-display-gaming">
+                    <span style="font-family: 'Orbitron'; font-size: 0.5rem; color: #8b9bb0;">NEXT PERIOD</span>
+                    <div class="next-period-value" id="dispPeriod">---</div>
+                </div>
+                <div class="input-area">
+                    <input type="text" id="numInput" class="gaming-input" placeholder="0 1 2 3" inputmode="numeric" />
+                    <button class="gaming-btn btn-primary-gaming" onclick="processBulkInput()">ADD RESULT</button>
+                </div>
+                <p id="statusMsg" class="status-msg">📊 Add results → Auto re-analyzes & predicts</p>
+                <div id="winRateDisplay" class="win-rate"></div>
+            </div>
+        </div>
+
+        <div class="view-toggle">
+            <div class="tab-item active" id="btnLive" onclick="switchView('live')">GAME HISTORY</div>
+            <div class="tab-item" id="btnHistory" onclick="switchView('history')">PREDICTION LOG</div>
+        </div>
+
+        <div class="gaming-card">
+            <div class="card-header">
+                <h3 id="viewTitle">GAME HISTORY</h3>
+                <span id="counter" style="font-size: 0.45rem; color: #8b5cf6">0/20</span>
+            </div>
+            <div class="card-content" style="max-height: 460px; overflow-y: auto;">
+                <table class="gaming-table">
+                    <thead id="tHead"></thead>
+                    <tbody id="tBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== GLOBAL STATE ==========
+    let history = [];        // chronological order (newest FIRST for display)
+    let curPeriod = 0;
+    let activeView = "live";
+    let currentPrediction = null;
+    let predictionStats = { wins: 0, losses: 0, total: 0 };
+    let lastPredictionWasWin = null;
+
+    function getSize(num) { return num <= 4 ? "SMALL" : "BIG"; }
+    function getColor(num) { return num % 2 === 0 ? "RED" : "GREEN"; }
+
+    // ========== COLOR PREDICTION LOGIC ==========
+    const getColorPrediction = (historyArray) => {
+        if (historyArray.length < 3) return { type: "WAIT", reason: "Need more data", predict: null, confidence: "LOW" };
+
+        const lastResults = historyArray.slice(0, 10);
+        const colors = lastResults.map(r => r.color);
+
+        // 1. Dragon Trend Detection
+        let currentStreak = 1;
+        for (let i = 0; i < colors.length - 1; i++) {
+            if (colors[i] === colors[i + 1]) currentStreak++;
+            else break;
+        }
+
+        if (currentStreak >= 3) {
+            return { 
+                predict: colors[0] === "RED" ? "GREEN" : "RED",
+                type: "DRAGON_BREAK", 
+                confidence: "HIGH",
+                reason: `${colors[0]} streak of ${currentStreak} - expecting opposite`
+            };
+        }
+
+        // 2. Mirror Trend Detection
+        if (colors.length >= 4 && colors[0] !== colors[1] && colors[1] === colors[2] && colors[2] !== colors[3]) {
+            return { 
+                predict: colors[1] === "RED" ? "GREEN" : "RED",
+                type: "MIRROR", 
+                confidence: "MEDIUM",
+                reason: "AB-AB mirror pattern - expecting opposite"
+            };
+        }
+
+        // 3. Imbalance correction
+        const redCount = colors.filter(c => c === 'RED').length;
+        const greenCount = colors.filter(c => c === 'GREEN').length;
+        
+        if (redCount >= 7) {
+            return { 
+                predict: 'GREEN', 
+                type: 'CORRECTION', 
+                confidence: 'HIGH',
+                reason: `RED overload (${redCount}/10) → expecting GREEN`
+            };
+        }
+        if (greenCount >= 7) {
+            return { 
+                predict: 'RED', 
+                type: 'CORRECTION', 
+                confidence: 'HIGH',
+                reason: `GREEN overload (${greenCount}/10) → expecting RED`
+            };
+        }
+
+        // 4. Alternating pattern
+        let alternations = 0;
+        for (let i = 0; i < colors.length - 1; i++) {
+            if (colors[i] !== colors[i + 1]) alternations++;
+        }
+        const altRate = colors.length > 1 ? alternations / (colors.length - 1) : 0;
+        
+        if (altRate > 0.7) {
+            const lastColor = colors[0];
+            return {
+                predict: lastColor === "RED" ? "GREEN" : "RED",
+                type: "ALTERNATING",
+                confidence: "MEDIUM",
+                reason: "High alternation pattern"
+            };
+        }
+
+        // Default: Opposite of most frequent in last 5
+        const last5Colors = colors.slice(0, 5);
+        const freq = {};
+        for (let c of last5Colors) {
+            freq[c] = (freq[c] || 0) + 1;
+        }
+        let mostFrequent = last5Colors[0];
+        for (let c in freq) {
+            if (freq[c] > freq[mostFrequent]) mostFrequent = c;
+        }
+        
+        return { 
+            predict: mostFrequent === "RED" ? "GREEN" : "RED",
+            type: "REVERSAL", 
+            confidence: "MEDIUM",
+            reason: `Most frequent ${mostFrequent} → expecting opposite`
+        };
+    };
+
+    // ========== SIZE PREDICTION LOGIC ==========
+    const getSizePrediction = (historyArray) => {
+        if (historyArray.length < 3) return { type: "WAIT", reason: "Need more data", predict: null, confidence: "LOW" };
+
+        const lastResults = historyArray.slice(0, 10);
+        const sizes = lastResults.map(r => r.size);
+
+        // 1. Dragon streak break
+        let currentStreak = 1;
+        for (let i = 0; i < sizes.length - 1; i++) {
+            if (sizes[i] === sizes[i + 1]) currentStreak++;
+            else break;
+        }
+
+        if (currentStreak >= 3) {
+            return { 
+                predict: sizes[0] === "SMALL" ? "BIG" : "SMALL",
+                type: "STREAK_BREAK", 
+                confidence: "HIGH",
+                reason: `${sizes[0]} streak of ${currentStreak} - expecting opposite`
+            };
+        }
+
+        // 2. Alternating pattern
+        let alternations = 0;
+        for (let i = 0; i < sizes.length - 1; i++) {
+            if (sizes[i] !== sizes[i + 1]) alternations++;
+        }
+        const altRate = sizes.length > 1 ? alternations / (sizes.length - 1) : 0;
+
+        if (altRate > 0.7) {
+            const lastSize = sizes[0];
+            return {
+                predict: lastSize === "SMALL" ? "BIG" : "SMALL",
+                type: "ALTERNATING",
+                confidence: "MEDIUM",
+                reason: "High alternation pattern"
+            };
+        }
+
+        // 3. Imbalance correction
+        const bigCount = sizes.filter(s => s === "BIG").length;
+        const smallCount = sizes.filter(s => s === "SMALL").length;
+        
+        if (bigCount >= 7) {
+            return {
+                predict: "SMALL",
+                type: "CORRECTION",
+                confidence: "HIGH",
+                reason: `BIG overload (${bigCount}/10) → expecting SMALL`
+            };
+        }
+        if (smallCount >= 7) {
+            return {
+                predict: "BIG",
+                type: "CORRECTION",
+                confidence: "HIGH",
+                reason: `SMALL overload (${smallCount}/10) → expecting BIG`
+            };
+        }
+
+        // Default: Opposite of most frequent in last 5
+        const last5Sizes = sizes.slice(0, 5);
+        const freq = {};
+        for (let s of last5Sizes) {
+            freq[s] = (freq[s] || 0) + 1;
+        }
+        let mostFrequent = last5Sizes[0];
+        for (let s in freq) {
+            if (freq[s] > freq[mostFrequent]) mostFrequent = s;
+        }
+        
+        return { 
+            predict: mostFrequent === "SMALL" ? "BIG" : "SMALL",
+            type: "REVERSAL", 
+            confidence: "MEDIUM",
+            reason: `Most frequent ${mostFrequent} → expecting opposite`
+        };
+    };
+
+    // ========== DECIDE PREDICTION TYPE ==========
+    function decidePredictionType(historyArray) {
+        if (historyArray.length < 3) return { type: "size", reason: "Need more data" };
+        
+        const sizePrediction = getSizePrediction(historyArray);
+        const colorPrediction = getColorPrediction(historyArray);
+        
+        // If last prediction was a loss, force switch to the other type
+        if (lastPredictionWasWin === false) {
+            const previousType = currentPrediction?.predictedType;
+            if (previousType === "size") {
+                return { type: "color", reason: "LAST PREDICTION LOST → switching to COLOR" };
+            } else if (previousType === "color") {
+                return { type: "size", reason: "LAST PREDICTION LOST → switching to SIZE" };
+            }
+        }
+        
+        // If SIZE has HIGH confidence, use SIZE
+        if (sizePrediction.confidence === "HIGH") {
+            return { type: "size", reason: "SIZE has HIGH confidence" };
+        }
+        
+        // If COLOR has HIGH confidence, use COLOR
+        if (colorPrediction.confidence === "HIGH") {
+            return { type: "color", reason: "COLOR has HIGH confidence" };
+        }
+        
+        // Alternate between SIZE and COLOR for variety
+        const shouldUseSize = Math.random() < 0.5;
+        return { 
+            type: shouldUseSize ? "size" : "color", 
+            reason: shouldUseSize ? "Random selection - SIZE" : "Random selection - COLOR"
+        };
+    }
+
+    // ========== MAIN PREDICTION FUNCTION - Analyzes ALL data from oldest to newest ==========
+    function generatePredictionFromFullHistory() {
+        // Create analysis history from oldest to newest (reverse of display order)
+        const analysisHistory = [...history].reverse().map(h => ({
+            period: h.period,
+            color: h.color,
+            size: h.size,
+            number: h.value
+        }));
+        
+        const pBox = document.getElementById("pBox");
+        const pRange = document.getElementById("pRange");
+        const pVal = document.getElementById("pVal");
+        const chaosBadge = document.getElementById("chaosBadge");
+        
+        if (analysisHistory.length < 3) {
+            pBox.classList.remove("waiting");
+            pRange.innerHTML = "⚠️ INSUFFICIENT DATA";
+            pVal.innerHTML = "---";
+            chaosBadge.innerHTML = `Need ${3 - analysisHistory.length} more entries`;
+            currentPrediction = null;
+            return;
+        }
+        
+        const decision = decidePredictionType(analysisHistory);
+        let predictionResult;
+        let predictedType;
+        
+        if (decision.type === "size") {
+            predictionResult = getSizePrediction(analysisHistory);
+            predictedType = "size";
+        } else {
+            predictionResult = getColorPrediction(analysisHistory);
+            predictedType = "color";
+        }
+        
+        if (!predictionResult.predict) {
+            predictionResult = { predict: predictedType === "size" ? "SMALL" : "RED", type: "DEFAULT", confidence: "LOW", reason: "Using default prediction" };
+        }
+        
+        currentPrediction = {
+            period: curPeriod,
+            predictedType: predictedType,
+            predictedValue: predictionResult.predict,
+            predictionMeta: {
+                type: predictionResult.type,
+                confidence: predictionResult.confidence,
+                reason: predictionResult.reason || "",
+                switchReason: decision.reason || "",
+                dataPoints: analysisHistory.length
+            }
+        };
+        
+        // Update UI
+        pBox.classList.remove("waiting");
+        const modeText = predictedType === "size" ? "📏 SIZE" : "🎨 COLOR";
+        const confidenceEmoji = predictionResult.confidence === "HIGH" ? "🔥" : (predictionResult.confidence === "MEDIUM" ? "⚡" : "📊");
+        pRange.innerHTML = `${modeText} ${confidenceEmoji} ${predictionResult.type} | ${predictionResult.confidence} | ${analysisHistory.length} entries`;
+        pVal.innerHTML = predictionResult.predict;
+        
+        let badgeHtml = `📊 ${predictionResult.reason || "Analyzing patterns"}`;
+        if (decision.reason && decision.reason !== predictionResult.reason) {
+            badgeHtml = `🔄 ${decision.reason}<br>📊 ${predictionResult.reason || ""}`;
+        }
+        chaosBadge.innerHTML = badgeHtml;
+        
+        // Update status message
+        document.getElementById("statusMsg").innerHTML = `🔄 Auto-reanalyzed ${analysisHistory.length} entries | Predicting: ${predictionResult.predict}`;
+        
+        return currentPrediction;
+    }
+    
+    function updateStatusMsg() {
+        const len = history.length;
+        const msg = document.getElementById("statusMsg");
+        const winRateDiv = document.getElementById("winRateDisplay");
+        
+        if (len >= 3) {
+            const winRate = predictionStats.total > 0 ? Math.round((predictionStats.wins / predictionStats.total) * 100) : 0;
+            msg.innerHTML = `✅ ${len} entries | Auto-reanalyzing after each entry | Win Rate: ${winRate}%`;
+            winRateDiv.innerHTML = `🏆 WIN RATE: ${winRate}% (${predictionStats.wins}W / ${predictionStats.losses}L) | Total: ${predictionStats.total}`;
+        } else {
+            msg.innerHTML = `📊 Table has ${len}/3 entries | Add ${3 - len} more results for predictions`;
+            winRateDiv.innerHTML = `⏳ Add ${3 - len} more results → Auto prediction will start`;
+        }
+    }
+    
+    // ========== DATA MANAGEMENT ==========
+    function parseMultiNumbers(inputStr) {
+        let trimmed = inputStr.trim();
+        if (trimmed === "") return [];
+        let numbers = [];
+        let digits = trimmed.match(/\d/g);
+        if (digits) {
+            numbers = digits.map(d => parseInt(d)).filter(n => n >= 0 && n <= 9);
+        }
+        return numbers;
+    }
+    
+    function addEntry(val) {
+        if (isNaN(val) || val < 0 || val > 9) return false;
+        
+        const size = getSize(val);
+        const color = getColor(val);
+        let resultDisplay = "-";
+        let predictedInfo = "---";
+        let wasWin = false;
+        
+        // Evaluate against current prediction BEFORE adding new entry
+        if (currentPrediction) {
+            let typeMatch = false;
+            if (currentPrediction.predictedType === "size") {
+                typeMatch = (size === currentPrediction.predictedValue);
+            } else {
+                typeMatch = (color === currentPrediction.predictedValue);
+            }
+            
+            wasWin = typeMatch;
+            
+            if (wasWin) {
+                resultDisplay = `<span class="win-text">✓ WIN (${val} → ${size} / ${color})</span>`;
+                predictionStats.wins++;
+            } else {
+                resultDisplay = `<span class="loss-text">✗ LOSS (${val} → ${size} / ${color})</span>`;
+                predictionStats.losses++;
+            }
+            predictionStats.total++;
+            predictedInfo = `${currentPrediction.predictedValue}`;
+        }
+        
+        // Set last prediction result for next decision
+        lastPredictionWasWin = wasWin;
+        
+        // Add to history at the BEGINNING (newest first for display)
+        history.unshift({
+            period: curPeriod,
+            value: val,
+            size: size,
+            color: color,
+            predicted: predictedInfo,
+            result: resultDisplay,
+            wasWin: wasWin
+        });
+        
+        curPeriod++;
+        
+        // Update UI
+        updateUI();
+        
+        // CRITICAL: Re-analyze ALL data from oldest to newest and generate NEW prediction
+        generatePredictionFromFullHistory();
+        
+        return true;
+    }
+    
+    function processBulkInput() {
+        const inputEl = document.getElementById("numInput");
+        const raw = inputEl.value;
+        if (!raw.trim()) {
+            document.getElementById("statusMsg").innerHTML = "⚠️ Enter numbers (e.g., 2 4 5 6)";
+            setTimeout(() => updateStatusMsg(), 1500);
+            return;
+        }
+        
+        const numbers = parseMultiNumbers(raw);
+        if (numbers.length === 0) {
+            document.getElementById("statusMsg").innerHTML = "⚠️ No valid digits 0-9!";
+            setTimeout(() => updateStatusMsg(), 1500);
+            return;
+        }
+        
+        for (let n of numbers) {
+            addEntry(n);
+        }
+        
+        inputEl.value = "";
+        
+        document.getElementById("statusMsg").innerHTML = `✅ Added ${numbers.length} result(s) | Auto-reanalyzed with new data`;
+        setTimeout(() => updateStatusMsg(), 2500);
+    }
+    
+    function startSystem() {
+        curPeriod = parseInt(document.getElementById("initPeriod").value) || 1;
+        history = [];
+        currentPrediction = null;
+        predictionStats = { wins: 0, losses: 0, total: 0 };
+        lastPredictionWasWin = null;
+        document.getElementById("setupArea").style.display = "none";
+        document.getElementById("mainEngine").style.display = "block";
+        updateUI();
+        document.getElementById("numInput").focus();
+        generatePredictionFromFullHistory();
+    }
+    
+    function updateUI() {
+        document.getElementById("dispPeriod").textContent = curPeriod;
+        const len = history.length;
+        document.getElementById("counter").textContent = `${len}/20`;
+        updateStatusMsg();
+        
+        const tHead = document.getElementById("tHead");
+        const tBody = document.getElementById("tBody");
+        
+        if (activeView === "live") {
+            tHead.innerHTML = `<tr><th>PERIOD</th><th>NUMBER</th><th>SIZE</th><th>COLOR</th><th>RESULT</th></tr>`;
+            tBody.innerHTML = history.map((h, index) => `
+                <tr>
+                    <td><span class="range-text">${h.period}${index === 0 ? ' <span class="latest-badge">LATEST</span>' : ''}</span></td>
+                    <td><div class="number-circle ${h.value % 2 === 0 ? 'number-even' : 'number-odd'}">${h.value}</div></span></td>
+                    <td><span style="font-size:0.55rem; font-weight:bold;">${h.size}</span></td>
+                    <td><span style="font-size:0.55rem; font-weight:bold; ${h.color === 'RED' ? 'color:#ff7b7b' : 'color:#6fef9e'}">${h.color}</span></span></td>
+                    <td>${h.result}</span></td>
+                </tr>
+            `).join("");
+        } else {
+            tHead.innerHTML = `<tr><th>PREDICTION</th><th>RESULT</th></tr>`;
+            const logs = history.filter(h => h.predicted !== "---");
+            if (logs.length === 0) {
+                tBody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#6b7280; padding:12px;">No predictions yet → Add results to start auto-prediction</td></tr>`;
+            } else {
+                tBody.innerHTML = logs.map(h => `
+                    <tr>
+                        <td><span class="range-text" style="font-size:0.55rem;">${h.predicted}</span></span></td>
+                        <td>${h.result}</span></td>
+                    </tr>
+                `).join("");
+            }
+        }
+    }
+    
+    function switchView(v) {
+        activeView = v;
+        document.querySelectorAll(".tab-item").forEach(btn => btn.classList.remove("active"));
+        document.getElementById(v === "live" ? "btnLive" : "btnHistory").classList.add("active");
+        document.getElementById("viewTitle").textContent = v === "live" ? "GAME HISTORY" : "PREDICTION LOG";
+        updateUI();
+    }
+    
     const inputField = document.getElementById("numInput");
     if (inputField) {
         inputField.addEventListener("input", function() {
