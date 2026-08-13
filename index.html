@@ -1,802 +1,918 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <title>WINGO PATTERN PRO - AUTO RE-ANALYZE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: "Inter", sans-serif;
-            background: #0a0c12;
-            color: white;
-            padding: 10px;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .header h1 {
-            font-family: "Orbitron";
-            font-size: 0.9rem;
-            text-align: center;
-            background: linear-gradient(135deg, #a855f7, #ec489a);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-        }
-        .gaming-card {
-            background: rgba(18, 22, 35, 0.9);
-            border-radius: 10px;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            margin-bottom: 10px;
-            overflow: hidden;
-        }
-        .card-header {
-            padding: 6px 12px;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-            background: rgba(139, 92, 246, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .card-header h3 {
-            font-family: "Orbitron";
-            font-size: 0.55rem;
-            color: #a855f7;
-            text-transform: uppercase;
-        }
-        .card-content {
-            padding: 8px;
-        }
-        .prediction-box {
-            background: rgba(250, 204, 21, 0.08);
-            border: 1px solid #facc15;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
-            text-align: center;
-            display: block;
-        }
-        .prediction-box.waiting {
-            border-color: #6b7280;
-            background: rgba(107, 114, 128, 0.08);
-        }
-        .prediction-box.waiting .pred-value {
-            color: #6b7280;
-        }
-        .pred-range {
-            font-family: "Orbitron";
-            font-size: 0.5rem;
-            color: #c084fc;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-        .pred-value {
-            font-family: "Orbitron";
-            font-size: 1.5rem;
-            color: #facc15;
-            font-weight: 900;
-        }
-        .period-display-gaming {
-            background: #05060a;
-            border-radius: 8px;
-            padding: 6px;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .next-period-value {
-            font-family: "Orbitron";
-            font-size: 1.1rem;
-            color: #facc15;
-            font-weight: bold;
-        }
-        .input-area {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 5px;
-        }
-        .gaming-input {
-            flex: 1;
-            background: #000;
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 8px;
-            color: white;
-            font-family: "Orbitron";
-            text-align: center;
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-        }
-        .gaming-input:focus {
-            outline: none;
-            border-color: #a855f7;
-        }
-        .gaming-btn {
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-family: "Orbitron";
-            font-size: 0.6rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.1s;
-        }
-        .btn-primary-gaming {
-            background: #8b5cf6;
-            color: white;
-        }
-        .btn-predict {
-            background: #facc15;
-            color: #0a0c12;
-            margin-top: 6px;
-            width: 100%;
-        }
-        .btn-predict:active {
-            transform: scale(0.97);
-        }
-        .gaming-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.65rem;
-        }
-        .gaming-table th {
-            padding: 5px 3px;
-            font-family: "Orbitron";
-            font-size: 0.45rem;
-            color: #a855f7;
-            border-bottom: 1px solid #333;
-        }
-        .gaming-table td {
-            padding: 5px 3px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .number-circle {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Orbitron";
-            font-weight: 900;
-            font-size: 0.65rem;
-            color: white;
-            margin: 0 auto;
-        }
-        .number-even {
-            background: #ff3131;
-            box-shadow: 0 0 3px #ff3131;
-        }
-        .number-odd {
-            background: #00ff88;
-            color: #05060a;
-            box-shadow: 0 0 3px #00ff88;
-        }
-        .win-text {
-            color: #00ff88;
-            font-weight: bold;
-            font-size: 0.55rem;
-        }
-        .loss-text {
-            color: #ff3131;
-            font-weight: bold;
-            font-size: 0.55rem;
-        }
-        .range-text {
-            font-size: 0.5rem;
-            color: #8b9bb0;
-            font-family: "Orbitron";
-        }
-        .view-toggle {
-            display: flex;
-            background: #05060a;
-            border-radius: 20px;
-            padding: 3px;
-            margin: 10px 0;
-            border: 1px solid #333;
-        }
-        .tab-item {
-            flex: 1;
-            padding: 5px;
-            font-family: "Orbitron";
-            font-size: 0.5rem;
-            color: #6b7280;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 16px;
-        }
-        .tab-item.active {
-            background: #8b5cf6;
-            color: white;
-        }
-        .chaos-badge {
-            font-size: 0.4rem;
-            background: #ec489a20;
-            color: #f472b6;
-            padding: 2px 6px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-top: 4px;
-        }
-        .status-msg {
-            font-size: 0.45rem;
-            color: #8b5cf6;
-            text-align: center;
-            margin-top: 5px;
-        }
-        .flex-col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .win-rate {
-            font-size: 0.45rem;
-            background: #1a1c2a;
-            padding: 4px 8px;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 5px;
-        }
-        .latest-badge {
-            background: #facc1520;
-            color: #facc15;
-            font-size: 0.35rem;
-            padding: 2px 4px;
-            border-radius: 8px;
-            margin-left: 5px;
-        }
-        .auto-badge {
-            font-size: 0.4rem;
-            background: #10b98120;
-            color: #10b981;
-            padding: 2px 6px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-left: 5px;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WinGo AI Mobile Dashboard</title>
+    <!-- Share Tech Mono Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- EXTERNAL STYLESHEET -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<div class="container">
-    <div class="header"><h1>WINGO PATTERN PRO</h1></div>
-
-    <div id="setupArea" class="gaming-card">
-        <div class="card-content" style="text-align: center; padding: 15px">
-            <p style="font-size: 0.55rem; color: #8b9bb0; margin-bottom: 10px; font-family: 'Orbitron';">SET STARTING PERIOD</p>
-            <input type="text" id="initPeriod" class="gaming-input" style="width: 120px; margin-bottom: 10px" placeholder="001" value="001" />
-            <button class="gaming-btn btn-primary-gaming" style="width: 100%" onclick="startSystem()">START ANALYZER</button>
-        </div>
+<body class="theme-blue-crystal">
+    <!-- BACKGROUND AMBIENT LAYERS -->
+    <div class="grid-plane"></div>
+    <div class="nebula"></div>
+    <div class="stars-container">
+        <div class="star-layer"></div>
+        <div class="star-layer"></div>
+        <div class="star-layer"></div>
     </div>
 
-    <div id="mainEngine" style="display: none">
-        <div class="prediction-box" id="pBox">
-            <div class="pred-range" id="pRange">📊 ANALYZING DATA...</div>
-            <div class="pred-value" id="pVal">---</div>
-            <div class="chaos-badge" id="chaosBadge"></div>
-        </div>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header>
+            <div class="title-text">WinGo Numbers</div>
+            <div class="status-info">
+                <div class="status-row">
+                    <div class="status-badge">
+                        <span class="dot" id="statusDot"></span>
+                        <span id="statusText">Loading...</span>
+                    </div>
+                    <div class="countdown">
+                        REFRESH: <span id="countdown">00</span>s
+                    </div>
+                    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">🔄 REFRESH</button>
+                </div>
+            </div>
+        </header>
 
-        <div class="gaming-card">
-            <div class="card-content">
-                <div class="period-display-gaming">
-                    <span style="font-family: 'Orbitron'; font-size: 0.5rem; color: #8b9bb0;">NEXT PERIOD</span>
-                    <div class="next-period-value" id="dispPeriod">---</div>
+        <!-- PREDICTOR HUD CARD WITH HOLOGRAPHIC QUANTUM ENGINE -->
+        <div id="predictorBox" class="card predictor-box">
+            <div class="predictor-header-row">
+                <div class="predictor-header">
+                    <span id="engineTitle">QUANTUM HOLO-COMPARATOR</span>
+                    <span id="engineTag" class="auto-tag">CALIBRATED</span>
                 </div>
-                <div class="input-area">
-                    <input type="text" id="numInput" class="gaming-input" placeholder="0 1 2 3" inputmode="numeric" />
-                    <button class="gaming-btn btn-primary-gaming" onclick="processBulkInput()">ADD RESULT</button>
+                <div class="issue-badge">NEXT: <span id="nextIssueNumber">--</span></div>
+            </div>
+
+            <!-- HOLOGRAPHIC SCANNING & QUANTUM TRANSFORM CONTAINER -->
+            <div id="hackingBox" class="checkbox-container">
+                <!-- HIDDEN CHECKBOX CONTROLLED BY AI TRIGGER -->
+                <input class="holo-checkbox-input" id="holo-check" type="checkbox" />
+                
+                <label class="holo-checkbox" for="holo-check">
+                    <div class="holo-box">
+                        <div class="holo-inner"></div>
+                        <div class="scan-effect"></div>
+                        
+                        <!-- QUANTUM FLOATING PARTICLES -->
+                        <div class="holo-particles">
+                            <div class="holo-particle"></div>
+                            <div class="holo-particle"></div>
+                            <div class="holo-particle"></div>
+                            <div class="holo-particle"></div>
+                            <div class="holo-particle"></div>
+                            <div class="holo-particle"></div>
+                        </div>
+
+                        <!-- ACTIVATION RINGS -->
+                        <div class="activation-rings">
+                            <div class="activation-ring"></div>
+                            <div class="activation-ring"></div>
+                            <div class="activation-ring"></div>
+                        </div>
+
+                        <!-- 3D ROTATING CUBE -->
+                        <div class="cube-transform">
+                            <div class="cube-face front"></div>
+                            <div class="cube-face back"></div>
+                            <div class="cube-face right"></div>
+                            <div class="cube-face left"></div>
+                            <div class="cube-face top"></div>
+                            <div class="cube-face bottom"></div>
+                            <!-- REVEALED PREDICTION GRAPHIC -->
+                            <div class="prediction-image-card" id="predictionCard">
+                                <img id="predictionImg" class="prediction-png-image" src="" alt="Prediction Graphic">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="corner-accent"></div>
+                    <div class="corner-accent"></div>
+                    <div class="corner-accent"></div>
+                    <div class="corner-accent"></div>
+
+                    <div class="holo-glow"></div>
+                </label>
+
+                <!-- FREQUENCY SPECTRUM ANALYZER BARS -->
+                <div class="frequency-spectrum">
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
                 </div>
-                <p id="statusMsg" class="status-msg">📊 Add results → Auto re-analyzes & predicts</p>
-                <div id="winRateDisplay" class="win-rate"></div>
+            </div>
+
+            <!-- CALCULATED PREDICTION RESULTS CONTAINER -->
+            <div id="resultContent" style="display: none;">
+                <div class="prediction-content">
+                    <div class="prediction-badges">
+                        <!-- LEFT SIDE: PREDICTION IMAGE -->
+                        <div class="prediction-result-image-wrapper">
+                            <img id="predictionResultImg" class="result-prediction-image" src="" alt="Prediction Result">
+                        </div>
+
+                        <!-- RIGHT SIDE: SCORES, CONFIDENCE & FREQUENCY SPECTRUM -->
+                        <div class="prediction-details-right">
+                            <span id="predictedScores" class="number-badge">Score G: 0 | Score R: 0</span>
+                            <span id="confidenceBadge" class="confidence-badge">AI CONFIDENCE: 0%</span>
+                            
+                            <div class="frequency-spectrum">
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signal Grid -->
+                <div class="signals-grid">
+                    <div class="signal-item">
+                        <div class="signal-title">Explicit Pattern Match</div>
+                        <div class="signal-val" id="sigStreak">--</div>
+                    </div>
+                    <div class="signal-item">
+                        <div class="signal-title">Weighted Recency</div>
+                        <div class="signal-val" id="sigFreq">--</div>
+                    </div>
+                    <div class="signal-item">
+                        <div class="signal-title">1st Order Markov P(X|Y)</div>
+                        <div class="signal-val" id="sigTransB">--</div>
+                    </div>
+                    <div class="signal-item">
+                        <div class="signal-title">10-Draw Ratio</div>
+                        <div class="signal-val" id="sigTransS">--</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="view-toggle">
-            <div class="tab-item active" id="btnLive" onclick="switchView('live')">GAME HISTORY</div>
-            <div class="tab-item" id="btnHistory" onclick="switchView('history')">PREDICTION LOG</div>
+        <!-- Dual Pattern Displays with Copy Buttons -->
+        <div class="pattern-group">
+            <div class="pattern-row">
+                <div class="pattern-text-wrap" id="sizePatternDisplay">
+                    SIZE PATTERN: <span id="sizePatternText">--</span>
+                </div>
+                <button class="copy-btn" onclick="copyPattern('size')">📋 COPY</button>
+            </div>
+            <div class="pattern-row">
+                <div class="pattern-text-wrap" id="colorPatternDisplay">
+                    CLR PATTERN: <span id="colorPatternText">--</span>
+                </div>
+                <button class="copy-btn" onclick="copyPattern('color')">📋 COPY</button>
+            </div>
         </div>
 
-        <div class="gaming-card">
-            <div class="card-header">
-                <h3 id="viewTitle">GAME HISTORY</h3>
-                <span id="counter" style="font-size: 0.45rem; color: #8b5cf6">0/20</span>
+        <!-- Numbers Feed Canvas -->
+        <div id="content" class="numbers-container">
+            <div class="loading">
+                <p style="text-align:center; color: var(--text-muted); padding: 14px 0; font-size: 11px;">INITIALIZING TELEMETRY...</p>
             </div>
-            <div class="card-content" style="max-height: 460px; overflow-y: auto;">
-                <table class="gaming-table">
-                    <thead id="tHead"></thead>
-                    <tbody id="tBody"></tbody>
+        </div>
+
+        <!-- History Table Card -->
+        <div class="card history-section">
+            <div class="history-title">
+                <span>SYSTEM LOG</span>
+                <button class="clear-btn" onclick="clearHistoryLog()">🗑️ CLEAR</button>
+            </div>
+            <div class="history-table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Issue</th>
+                            <th>Prediction</th>
+                            <th>Actual</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="4" style="color: var(--text-muted); font-size: 10px;">No predictions logged. Tap "GENERATE AI PREDICTION".</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
+
+        <div class="last-updated" id="lastUpdated">LAST UPDATED: --</div>
     </div>
-</div>
 
-<script>
-    // ========== GLOBAL STATE ==========
-    let history = [];        // chronological order (newest FIRST for display)
-    let curPeriod = 0;
-    let activeView = "live";
-    let currentPrediction = null;
-    let predictionStats = { wins: 0, losses: 0, total: 0 };
-    let lastPredictionWasWin = null;
+    <!-- FIXED STICKY BOTTOM PREDICTION BUTTON BAR -->
+    <div class="sticky-bottom-bar">
+        <button class="predict-btn" onclick="triggerManualPrediction()">⚡ GENERATE AI PREDICTION</button>
+    </div>
 
-    function getSize(num) { return num <= 4 ? "SMALL" : "BIG"; }
-    function getColor(num) { return num % 2 === 0 ? "RED" : "GREEN"; }
-
-    // ========== COLOR PREDICTION LOGIC ==========
-    const getColorPrediction = (historyArray) => {
-        if (historyArray.length < 3) return { type: "WAIT", reason: "Need more data", predict: null, confidence: "LOW" };
-
-        const lastResults = historyArray.slice(0, 10);
-        const colors = lastResults.map(r => r.color);
-
-        // 1. Dragon Trend Detection
-        let currentStreak = 1;
-        for (let i = 0; i < colors.length - 1; i++) {
-            if (colors[i] === colors[i + 1]) currentStreak++;
-            else break;
-        }
-
-        if (currentStreak >= 3) {
-            return { 
-                predict: colors[0] === "RED" ? "GREEN" : "RED",
-                type: "DRAGON_BREAK", 
-                confidence: "HIGH",
-                reason: `${colors[0]} streak of ${currentStreak} - expecting opposite`
-            };
-        }
-
-        // 2. Mirror Trend Detection
-        if (colors.length >= 4 && colors[0] !== colors[1] && colors[1] === colors[2] && colors[2] !== colors[3]) {
-            return { 
-                predict: colors[1] === "RED" ? "GREEN" : "RED",
-                type: "MIRROR", 
-                confidence: "MEDIUM",
-                reason: "AB-AB mirror pattern - expecting opposite"
-            };
-        }
-
-        // 3. Imbalance correction
-        const redCount = colors.filter(c => c === 'RED').length;
-        const greenCount = colors.filter(c => c === 'GREEN').length;
-        
-        if (redCount >= 7) {
-            return { 
-                predict: 'GREEN', 
-                type: 'CORRECTION', 
-                confidence: 'HIGH',
-                reason: `RED overload (${redCount}/10) → expecting GREEN`
-            };
-        }
-        if (greenCount >= 7) {
-            return { 
-                predict: 'RED', 
-                type: 'CORRECTION', 
-                confidence: 'HIGH',
-                reason: `GREEN overload (${greenCount}/10) → expecting RED`
-            };
-        }
-
-        // 4. Alternating pattern
-        let alternations = 0;
-        for (let i = 0; i < colors.length - 1; i++) {
-            if (colors[i] !== colors[i + 1]) alternations++;
-        }
-        const altRate = colors.length > 1 ? alternations / (colors.length - 1) : 0;
-        
-        if (altRate > 0.7) {
-            const lastColor = colors[0];
-            return {
-                predict: lastColor === "RED" ? "GREEN" : "RED",
-                type: "ALTERNATING",
-                confidence: "MEDIUM",
-                reason: "High alternation pattern"
-            };
-        }
-
-        // Default: Opposite of most frequent in last 5
-        const last5Colors = colors.slice(0, 5);
-        const freq = {};
-        for (let c of last5Colors) {
-            freq[c] = (freq[c] || 0) + 1;
-        }
-        let mostFrequent = last5Colors[0];
-        for (let c in freq) {
-            if (freq[c] > freq[mostFrequent]) mostFrequent = c;
-        }
-        
-        return { 
-            predict: mostFrequent === "RED" ? "GREEN" : "RED",
-            type: "REVERSAL", 
-            confidence: "MEDIUM",
-            reason: `Most frequent ${mostFrequent} → expecting opposite`
+    <script>
+        const state = {
+            historyLog: [],
+            sizePatternRaw: "",
+            colorPatternRaw: "",
+            lastPrediction: null,
+            lastResultStatus: null,
+            consecutiveRepeatCount: 0
         };
-    };
 
-    // ========== SIZE PREDICTION LOGIC ==========
-    const getSizePrediction = (historyArray) => {
-        if (historyArray.length < 3) return { type: "WAIT", reason: "Need more data", predict: null, confidence: "LOW" };
-
-        const lastResults = historyArray.slice(0, 10);
-        const sizes = lastResults.map(r => r.size);
-
-        // 1. Dragon streak break
-        let currentStreak = 1;
-        for (let i = 0; i < sizes.length - 1; i++) {
-            if (sizes[i] === sizes[i + 1]) currentStreak++;
-            else break;
-        }
-
-        if (currentStreak >= 3) {
-            return { 
-                predict: sizes[0] === "SMALL" ? "BIG" : "SMALL",
-                type: "STREAK_BREAK", 
-                confidence: "HIGH",
-                reason: `${sizes[0]} streak of ${currentStreak} - expecting opposite`
-            };
-        }
-
-        // 2. Alternating pattern
-        let alternations = 0;
-        for (let i = 0; i < sizes.length - 1; i++) {
-            if (sizes[i] !== sizes[i + 1]) alternations++;
-        }
-        const altRate = sizes.length > 1 ? alternations / (sizes.length - 1) : 0;
-
-        if (altRate > 0.7) {
-            const lastSize = sizes[0];
-            return {
-                predict: lastSize === "SMALL" ? "BIG" : "SMALL",
-                type: "ALTERNATING",
-                confidence: "MEDIUM",
-                reason: "High alternation pattern"
-            };
-        }
-
-        // 3. Imbalance correction
-        const bigCount = sizes.filter(s => s === "BIG").length;
-        const smallCount = sizes.filter(s => s === "SMALL").length;
-        
-        if (bigCount >= 7) {
-            return {
-                predict: "SMALL",
-                type: "CORRECTION",
-                confidence: "HIGH",
-                reason: `BIG overload (${bigCount}/10) → expecting SMALL`
-            };
-        }
-        if (smallCount >= 7) {
-            return {
-                predict: "BIG",
-                type: "CORRECTION",
-                confidence: "HIGH",
-                reason: `SMALL overload (${smallCount}/10) → expecting BIG`
-            };
-        }
-
-        // Default: Opposite of most frequent in last 5
-        const last5Sizes = sizes.slice(0, 5);
-        const freq = {};
-        for (let s of last5Sizes) {
-            freq[s] = (freq[s] || 0) + 1;
-        }
-        let mostFrequent = last5Sizes[0];
-        for (let s in freq) {
-            if (freq[s] > freq[mostFrequent]) mostFrequent = s;
-        }
-        
-        return { 
-            predict: mostFrequent === "SMALL" ? "BIG" : "SMALL",
-            type: "REVERSAL", 
-            confidence: "MEDIUM",
-            reason: `Most frequent ${mostFrequent} → expecting opposite`
+        const CONFIG = {
+            PROXIES: [
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?',
+                'https://api.codetabs.com/v1/proxy?quest='
+            ],
+            API_URL: 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json',
+            MAX_RETRIES: 3
         };
-    };
 
-    // ========== DECIDE PREDICTION TYPE ==========
-    function decidePredictionType(historyArray) {
-        if (historyArray.length < 3) return { type: "size", reason: "Need more data" };
-        
-        const sizePrediction = getSizePrediction(historyArray);
-        const colorPrediction = getColorPrediction(historyArray);
-        
-        // If last prediction was a loss, force switch to the other type
-        if (lastPredictionWasWin === false) {
-            const previousType = currentPrediction?.predictedType;
-            if (previousType === "size") {
-                return { type: "color", reason: "LAST PREDICTION LOST → switching to COLOR" };
-            } else if (previousType === "color") {
-                return { type: "size", reason: "LAST PREDICTION LOST → switching to SIZE" };
+        let countdownInterval = null;
+        let isFetching = false;
+        let retryCount = 0;
+        let lastFetchedMinute = -1;
+        let globalRawList = [];
+        let globalNumberField = '';
+        let globalIssueField = '';
+        let globalLatestIssue = null;
+        let hackingInterval = null;
+
+        // EXPLICIT PATTERN MAP DIRECTORY
+        const EXPLICIT_PATTERN_MAP = [
+            // --- SECTION 1: Standard Alternating & Consecutive Patterns ---
+            { key: "GRGR", target: "G" },
+            { key: "RGRG", target: "R" },
+            { key: "GRR", target: "G" },
+            { key: "RGG", target: "R" },
+            { key: "GRRR", target: "G" },
+            { key: "RGGG", target: "R" },
+            { key: "GRRRR", target: "G" },
+            { key: "RGGGG", target: "R" },
+            { key: "GGRR", target: "G" },
+            { key: "RRGG", target: "R" },
+            { key: "GGRRR", target: "G" },
+            { key: "RRGGG", target: "R" },
+            { key: "GGRRRR", target: "R" },
+            { key: "RRGGGG", target: "G" },
+            { key: "GGGRRR", target: "G" },
+            { key: "RRRGGG", target: "R" },
+            { key: "GGGRRRR", target: "G" },
+            { key: "RRRGGGG", target: "R" },
+            { key: "GGGGRRRR", target: "G" },
+            { key: "RRRRGGGG", target: "R" },
+
+            // --- SECTION 2: Mirror Trends ---
+            { key: "GGRG", target: "G" },
+            { key: "RRGR", target: "R" },
+            { key: "RGGG", target: "R" },
+            { key: "GRRR", target: "G" },
+            { key: "GGRRG", target: "G" },
+            { key: "RRGGR", target: "R" },
+            { key: "RGGGRGG", target: "R" },
+            { key: "GRRRGRR", target: "G" },
+            { key: "GGGRR", target: "R" },
+            { key: "RRRGG", target: "G" },
+            { key: "GGGRGG", target: "G" },
+            { key: "RRRGRR", target: "R" },
+
+            // --- SECTION 3: Unusual, Hybrid & Asymmetrical Patterns ---
+            { key: "RRGGGRGGR", target: "G" },
+            { key: "GGRRRRRRG", target: "R" },
+            { key: "GGRGRGRGG", target: "G" },
+            { key: "RRGRGRGRR", target: "R" },
+            { key: "RRGGRGGRR", target: "G" },
+
+            // --- SECTION 4: Long Streaks (Dragon Trends) ---
+            { key: "GGGGG", target: "G" },
+            { key: "RRRRR", target: "R" }
+        ];
+
+        // DOM ELEMENTS
+        const content = document.getElementById('content');
+        const countdownDisplay = document.getElementById('countdown');
+        const lastUpdatedDisplay = document.getElementById('lastUpdated');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const predictorBox = document.getElementById('predictorBox');
+        const hackingBox = document.getElementById('hackingBox');
+        const holoCheck = document.getElementById('holo-check');
+        const predictionCard = document.getElementById('predictionCard');
+        const predictionImg = document.getElementById('predictionImg');
+        const predictionResultImg = document.getElementById('predictionResultImg');
+        const resultContent = document.getElementById('resultContent');
+        const predictedScores = document.getElementById('predictedScores');
+        const confidenceBadge = document.getElementById('confidenceBadge');
+        const engineTitle = document.getElementById('engineTitle');
+        const engineTag = document.getElementById('engineTag');
+        const nextIssueNumber = document.getElementById('nextIssueNumber');
+        const historyTableBody = document.getElementById('historyTableBody');
+
+        const sizePatternText = document.getElementById('sizePatternText');
+        const colorPatternText = document.getElementById('colorPatternText');
+
+        const sigStreak = document.getElementById('sigStreak');
+        const sigFreq = document.getElementById('sigFreq');
+        const sigTransB = document.getElementById('sigTransB');
+        const sigTransS = document.getElementById('sigTransS');
+
+        function getISTDate() {
+            const now = new Date();
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            return new Date(utcTime + (3600000 * 5.5));
+        }
+
+        function getNumberSize(num) {
+            const n = Number(num);
+            if (isNaN(n)) return 'Unknown';
+            return n >= 5 ? 'Big' : 'Small';
+        }
+
+        function getNumberColorShort(num) {
+            const n = Number(num);
+            if (n === 0 || n === 5) return (n === 0) ? 'R' : 'G';
+            return (n % 2 === 0) ? 'R' : 'G';
+        }
+
+        function getSizeShort(size) {
+            return size === 'Big' ? 'B' : 'S';
+        }
+
+        function clearHistoryLog() {
+            state.historyLog = [];
+            state.lastPrediction = null;
+            state.lastResultStatus = null;
+            state.consecutiveRepeatCount = 0;
+            renderHistoryTable([]);
+        }
+
+        function updateNextIssueDisplay() {
+            if (!globalLatestIssue) {
+                nextIssueNumber.textContent = '--';
+                return;
+            }
+
+            const rawIssueStr = String(globalLatestIssue);
+            try {
+                if (/^\d+$/.test(rawIssueStr)) {
+                    const currentIssue = BigInt(rawIssueStr);
+                    const nextIssue = currentIssue + 1n;
+                    nextIssueNumber.textContent = nextIssue.toString();
+                } else {
+                    nextIssueNumber.textContent = rawIssueStr;
+                }
+            } catch (e) {
+                nextIssueNumber.textContent = rawIssueStr;
             }
         }
-        
-        // If SIZE has HIGH confidence, use SIZE
-        if (sizePrediction.confidence === "HIGH") {
-            return { type: "size", reason: "SIZE has HIGH confidence" };
-        }
-        
-        // If COLOR has HIGH confidence, use COLOR
-        if (colorPrediction.confidence === "HIGH") {
-            return { type: "color", reason: "COLOR has HIGH confidence" };
-        }
-        
-        // Alternate between SIZE and COLOR for variety
-        const shouldUseSize = Math.random() < 0.5;
-        return { 
-            type: shouldUseSize ? "size" : "color", 
-            reason: shouldUseSize ? "Random selection - SIZE" : "Random selection - COLOR"
-        };
-    }
 
-    // ========== MAIN PREDICTION FUNCTION - Analyzes ALL data from oldest to newest ==========
-    function generatePredictionFromFullHistory() {
-        // Create analysis history from oldest to newest (reverse of display order)
-        const analysisHistory = [...history].reverse().map(h => ({
-            period: h.period,
-            color: h.color,
-            size: h.size,
-            number: h.value
-        }));
-        
-        const pBox = document.getElementById("pBox");
-        const pRange = document.getElementById("pRange");
-        const pVal = document.getElementById("pVal");
-        const chaosBadge = document.getElementById("chaosBadge");
-        
-        if (analysisHistory.length < 3) {
-            pBox.classList.remove("waiting");
-            pRange.innerHTML = "⚠️ INSUFFICIENT DATA";
-            pVal.innerHTML = "---";
-            chaosBadge.innerHTML = `Need ${3 - analysisHistory.length} more entries`;
-            currentPrediction = null;
-            return;
+        function evaluateStateTransition() {
+            if (state.historyLog.length === 0 || !globalRawList || globalRawList.length === 0) return;
+
+            const lastEntry = state.historyLog[0];
+            if (lastEntry.status !== 'PENDING') return;
+
+            const matchedDraw = globalRawList.find(item => String(item[globalIssueField]) === String(lastEntry.issue));
+            if (!matchedDraw) return;
+
+            const actualVal = Number(matchedDraw[globalNumberField]);
+            const actualColorShort = getNumberColorShort(actualVal);
+            const actualColorFull = actualColorShort === 'G' ? 'GREEN' : 'RED';
+
+            lastEntry.actualNum = actualVal;
+            lastEntry.actualSize = actualColorFull;
+
+            let isWin = (lastEntry.predictedValue === actualColorFull);
+            lastEntry.status = isWin ? 'WIN' : 'LOSS';
+
+            state.lastResultStatus = lastEntry.status;
+
+            renderHistoryTable(state.historyLog);
         }
-        
-        const decision = decidePredictionType(analysisHistory);
-        let predictionResult;
-        let predictedType;
-        
-        if (decision.type === "size") {
-            predictionResult = getSizePrediction(analysisHistory);
-            predictedType = "size";
-        } else {
-            predictionResult = getColorPrediction(analysisHistory);
-            predictedType = "color";
-        }
-        
-        if (!predictionResult.predict) {
-            predictionResult = { predict: predictedType === "size" ? "SMALL" : "RED", type: "DEFAULT", confidence: "LOW", reason: "Using default prediction" };
-        }
-        
-        currentPrediction = {
-            period: curPeriod,
-            predictedType: predictedType,
-            predictedValue: predictionResult.predict,
-            predictionMeta: {
-                type: predictionResult.type,
-                confidence: predictionResult.confidence,
-                reason: predictionResult.reason || "",
-                switchReason: decision.reason || "",
-                dataPoints: analysisHistory.length
+
+        function updatePredictionHistoryTracker(currentNextIssueKey, predData) {
+            let existingEntry = state.historyLog.find(item => item.issue === currentNextIssueKey);
+            if (!existingEntry) {
+                const newEntry = {
+                    issue: currentNextIssueKey,
+                    engineName: predData.engineName,
+                    predictedValue: predData.predictedValue,
+                    predictedNumbers: predData.numbers,
+                    actualNum: null,
+                    actualSize: null,
+                    status: 'PENDING'
+                };
+                state.historyLog.unshift(newEntry);
             }
-        };
-        
-        // Update UI
-        pBox.classList.remove("waiting");
-        const modeText = predictedType === "size" ? "📏 SIZE" : "🎨 COLOR";
-        const confidenceEmoji = predictionResult.confidence === "HIGH" ? "🔥" : (predictionResult.confidence === "MEDIUM" ? "⚡" : "📊");
-        pRange.innerHTML = `${modeText} ${confidenceEmoji} ${predictionResult.type} | ${predictionResult.confidence} | ${analysisHistory.length} entries`;
-        pVal.innerHTML = predictionResult.predict;
-        
-        let badgeHtml = `📊 ${predictionResult.reason || "Analyzing patterns"}`;
-        if (decision.reason && decision.reason !== predictionResult.reason) {
-            badgeHtml = `🔄 ${decision.reason}<br>📊 ${predictionResult.reason || ""}`;
+
+            state.historyLog = state.historyLog.slice(0, 10);
+            renderHistoryTable(state.historyLog);
         }
-        chaosBadge.innerHTML = badgeHtml;
-        
-        // Update status message
-        document.getElementById("statusMsg").innerHTML = `🔄 Auto-reanalyzed ${analysisHistory.length} entries | Predicting: ${predictionResult.predict}`;
-        
-        return currentPrediction;
-    }
-    
-    function updateStatusMsg() {
-        const len = history.length;
-        const msg = document.getElementById("statusMsg");
-        const winRateDiv = document.getElementById("winRateDisplay");
-        
-        if (len >= 3) {
-            const winRate = predictionStats.total > 0 ? Math.round((predictionStats.wins / predictionStats.total) * 100) : 0;
-            msg.innerHTML = `✅ ${len} entries | Auto-reanalyzing after each entry | Win Rate: ${winRate}%`;
-            winRateDiv.innerHTML = `🏆 WIN RATE: ${winRate}% (${predictionStats.wins}W / ${predictionStats.losses}L) | Total: ${predictionStats.total}`;
-        } else {
-            msg.innerHTML = `📊 Table has ${len}/3 entries | Add ${3 - len} more results for predictions`;
-            winRateDiv.innerHTML = `⏳ Add ${3 - len} more results → Auto prediction will start`;
-        }
-    }
-    
-    // ========== DATA MANAGEMENT ==========
-    function parseMultiNumbers(inputStr) {
-        let trimmed = inputStr.trim();
-        if (trimmed === "") return [];
-        let numbers = [];
-        let digits = trimmed.match(/\d/g);
-        if (digits) {
-            numbers = digits.map(d => parseInt(d)).filter(n => n >= 0 && n <= 9);
-        }
-        return numbers;
-    }
-    
-    function addEntry(val) {
-        if (isNaN(val) || val < 0 || val > 9) return false;
-        
-        const size = getSize(val);
-        const color = getColor(val);
-        let resultDisplay = "-";
-        let predictedInfo = "---";
-        let wasWin = false;
-        
-        // Evaluate against current prediction BEFORE adding new entry
-        if (currentPrediction) {
-            let typeMatch = false;
-            if (currentPrediction.predictedType === "size") {
-                typeMatch = (size === currentPrediction.predictedValue);
-            } else {
-                typeMatch = (color === currentPrediction.predictedValue);
+
+        function renderHistoryTable(historyLog) {
+            if (!historyLog || historyLog.length === 0) {
+                historyTableBody.innerHTML = `<tr><td colspan="4" style="color: var(--text-muted); font-size: 10px;">No predictions logged. Tap "GENERATE AI PREDICTION".</td></tr>`;
+                return;
             }
-            
-            wasWin = typeMatch;
-            
-            if (wasWin) {
-                resultDisplay = `<span class="win-text">✓ WIN (${val} → ${size} / ${color})</span>`;
-                predictionStats.wins++;
-            } else {
-                resultDisplay = `<span class="loss-text">✗ LOSS (${val} → ${size} / ${color})</span>`;
-                predictionStats.losses++;
-            }
-            predictionStats.total++;
-            predictedInfo = `${currentPrediction.predictedValue}`;
-        }
-        
-        // Set last prediction result for next decision
-        lastPredictionWasWin = wasWin;
-        
-        // Add to history at the BEGINNING (newest first for display)
-        history.unshift({
-            period: curPeriod,
-            value: val,
-            size: size,
-            color: color,
-            predicted: predictedInfo,
-            result: resultDisplay,
-            wasWin: wasWin
-        });
-        
-        curPeriod++;
-        
-        // Update UI
-        updateUI();
-        
-        // CRITICAL: Re-analyze ALL data from oldest to newest and generate NEW prediction
-        generatePredictionFromFullHistory();
-        
-        return true;
-    }
-    
-    function processBulkInput() {
-        const inputEl = document.getElementById("numInput");
-        const raw = inputEl.value;
-        if (!raw.trim()) {
-            document.getElementById("statusMsg").innerHTML = "⚠️ Enter numbers (e.g., 2 4 5 6)";
-            setTimeout(() => updateStatusMsg(), 1500);
-            return;
-        }
-        
-        const numbers = parseMultiNumbers(raw);
-        if (numbers.length === 0) {
-            document.getElementById("statusMsg").innerHTML = "⚠️ No valid digits 0-9!";
-            setTimeout(() => updateStatusMsg(), 1500);
-            return;
-        }
-        
-        for (let n of numbers) {
-            addEntry(n);
-        }
-        
-        inputEl.value = "";
-        
-        document.getElementById("statusMsg").innerHTML = `✅ Added ${numbers.length} result(s) | Auto-reanalyzed with new data`;
-        setTimeout(() => updateStatusMsg(), 2500);
-    }
-    
-    function startSystem() {
-        curPeriod = parseInt(document.getElementById("initPeriod").value) || 1;
-        history = [];
-        currentPrediction = null;
-        predictionStats = { wins: 0, losses: 0, total: 0 };
-        lastPredictionWasWin = null;
-        document.getElementById("setupArea").style.display = "none";
-        document.getElementById("mainEngine").style.display = "block";
-        updateUI();
-        document.getElementById("numInput").focus();
-        generatePredictionFromFullHistory();
-    }
-    
-    function updateUI() {
-        document.getElementById("dispPeriod").textContent = curPeriod;
-        const len = history.length;
-        document.getElementById("counter").textContent = `${len}/20`;
-        updateStatusMsg();
-        
-        const tHead = document.getElementById("tHead");
-        const tBody = document.getElementById("tBody");
-        
-        if (activeView === "live") {
-            tHead.innerHTML = `<tr><th>PERIOD</th><th>NUMBER</th><th>SIZE</th><th>COLOR</th><th>RESULT</th></tr>`;
-            tBody.innerHTML = history.map((h, index) => `
-                <tr>
-                    <td><span class="range-text">${h.period}${index === 0 ? ' <span class="latest-badge">LATEST</span>' : ''}</span></td>
-                    <td><div class="number-circle ${h.value % 2 === 0 ? 'number-even' : 'number-odd'}">${h.value}</div></span></td>
-                    <td><span style="font-size:0.55rem; font-weight:bold;">${h.size}</span></td>
-                    <td><span style="font-size:0.55rem; font-weight:bold; ${h.color === 'RED' ? 'color:#ff7b7b' : 'color:#6fef9e'}">${h.color}</span></span></td>
-                    <td>${h.result}</span></td>
-                </tr>
-            `).join("");
-        } else {
-            tHead.innerHTML = `<tr><th>PREDICTION</th><th>RESULT</th></tr>`;
-            const logs = history.filter(h => h.predicted !== "---");
-            if (logs.length === 0) {
-                tBody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#6b7280; padding:12px;">No predictions yet → Add results to start auto-prediction</td></tr>`;
-            } else {
-                tBody.innerHTML = logs.map(h => `
+
+            let html = '';
+            historyLog.forEach(entry => {
+                const shortIssue = entry.issue.length > 6 ? '...' + entry.issue.slice(-6) : entry.issue;
+                const valLower = String(entry.predictedValue).toLowerCase();
+
+                let actualText = '--';
+                if (entry.actualNum !== null && entry.actualNum !== undefined) {
+                    actualText = `${entry.actualNum}(${entry.actualSize[0]})`;
+                }
+
+                let statusTag = `<span class="result-tag pending">PENDING</span>`;
+                if (entry.status === 'WIN') {
+                    statusTag = `<span class="result-tag win">WIN</span>`;
+                } else if (entry.status === 'LOSS') {
+                    statusTag = `<span class="result-tag loss">LOSS</span>`;
+                }
+
+                html += `
                     <tr>
-                        <td><span class="range-text" style="font-size:0.55rem;">${h.predicted}</span></span></td>
-                        <td>${h.result}</span></td>
+                        <td><strong>${shortIssue}</strong></td>
+                        <td>
+                            <div class="pred-cell">
+                                <span class="pred-value ${valLower}">${entry.predictedValue}</span>
+                            </div>
+                        </td>
+                        <td>${actualText}</td>
+                        <td>${statusTag}</td>
                     </tr>
-                `).join("");
+                `;
+            });
+
+            historyTableBody.innerHTML = html;
+        }
+
+        /* COPY PATTERN FUNCTION WITH FALLBACK */
+        function copyPattern(type) {
+            let textToCopy = "";
+            if (type === 'size') {
+                textToCopy = `SIZE PATTERN: ${state.sizePatternRaw}`;
+            } else if (type === 'color') {
+                textToCopy = `CLR PATTERN: ${state.colorPatternRaw}`;
+            }
+
+            if (!textToCopy) return;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert(`Copied to clipboard!\n${textToCopy}`);
+                }).catch(() => {
+                    fallbackCopyText(textToCopy);
+                });
+            } else {
+                fallbackCopyText(textToCopy);
             }
         }
-    }
-    
-    function switchView(v) {
-        activeView = v;
-        document.querySelectorAll(".tab-item").forEach(btn => btn.classList.remove("active"));
-        document.getElementById(v === "live" ? "btnLive" : "btnHistory").classList.add("active");
-        document.getElementById("viewTitle").textContent = v === "live" ? "GAME HISTORY" : "PREDICTION LOG";
-        updateUI();
-    }
-    
-    const inputField = document.getElementById("numInput");
-    if (inputField) {
-        inputField.addEventListener("input", function() {
-            this.value = this.value.replace(/\D/g, "").split("").join(" ");
-        });
-        inputField.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") processBulkInput();
-        });
-    }
-    
-    window.onload = () => {
-        const initField = document.getElementById("initPeriod");
-        if (initField) initField.value = "001";
-    };
-</script>
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert(`Copied to clipboard!\n${text}`);
+                } else {
+                    alert(`Pattern Text:\n${text}`);
+                }
+            } catch (err) {
+                alert(`Pattern Text:\n${text}`);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // ====================================================
+        // EXPLICIT PATTERN COMPARISON & PREDICTION ENGINE
+        // ====================================================
+        function runCustomUserLogic(draws, nextIssueKey) {
+            if (!draws || draws.length < 10) return null;
+
+            const recent10Draws = draws.slice(0, 10);
+            const numList = recent10Draws.map(d => Number(d[globalNumberField]));
+            
+            // Chronological colors: Index 0 = Oldest, Index 9 = Newest
+            const chronologicalColors = recent10Draws.map(d => getNumberColorShort(d[globalNumberField])).reverse();
+            const fullHistoryString = chronologicalColors.join('');
+
+            let scoreG = 0;
+            let scoreR = 0;
+            let matchedPatternName = "MARKOV RECURSIVE ENGINE";
+            let explicitMatchedTarget = null;
+
+            // 1. MATCH EXPLICIT PATTERN MAP
+            for (let windowLen = Math.min(9, fullHistoryString.length); windowLen >= 3; windowLen--) {
+                const tailSubStr = fullHistoryString.slice(-windowLen);
+
+                const directMatch = EXPLICIT_PATTERN_MAP.find(item => {
+                    const cleanKey = item.key.replace(/\s+/g, '');
+                    return cleanKey === tailSubStr;
+                });
+
+                if (directMatch) {
+                    explicitMatchedTarget = directMatch.target;
+                    const formattedSub = tailSubStr.split('').join(' → ');
+                    matchedPatternName = `EXPLICIT MATCH: [${formattedSub}] → PREDICT [${explicitMatchedTarget}]`;
+                    break;
+                }
+            }
+
+            if (explicitMatchedTarget === 'G') {
+                scoreG += 8.0;
+            } else if (explicitMatchedTarget === 'R') {
+                scoreR += 8.0;
+            }
+
+            // 2. EXPONENTIAL RECENCY WEIGHTING
+            const colorList = [...chronologicalColors].reverse();
+            const recencyWeights = [5, 4, 3, 2, 1];
+            let weightedG = 0;
+            let weightedR = 0;
+
+            for (let i = 0; i < 5; i++) {
+                if (colorList[i] === 'G') weightedG += recencyWeights[i];
+                else weightedR += recencyWeights[i];
+            }
+
+            scoreG += (weightedG * 0.15);
+            scoreR += (weightedR * 0.15);
+            let recencyMsg = `W-G:${weightedG.toFixed(1)} | W-R:${weightedR.toFixed(1)}`;
+
+            // 3. MARKOV TRANSITION PROBABILITY
+            let gToG = 0, gToR = 0, rToG = 0, rToR = 0;
+            for (let i = 0; i < chronologicalColors.length - 1; i++) {
+                const cur = chronologicalColors[i];
+                const next = chronologicalColors[i + 1];
+                if (cur === 'G' && next === 'G') gToG++;
+                if (cur === 'G' && next === 'R') gToR++;
+                if (cur === 'R' && next === 'G') rToG++;
+                if (cur === 'R' && next === 'R') rToR++;
+            }
+
+            const latestColor = colorList[0];
+            let markovMsg = "";
+            if (latestColor === 'G') {
+                const probG = (gToG + 1) / Math.max(1, (gToG + gToR + 2));
+                if (gToG >= gToR) scoreG += 1.2;
+                else scoreR += 1.2;
+                markovMsg = `P(G|G)=${(probG * 100).toFixed(0)}%`;
+            } else {
+                const probR = (rToR + 1) / Math.max(1, (rToG + rToR + 2));
+                if (rToR >= rToG) scoreR += 1.2;
+                else scoreG += 1.2;
+                markovMsg = `P(R|R)=${(probR * 100).toFixed(0)}%`;
+            }
+
+            // 4. COLOR DENSITY BALANCING
+            const gCount = colorList.filter(x => x === 'G').length;
+            const rCount = 10 - gCount;
+
+            if (gCount >= 8) scoreR += 2.5;
+            else if (rCount >= 8) scoreG += 2.5;
+
+            // 5. ANTI-LOOPING & POST-LOSS FLIP GUARDRAILS
+            if (state.lastResultStatus === 'LOSS' && state.lastPrediction) {
+                if (state.lastPrediction === 'GREEN') {
+                    scoreR += 4.5;
+                    matchedPatternName = "POST-LOSS FLIP → RED";
+                } else if (state.lastPrediction === 'RED') {
+                    scoreG += 4.5;
+                    matchedPatternName = "POST-LOSS FLIP → GREEN";
+                }
+            }
+
+            let initialPrediction = scoreG >= scoreR ? 'GREEN' : 'RED';
+
+            if (state.lastPrediction === initialPrediction) {
+                state.consecutiveRepeatCount++;
+                if (state.consecutiveRepeatCount >= 2) {
+                    initialPrediction = initialPrediction === 'GREEN' ? 'RED' : 'GREEN';
+                    matchedPatternName = "ANTI-LOOP CAP TRIGGERED";
+                    state.consecutiveRepeatCount = 0;
+                }
+            } else {
+                state.consecutiveRepeatCount = 1;
+            }
+
+            state.lastPrediction = initialPrediction;
+            const finalPrediction = initialPrediction;
+
+            const total = scoreG + scoreR;
+            const scoreDiff = Math.abs(scoreG - scoreR);
+            let confidence = total > 0 ? Math.round(62 + (scoreDiff / Math.max(1, total)) * 33) : 65;
+            confidence = Math.min(96, Math.max(62, confidence));
+
+            const candidatePool = finalPrediction === 'GREEN' ? [1, 3, 5, 7, 9] : [0, 2, 4, 6, 8];
+            const digitScores = Array(10).fill(0);
+
+            candidatePool.forEach(d => {
+                const freq = numList.filter(n => n === d).length;
+                const lastIdx = numList.indexOf(d);
+
+                if (freq === 0) digitScores[d] += 20;
+                else digitScores[d] += freq * 6;
+
+                if (lastIdx >= 2 && lastIdx <= 5) digitScores[d] += 12;
+            });
+
+            const top2Numbers = candidatePool.sort((a, b) => digitScores[b] - digitScores[a]).slice(0, 2);
+
+            return {
+                engineName: 'QUANTUM HOLO-COMPARATOR',
+                tagText: explicitMatchedTarget ? 'EXPLICIT MATCHED' : 'CALIBRATED',
+                tagClass: 'surewin',
+                predictionType: 'Color',
+                predictedValue: finalPrediction,
+                displayPrediction: finalPrediction,
+                numbers: top2Numbers,
+                scoreG: scoreG.toFixed(1),
+                scoreR: scoreR.toFixed(1),
+                confidence: confidence,
+                patternMatchMsg: matchedPatternName,
+                recencyMsg: recencyMsg,
+                markovMsg: markovMsg,
+                gCount: gCount,
+                rCount: rCount
+            };
+        }
+
+        // TRIGGER MANUAL PREDICTION WITH HOLOGRAPHIC QUANTUM CUBE REVEAL
+        function triggerManualPrediction() {
+            if (!globalRawList || globalRawList.length < 10) {
+                alert('Insufficient telemetry data. Please wait for data to load.');
+                return;
+            }
+
+            resultContent.style.display = 'none';
+            hackingBox.style.display = 'flex';
+
+            // Activate Holographic Checkbox & Rings/Particles Animation
+            if (holoCheck) holoCheck.checked = true;
+
+            updateNextIssueDisplay();
+            const currentNextIssueKey = nextIssueNumber.textContent;
+            const predData = runCustomUserLogic(globalRawList, currentNextIssueKey);
+
+            // Phase 1 (1.8s): Set image/Green.png or image/Red.png inside Holographic Quantum Box
+            setTimeout(() => {
+                if (predData && predictionImg) {
+                    if (predData.predictedValue === 'GREEN') {
+                        predictionImg.src = 'images/Green.png';
+                    } else {
+                        predictionImg.src = 'images/Red.png';
+                    }
+                    if (predictionCard) {
+                        predictionCard.className = `prediction-image-card ${predData.predictedValue.toLowerCase()} show`;
+                    }
+                }
+            }, 1800);
+
+            // Phase 2 (3.5s): Display Complete Results Dashboard
+            setTimeout(() => {
+                if (predData) {
+                    applyUIState(predData);
+                    updatePredictionHistoryTracker(currentNextIssueKey, predData);
+                }
+            }, 3500);
+        }
+
+        function applyUIState(predData) {
+            hackingBox.style.display = 'none';
+            resultContent.style.display = 'block';
+
+            engineTitle.textContent = predData.engineName || 'QUANTUM HOLO-COMPARATOR';
+            engineTag.textContent = predData.tagText || 'CALIBRATED';
+            engineTag.className = `auto-tag ${predData.tagClass || ''}`;
+            
+            const predVal = String(predData.displayPrediction || '--').toUpperCase();
+            
+            // Assign image/Green.png or image/Red.png to result image wrapper
+            if (predictionResultImg) {
+                if (predVal === 'GREEN' || predVal === 'G') {
+                    predictionResultImg.src = 'images/Green.png';
+                } else {
+                    predictionResultImg.src = 'images/Red.png';
+                }
+            }
+            
+            predictedScores.textContent = `Score G: ${predData.scoreG} | Score R: ${predData.scoreR}`;
+            
+            const conf = predData.confidence || 0;
+            confidenceBadge.textContent = `AI CONFIDENCE: ${conf}%`;
+
+            sigStreak.textContent = predData.patternMatchMsg;
+            sigFreq.textContent = predData.recencyMsg;
+            sigTransB.textContent = predData.markovMsg;
+            sigTransS.textContent = `G:${predData.gCount} | R:${predData.rCount}`;
+        }
+
+        async function fetchWithProxy(url, proxyIndex = 0) {
+            if (proxyIndex >= CONFIG.PROXIES.length) throw new Error('All proxies failed');
+            const proxy = CONFIG.PROXIES[proxyIndex];
+            try {
+                const response = await fetch(proxy + encodeURIComponent(url), {
+                    headers: { 'Accept': 'application/json' },
+                    signal: AbortSignal.timeout(10000)
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                return fetchWithProxy(url, proxyIndex + 1);
+            }
+        }
+
+        async function fetchData() {
+            if (isFetching) return;
+            isFetching = true;
+            refreshBtn.disabled = true;
+            statusDot.className = 'dot loading';
+            statusText.textContent = 'Fetching...';
+            
+            try {
+                let data;
+                try {
+                    const directResponse = await fetch(`${CONFIG.API_URL}?ts=${Date.now()}`, {
+                        headers: { 'Accept': 'application/json' },
+                        signal: AbortSignal.timeout(5000)
+                    });
+                    if (directResponse.ok) data = await directResponse.json();
+                    else throw new Error('Direct fetch failed');
+                } catch (directError) {
+                    data = await fetchWithProxy(`${CONFIG.API_URL}?ts=${Date.now()}`);
+                }
+
+                let list = data?.data?.list || data?.list || (Array.isArray(data) ? data : []);
+
+                if (list && list.length > 0) {
+                    displayNumbers(list);
+                    updateLastUpdated();
+                    evaluateStateTransition();
+                    retryCount = 0;
+                    statusDot.className = 'dot';
+                    statusText.textContent = `${list.length} numbers`;
+                } else {
+                    throw new Error('No data');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                content.innerHTML = `<div class="error-message">Failed to load data</div>`;
+                statusDot.className = 'dot error';
+                statusText.textContent = 'Error';
+            } finally {
+                isFetching = false;
+                refreshBtn.disabled = false;
+            }
+        }
+
+        function displayNumbers(numbers) {
+            const firstItem = numbers[0];
+            const possibleNumberFields = ['number', 'value', 'result', 'num', 'winningNumber', 'winNumber', 'code', 'digit'];
+            const possibleIssueFields = ['issue', 'id', 'round', 'drawId', 'period', 'no'];
+            
+            let numberField = possibleNumberFields.find(field => firstItem?.[field] !== undefined);
+            let issueField = possibleIssueFields.find(field => firstItem?.[field] !== undefined);
+
+            if (!numberField && firstItem) {
+                for (const key of Object.keys(firstItem)) {
+                    if (typeof firstItem[key] === 'number' || !isNaN(firstItem[key])) {
+                        numberField = key;
+                        break;
+                    }
+                }
+            }
+
+            if (!issueField && firstItem) {
+                for (const key of Object.keys(firstItem)) {
+                    if (key.toLowerCase().includes('issue') || key.toLowerCase().includes('period') || key.toLowerCase().includes('id')) {
+                        issueField = key;
+                        break;
+                    }
+                }
+            }
+
+            const sortedNumbers = [...numbers].sort((a, b) => {
+                const issueA = issueField ? BigInt(a[issueField] || 0) : 0n;
+                const issueB = issueField ? BigInt(b[issueField] || 0) : 0n;
+                if (issueB > issueA) return 1;
+                if (issueB < issueA) return -1;
+                return 0;
+            });
+
+            if (sortedNumbers.length > 0 && issueField) {
+                globalLatestIssue = sortedNumbers[0][issueField];
+                updateNextIssueDisplay();
+            }
+
+            const latest10 = sortedNumbers.slice(0, 10);
+            const displayList = latest10.reverse();
+
+            globalRawList = sortedNumbers;
+            globalNumberField = numberField;
+            globalIssueField = issueField;
+
+            const sizePatternArray = displayList.map(item => getSizeShort(getNumberSize(item[numberField])));
+            const colorPatternArray = displayList.map(item => getNumberColorShort(item[numberField]));
+
+            state.sizePatternRaw = sizePatternArray.join(' → ');
+            state.colorPatternRaw = colorPatternArray.join(' → ');
+
+            sizePatternText.textContent = state.sizePatternRaw;
+            colorPatternText.textContent = state.colorPatternRaw;
+
+            let html = `
+                <div class="direction-label">Live History (Oldest <span class="arrow">→</span> Latest)</div>
+                <div class="numbers-container">
+                    <div class="numbers-wrapper">
+            `;
+            
+            displayList.forEach((item, index) => {
+                const numberValue = item[numberField] ?? '?';
+                const isLatest = (index === displayList.length - 1);
+                const type = getNumberSize(numberValue) === 'Big' ? 'big' : 'small';
+                const highlightStyle = isLatest ? 'transform: scale(1.05);' : '';
+                
+                html += `
+                    <div class="number-card ${type}" style="${highlightStyle}">
+                        <span class="number">${numberValue}</span>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            content.innerHTML = html;
+            
+            setTimeout(() => {
+                const container = document.querySelector('.numbers-container');
+                if (container) container.scrollLeft = container.scrollWidth;
+            }, 100);
+        }
+
+        function updateLastUpdated() {
+            const istNow = getISTDate();
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            if (lastUpdatedDisplay) {
+                lastUpdatedDisplay.textContent = `LAST UPDATED: ${istNow.toLocaleString('en-IN', options)} IST`;
+            }
+        }
+
+        function startISTCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            const updateTimer = () => {
+                const istNow = getISTDate();
+                const secondsRemaining = 60 - istNow.getSeconds();
+                countdownDisplay.textContent = secondsRemaining === 60 ? '00' : (secondsRemaining < 10 ? `0${secondsRemaining}` : secondsRemaining);
+
+                if ((secondsRemaining === 60 || secondsRemaining === 0) && lastFetchedMinute !== istNow.getMinutes()) {
+                    lastFetchedMinute = istNow.getMinutes();
+                    fetchData();
+                }
+            };
+
+            updateTimer();
+            countdownInterval = setInterval(updateTimer, 1000);
+        }
+
+        window.refreshData = function() {
+            if (isFetching) return;
+            retryCount = 0;
+            fetchData();
+        };
+
+        async function init() {
+            await fetchData();
+            startISTCountdown();
+        }
+
+        init();
+    </script>
 </body>
 </html>
