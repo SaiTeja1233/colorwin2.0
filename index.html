@@ -10,6 +10,136 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <!-- EXTERNAL STYLESHEET -->
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* MODE TOGGLE SWITCH & MANUAL INPUT STYLING */
+        .mode-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #1e293b;
+            border: 1px solid #38bdf8;
+            border-radius: 20px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #38bdf8;
+            border-radius: 50%;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 6px #38bdf8;
+        }
+
+        input:checked + .slider {
+            background-color: #0f172a;
+            border-color: #a855f7;
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+            background-color: #c084fc;
+            box-shadow: 0 0 6px #c084fc;
+        }
+
+        .mode-label {
+            color: #38bdf8;
+            font-weight: bold;
+            min-width: 52px;
+            text-align: right;
+            transition: color 0.3s;
+        }
+
+        .mode-label.manual {
+            color: #c084fc;
+        }
+
+        /* MANUAL INPUT HUD PANEL */
+        .manual-input-box {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
+        }
+
+        .manual-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .manual-input {
+            flex: 1;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            color: #f8fafc;
+            padding: 8px 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .manual-input:focus {
+            border-color: #c084fc;
+            box-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
+        }
+
+        .manual-btn {
+            background: linear-gradient(135deg, #9333ea, #6b21a8);
+            color: #fff;
+            border: 1px solid #c084fc;
+            padding: 8px 14px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .manual-btn:hover {
+            box-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
+            transform: scale(1.02);
+        }
+
+        .manual-btn.clear {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: #fca5a5;
+        }
+    </style>
 </head>
 <body class="theme-blue-crystal">
     <!-- BACKGROUND AMBIENT LAYERS -->
@@ -24,20 +154,41 @@
     <div class="dashboard-container">
         <!-- Header -->
         <header>
-            <div class="title-text">WinGo Numbers</div>
-            <div class="status-info">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div class="title-text">WinGo Numbers</div>
+                
+                <!-- LIVE / MANUAL TOGGLE SWITCH -->
+                <div class="mode-toggle-wrapper">
+                    <span id="modeStatusLabel" class="mode-label">LIVE</span>
+                    <label class="switch">
+                        <input type="checkbox" id="modeToggle" onchange="toggleOperationMode(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="status-info" style="margin-top: 8px;">
                 <div class="status-row">
                     <div class="status-badge">
                         <span class="dot" id="statusDot"></span>
                         <span id="statusText">Loading...</span>
                     </div>
-                    <div class="countdown">
+                    <div class="countdown" id="countdownWrap">
                         REFRESH: <span id="countdown">00</span>s
                     </div>
                     <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">🔄 REFRESH</button>
                 </div>
             </div>
         </header>
+
+        <!-- MANUAL TELEMETRY INPUT PANEL -->
+        <div id="manualInputContainer" class="manual-input-box">
+            <div class="manual-input-row">
+                <input type="text" id="manualSequenceInput" class="manual-input" placeholder="Enter number(s) e.g. 1245324 or 7" onkeydown="if(event.key==='Enter') applyManualNumbers()" />
+                <button class="manual-btn" onclick="applyManualNumbers()">➕ ADD</button>
+                <button class="manual-btn clear" onclick="clearManualNumbers()">CLEAR</button>
+            </div>
+        </div>
 
         <!-- PREDICTOR HUD CARD WITH HOLOGRAPHIC QUANTUM ENGINE -->
         <div id="predictorBox" class="card predictor-box">
@@ -229,7 +380,9 @@
             colorPatternRaw: "",
             lastPrediction: null,
             lastResultStatus: null,
-            consecutiveRepeatCount: 0
+            consecutiveRepeatCount: 0,
+            isManualMode: false,
+            manualDrawList: [] // Stores manual draws chronologically (0: Oldest -> end: Latest)
         };
 
         const CONFIG = {
@@ -247,14 +400,13 @@
         let retryCount = 0;
         let lastFetchedMinute = -1;
         let globalRawList = [];
-        let globalNumberField = '';
-        let globalIssueField = '';
+        let globalNumberField = 'number';
+        let globalIssueField = 'issue';
         let globalLatestIssue = null;
-        let hackingInterval = null;
+        let manualIssueCounter = 1000;
 
         // EXPLICIT PATTERN MAP DIRECTORY
         const EXPLICIT_PATTERN_MAP = [
-            // --- SECTION 1: Standard Alternating & Consecutive Patterns ---
             { key: "GRGR", target: "G" },
             { key: "RGRG", target: "R" },
             { key: "GRR", target: "G" },
@@ -275,8 +427,6 @@
             { key: "RRRGGGG", target: "R" },
             { key: "GGGGRRRR", target: "G" },
             { key: "RRRRGGGG", target: "R" },
-
-            // --- SECTION 2: Mirror Trends ---
             { key: "GGRG", target: "G" },
             { key: "RRGR", target: "R" },
             { key: "RGGG", target: "R" },
@@ -289,15 +439,11 @@
             { key: "RRRGG", target: "G" },
             { key: "GGGRGG", target: "G" },
             { key: "RRRGRR", target: "R" },
-
-            // --- SECTION 3: Unusual, Hybrid & Asymmetrical Patterns ---
             { key: "RRGGGRGGR", target: "G" },
             { key: "GGRRRRRRG", target: "R" },
             { key: "GGRGRGRGG", target: "G" },
             { key: "RRGRGRGRR", target: "R" },
             { key: "RRGGRGGRR", target: "G" },
-
-            // --- SECTION 4: Long Streaks (Dragon Trends) ---
             { key: "GGGGG", target: "G" },
             { key: "RRRRR", target: "R" }
         ];
@@ -305,6 +451,7 @@
         // DOM ELEMENTS
         const content = document.getElementById('content');
         const countdownDisplay = document.getElementById('countdown');
+        const countdownWrap = document.getElementById('countdownWrap');
         const lastUpdatedDisplay = document.getElementById('lastUpdated');
         const statusDot = document.getElementById('statusDot');
         const statusText = document.getElementById('statusText');
@@ -322,6 +469,9 @@
         const engineTag = document.getElementById('engineTag');
         const nextIssueNumber = document.getElementById('nextIssueNumber');
         const historyTableBody = document.getElementById('historyTableBody');
+        const modeStatusLabel = document.getElementById('modeStatusLabel');
+        const manualInputContainer = document.getElementById('manualInputContainer');
+        const manualSequenceInput = document.getElementById('manualSequenceInput');
 
         const sizePatternText = document.getElementById('sizePatternText');
         const colorPatternText = document.getElementById('colorPatternText');
@@ -351,6 +501,102 @@
 
         function getSizeShort(size) {
             return size === 'Big' ? 'B' : 'S';
+        }
+
+        // ====================================================
+        // TOGGLE LIVE / MANUAL MODE
+        // ====================================================
+        function toggleOperationMode(isManual) {
+            state.isManualMode = isManual;
+            if (isManual) {
+                modeStatusLabel.textContent = 'MANUAL';
+                modeStatusLabel.className = 'mode-label manual';
+                manualInputContainer.style.display = 'flex';
+                refreshBtn.style.display = 'none';
+                countdownWrap.style.display = 'none';
+                statusDot.className = 'dot';
+                statusText.textContent = 'Manual Input';
+                
+                if (countdownInterval) clearInterval(countdownInterval);
+
+                if (state.manualDrawList.length > 0) {
+                    syncManualDisplay();
+                } else if (globalRawList.length > 0) {
+                    state.manualDrawList = [...globalRawList].slice(0, 10).reverse();
+                    syncManualDisplay();
+                }
+            } else {
+                modeStatusLabel.textContent = 'LIVE';
+                modeStatusLabel.className = 'mode-label';
+                manualInputContainer.style.display = 'none';
+                refreshBtn.style.display = 'inline-block';
+                countdownWrap.style.display = 'inline-block';
+                
+                startISTCountdown();
+                fetchData();
+            }
+        }
+
+        // ====================================================
+        // MANUAL ENTRY ADD / APPEND / SLIDING LOGIC
+        // ====================================================
+        function applyManualNumbers() {
+            const rawVal = manualSequenceInput.value.trim();
+            if (!rawVal) return;
+
+            let newDigits = [];
+            if (/^\d+$/.test(rawVal)) {
+                newDigits = rawVal.split('').map(Number);
+            } else {
+                newDigits = rawVal.split(/[\s,->]+/).filter(v => v !== '' && !isNaN(v)).map(Number);
+            }
+
+            if (newDigits.length === 0) {
+                alert('Invalid number format.');
+                return;
+            }
+
+            // Append each number as the latest entry
+            newDigits.forEach(num => {
+                manualIssueCounter++;
+                state.manualDrawList.push({
+                    issue: String(manualIssueCounter),
+                    number: num
+                });
+            });
+
+            // Maintain exact 10 entries: drop oldest entries from the beginning
+            if (state.manualDrawList.length > 10) {
+                state.manualDrawList = state.manualDrawList.slice(-10);
+            }
+
+            // Clear input field immediately
+            manualSequenceInput.value = '';
+
+            syncManualDisplay();
+            evaluateStateTransition();
+            updateLastUpdated();
+        }
+
+        function syncManualDisplay() {
+            // sortedList: Index 0 is newest for engine processing
+            const sortedList = [...state.manualDrawList].reverse();
+            globalNumberField = 'number';
+            globalIssueField = 'issue';
+            displayNumbers(sortedList);
+            statusDot.className = 'dot';
+            statusText.textContent = `${state.manualDrawList.length}/10 numbers`;
+        }
+
+        function clearManualNumbers() {
+            manualSequenceInput.value = '';
+            state.manualDrawList = [];
+            globalRawList = [];
+            content.innerHTML = `<div class="loading"><p style="text-align:center; color: var(--text-muted); padding: 14px 0; font-size: 11px;">AWAITING MANUAL INPUT...</p></div>`;
+            sizePatternText.textContent = '--';
+            colorPatternText.textContent = '--';
+            nextIssueNumber.textContent = '--';
+            statusText.textContent = 'Awaiting numbers';
         }
 
         function clearHistoryLog() {
@@ -401,7 +647,6 @@
             lastEntry.status = isWin ? 'WIN' : 'LOSS';
 
             state.lastResultStatus = lastEntry.status;
-
             renderHistoryTable(state.historyLog);
         }
 
@@ -464,7 +709,6 @@
             historyTableBody.innerHTML = html;
         }
 
-        /* COPY PATTERN FUNCTION WITH FALLBACK */
         function copyPattern(type) {
             let textToCopy = "";
             if (type === 'size') {
@@ -667,21 +911,22 @@
         // TRIGGER MANUAL PREDICTION WITH HOLOGRAPHIC QUANTUM CUBE REVEAL
         function triggerManualPrediction() {
             if (!globalRawList || globalRawList.length < 10) {
-                alert('Insufficient telemetry data. Please wait for data to load.');
+                alert(`Insufficient telemetry data (${globalRawList.length}/10 entries loaded). Please add at least 10 numbers or wait for live stream.`);
                 return;
             }
+
+            // Clear input if anything was left in it
+            if (manualSequenceInput) manualSequenceInput.value = '';
 
             resultContent.style.display = 'none';
             hackingBox.style.display = 'flex';
 
-            // Activate Holographic Checkbox & Rings/Particles Animation
             if (holoCheck) holoCheck.checked = true;
 
             updateNextIssueDisplay();
             const currentNextIssueKey = nextIssueNumber.textContent;
             const predData = runCustomUserLogic(globalRawList, currentNextIssueKey);
 
-            // Phase 1 (1.8s): Set image/Green.png or image/Red.png inside Holographic Quantum Box
             setTimeout(() => {
                 if (predData && predictionImg) {
                     if (predData.predictedValue === 'GREEN') {
@@ -695,7 +940,6 @@
                 }
             }, 1800);
 
-            // Phase 2 (3.5s): Display Complete Results Dashboard
             setTimeout(() => {
                 if (predData) {
                     applyUIState(predData);
@@ -714,7 +958,6 @@
             
             const predVal = String(predData.displayPrediction || '--').toUpperCase();
             
-            // Assign image/Green.png or image/Red.png to result image wrapper
             if (predictionResultImg) {
                 if (predVal === 'GREEN' || predVal === 'G') {
                     predictionResultImg.src = 'images/Green.png';
@@ -750,7 +993,7 @@
         }
 
         async function fetchData() {
-            if (isFetching) return;
+            if (isFetching || state.isManualMode) return;
             isFetching = true;
             refreshBtn.disabled = true;
             statusDot.className = 'dot loading';
@@ -835,11 +1078,11 @@
             const displayList = latest10.reverse();
 
             globalRawList = sortedNumbers;
-            globalNumberField = numberField;
-            globalIssueField = issueField;
+            globalNumberField = numberField || 'number';
+            globalIssueField = issueField || 'issue';
 
-            const sizePatternArray = displayList.map(item => getSizeShort(getNumberSize(item[numberField])));
-            const colorPatternArray = displayList.map(item => getNumberColorShort(item[numberField]));
+            const sizePatternArray = displayList.map(item => getSizeShort(getNumberSize(item[globalNumberField])));
+            const colorPatternArray = displayList.map(item => getNumberColorShort(item[globalNumberField]));
 
             state.sizePatternRaw = sizePatternArray.join(' → ');
             state.colorPatternRaw = colorPatternArray.join(' → ');
@@ -854,7 +1097,7 @@
             `;
             
             displayList.forEach((item, index) => {
-                const numberValue = item[numberField] ?? '?';
+                const numberValue = item[globalNumberField] ?? '?';
                 const isLatest = (index === displayList.length - 1);
                 const type = getNumberSize(numberValue) === 'Big' ? 'big' : 'small';
                 const highlightStyle = isLatest ? 'transform: scale(1.05);' : '';
@@ -887,6 +1130,7 @@
             if (countdownInterval) clearInterval(countdownInterval);
 
             const updateTimer = () => {
+                if (state.isManualMode) return;
                 const istNow = getISTDate();
                 const secondsRemaining = 60 - istNow.getSeconds();
                 countdownDisplay.textContent = secondsRemaining === 60 ? '00' : (secondsRemaining < 10 ? `0${secondsRemaining}` : secondsRemaining);
@@ -902,7 +1146,7 @@
         }
 
         window.refreshData = function() {
-            if (isFetching) return;
+            if (isFetching || state.isManualMode) return;
             retryCount = 0;
             fetchData();
         };
