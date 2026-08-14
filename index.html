@@ -1,1162 +1,1422 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WinGo AI Mobile Dashboard</title>
-    <!-- Share Tech Mono Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- EXTERNAL STYLESHEET -->
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* MODE TOGGLE SWITCH & MANUAL INPUT STYLING */
-        .mode-toggle-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>WinGo AI Mobile Dashboard</title>
+        <!-- Share Tech Mono Font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap"
+            rel="stylesheet"
+        />
+        <!-- EXTERNAL STYLESHEET -->
+        <link rel="stylesheet" href="styles.css" />
+        <style>
+            /* MODE TOGGLE SWITCH & MANUAL INPUT STYLING */
+            .mode-toggle-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 11px;
+                letter-spacing: 1px;
+            }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 22px;
-        }
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 44px;
+                height: 22px;
+            }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #1e293b;
-            border: 1px solid #38bdf8;
-            border-radius: 20px;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
-        }
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #1e293b;
+                border: 1px solid #38bdf8;
+                border-radius: 20px;
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+            }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #38bdf8;
-            border-radius: 50%;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 6px #38bdf8;
-        }
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 14px;
+                width: 14px;
+                left: 3px;
+                bottom: 3px;
+                background-color: #38bdf8;
+                border-radius: 50%;
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 0 6px #38bdf8;
+            }
 
-        input:checked + .slider {
-            background-color: #0f172a;
-            border-color: #a855f7;
-            box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
-        }
+            input:checked + .slider {
+                background-color: #0f172a;
+                border-color: #a855f7;
+                box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+            }
 
-        input:checked + .slider:before {
-            transform: translateX(22px);
-            background-color: #c084fc;
-            box-shadow: 0 0 6px #c084fc;
-        }
+            input:checked + .slider:before {
+                transform: translateX(22px);
+                background-color: #c084fc;
+                box-shadow: 0 0 6px #c084fc;
+            }
 
-        .mode-label {
-            color: #38bdf8;
-            font-weight: bold;
-            min-width: 52px;
-            text-align: right;
-            transition: color 0.3s;
-        }
+            .mode-label {
+                color: #38bdf8;
+                font-weight: bold;
+                min-width: 52px;
+                text-align: right;
+                transition: color 0.3s;
+            }
 
-        .mode-label.manual {
-            color: #c084fc;
-        }
+            .mode-label.manual {
+                color: #c084fc;
+            }
 
-        /* MANUAL INPUT HUD PANEL */
-        .manual-input-box {
-            display: none;
-            flex-direction: column;
-            gap: 8px;
-            padding: 10px;
-            margin-bottom: 12px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
-        }
+            /* MANUAL INPUT HUD PANEL */
+            .manual-input-box {
+                display: none;
+                flex-direction: column;
+                gap: 8px;
+                padding: 10px;
+                margin-bottom: 12px;
+                background: rgba(15, 23, 42, 0.85);
+                border: 1px solid rgba(168, 85, 247, 0.4);
+                border-radius: 8px;
+                box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
+            }
 
-        .manual-input-row {
-            display: flex;
-            gap: 8px;
-        }
+            .manual-input-row {
+                display: flex;
+                gap: 8px;
+            }
 
-        .manual-input {
-            flex: 1;
-            background: rgba(2, 6, 23, 0.8);
-            border: 1px solid rgba(168, 85, 247, 0.5);
-            color: #f8fafc;
-            padding: 8px 12px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 13px;
-            border-radius: 4px;
-            outline: none;
-        }
+            .manual-input {
+                flex: 1;
+                background: rgba(2, 6, 23, 0.8);
+                border: 1px solid rgba(168, 85, 247, 0.5);
+                color: #f8fafc;
+                padding: 8px 12px;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 13px;
+                border-radius: 4px;
+                outline: none;
+            }
 
-        .manual-input:focus {
-            border-color: #c084fc;
-            box-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
-        }
+            .manual-input:focus {
+                border-color: #c084fc;
+                box-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
+            }
 
-        .manual-btn {
-            background: linear-gradient(135deg, #9333ea, #6b21a8);
-            color: #fff;
-            border: 1px solid #c084fc;
-            padding: 8px 14px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+            .manual-btn {
+                background: linear-gradient(135deg, #9333ea, #6b21a8);
+                color: #fff;
+                border: 1px solid #c084fc;
+                padding: 8px 14px;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 11px;
+                font-weight: bold;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
 
-        .manual-btn:hover {
-            box-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
-            transform: scale(1.02);
-        }
+            .manual-btn:hover {
+                box-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
+                transform: scale(1.02);
+            }
 
-        .manual-btn.clear {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.6);
-            color: #fca5a5;
-        }
-    </style>
-</head>
-<body class="theme-blue-crystal">
-    <!-- BACKGROUND AMBIENT LAYERS -->
-    <div class="grid-plane"></div>
-    <div class="nebula"></div>
-    <div class="stars-container">
-        <div class="star-layer"></div>
-        <div class="star-layer"></div>
-        <div class="star-layer"></div>
-    </div>
+            .manual-btn.clear {
+                background: rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 0.6);
+                color: #fca5a5;
+            }
+        </style>
+    </head>
+    <body class="theme-blue-crystal">
+        <!-- BACKGROUND AMBIENT LAYERS -->
+        <div class="grid-plane"></div>
+        <div class="nebula"></div>
+        <div class="stars-container">
+            <div class="star-layer"></div>
+            <div class="star-layer"></div>
+            <div class="star-layer"></div>
+        </div>
 
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header>
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div class="title-text">WinGo Numbers</div>
-                
-                <!-- LIVE / MANUAL TOGGLE SWITCH -->
-                <div class="mode-toggle-wrapper">
-                    <span id="modeStatusLabel" class="mode-label">LIVE</span>
-                    <label class="switch">
-                        <input type="checkbox" id="modeToggle" onchange="toggleOperationMode(this.checked)">
-                        <span class="slider"></span>
+        <div class="dashboard-container">
+            <!-- Header -->
+            <header>
+                <div
+                    style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        width: 100%;
+                    "
+                >
+                    <div class="title-text">WinGo Numbers</div>
+
+                    <!-- LIVE / MANUAL TOGGLE SWITCH -->
+                    <div class="mode-toggle-wrapper">
+                        <span id="modeStatusLabel" class="mode-label"
+                            >LIVE</span
+                        >
+                        <label class="switch">
+                            <input
+                                type="checkbox"
+                                id="modeToggle"
+                                onchange="toggleOperationMode(this.checked)"
+                            />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="status-info" style="margin-top: 8px">
+                    <div class="status-row">
+                        <div class="status-badge">
+                            <span class="dot" id="statusDot"></span>
+                            <span id="statusText">Loading...</span>
+                        </div>
+                        <div class="countdown" id="countdownWrap">
+                            REFRESH: <span id="countdown">00</span>s
+                        </div>
+                        <button
+                            class="refresh-btn"
+                            id="refreshBtn"
+                            onclick="refreshData()"
+                        >
+                            🔄 REFRESH
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MANUAL TELEMETRY INPUT PANEL -->
+            <div id="manualInputContainer" class="manual-input-box">
+                <div class="manual-input-row">
+                    <input
+                        type="text"
+                        id="manualSequenceInput"
+                        class="manual-input"
+                        placeholder="Enter number(s) e.g. 1245324 or 7"
+                        onkeydown="
+                            if (event.key === 'Enter') applyManualNumbers();
+                        "
+                    />
+                    <button class="manual-btn" onclick="applyManualNumbers()">
+                        ➕ ADD
+                    </button>
+                    <button
+                        class="manual-btn clear"
+                        onclick="clearManualNumbers()"
+                    >
+                        CLEAR
+                    </button>
+                </div>
+            </div>
+
+            <!-- PREDICTOR HUD CARD WITH HOLOGRAPHIC QUANTUM ENGINE -->
+            <div id="predictorBox" class="card predictor-box">
+                <div class="predictor-header-row">
+                    <div class="predictor-header">
+                        <span id="engineTitle">QUANTUM HOLO-COMPARATOR</span>
+                        <span id="engineTag" class="auto-tag">CALIBRATED</span>
+                    </div>
+                    <div class="issue-badge">
+                        NEXT: <span id="nextIssueNumber">--</span>
+                    </div>
+                </div>
+
+                <!-- HOLOGRAPHIC SCANNING & QUANTUM TRANSFORM CONTAINER -->
+                <div id="hackingBox" class="checkbox-container">
+                    <!-- HIDDEN CHECKBOX CONTROLLED BY AI TRIGGER -->
+                    <input
+                        class="holo-checkbox-input"
+                        id="holo-check"
+                        type="checkbox"
+                    />
+
+                    <label class="holo-checkbox" for="holo-check">
+                        <div class="holo-box">
+                            <div class="holo-inner"></div>
+                            <div class="scan-effect"></div>
+
+                            <!-- QUANTUM FLOATING PARTICLES -->
+                            <div class="holo-particles">
+                                <div class="holo-particle"></div>
+                                <div class="holo-particle"></div>
+                                <div class="holo-particle"></div>
+                                <div class="holo-particle"></div>
+                                <div class="holo-particle"></div>
+                                <div class="holo-particle"></div>
+                            </div>
+
+                            <!-- ACTIVATION RINGS -->
+                            <div class="activation-rings">
+                                <div class="activation-ring"></div>
+                                <div class="activation-ring"></div>
+                                <div class="activation-ring"></div>
+                            </div>
+
+                            <!-- 3D ROTATING CUBE -->
+                            <div class="cube-transform">
+                                <div class="cube-face front"></div>
+                                <div class="cube-face back"></div>
+                                <div class="cube-face right"></div>
+                                <div class="cube-face left"></div>
+                                <div class="cube-face top"></div>
+                                <div class="cube-face bottom"></div>
+                                <!-- REVEALED PREDICTION GRAPHIC -->
+                                <div
+                                    class="prediction-image-card"
+                                    id="predictionCard"
+                                >
+                                    <img
+                                        id="predictionImg"
+                                        class="prediction-png-image"
+                                        src=""
+                                        alt="Prediction Graphic"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="corner-accent"></div>
+                        <div class="corner-accent"></div>
+                        <div class="corner-accent"></div>
+                        <div class="corner-accent"></div>
+
+                        <div class="holo-glow"></div>
                     </label>
-                </div>
-            </div>
 
-            <div class="status-info" style="margin-top: 8px;">
-                <div class="status-row">
-                    <div class="status-badge">
-                        <span class="dot" id="statusDot"></span>
-                        <span id="statusText">Loading...</span>
+                    <!-- FREQUENCY SPECTRUM ANALYZER BARS -->
+                    <div class="frequency-spectrum">
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
+                        <div class="frequency-bar"></div>
                     </div>
-                    <div class="countdown" id="countdownWrap">
-                        REFRESH: <span id="countdown">00</span>s
-                    </div>
-                    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">🔄 REFRESH</button>
                 </div>
-            </div>
-        </header>
 
-        <!-- MANUAL TELEMETRY INPUT PANEL -->
-        <div id="manualInputContainer" class="manual-input-box">
-            <div class="manual-input-row">
-                <input type="text" id="manualSequenceInput" class="manual-input" placeholder="Enter number(s) e.g. 1245324 or 7" onkeydown="if(event.key==='Enter') applyManualNumbers()" />
-                <button class="manual-btn" onclick="applyManualNumbers()">➕ ADD</button>
-                <button class="manual-btn clear" onclick="clearManualNumbers()">CLEAR</button>
-            </div>
-        </div>
+                <!-- CALCULATED PREDICTION RESULTS CONTAINER -->
+                <div id="resultContent" style="display: none">
+                    <div class="prediction-content">
+                        <div class="prediction-badges">
+                            <!-- LEFT SIDE: PREDICTION IMAGE -->
+                            <div class="prediction-result-image-wrapper">
+                                <img
+                                    id="predictionResultImg"
+                                    class="result-prediction-image"
+                                    src=""
+                                    alt="Prediction Result"
+                                />
+                            </div>
 
-        <!-- PREDICTOR HUD CARD WITH HOLOGRAPHIC QUANTUM ENGINE -->
-        <div id="predictorBox" class="card predictor-box">
-            <div class="predictor-header-row">
-                <div class="predictor-header">
-                    <span id="engineTitle">QUANTUM HOLO-COMPARATOR</span>
-                    <span id="engineTag" class="auto-tag">CALIBRATED</span>
-                </div>
-                <div class="issue-badge">NEXT: <span id="nextIssueNumber">--</span></div>
-            </div>
+                            <!-- RIGHT SIDE: SCORES, CONFIDENCE & FREQUENCY SPECTRUM -->
+                            <div class="prediction-details-right">
+                                <span id="predictedScores" class="number-badge"
+                                    >Score G: 0 | Score R: 0</span
+                                >
+                                <span
+                                    id="confidenceBadge"
+                                    class="confidence-badge"
+                                    >AI CONFIDENCE: 0%</span
+                                >
 
-            <!-- HOLOGRAPHIC SCANNING & QUANTUM TRANSFORM CONTAINER -->
-            <div id="hackingBox" class="checkbox-container">
-                <!-- HIDDEN CHECKBOX CONTROLLED BY AI TRIGGER -->
-                <input class="holo-checkbox-input" id="holo-check" type="checkbox" />
-                
-                <label class="holo-checkbox" for="holo-check">
-                    <div class="holo-box">
-                        <div class="holo-inner"></div>
-                        <div class="scan-effect"></div>
-                        
-                        <!-- QUANTUM FLOATING PARTICLES -->
-                        <div class="holo-particles">
-                            <div class="holo-particle"></div>
-                            <div class="holo-particle"></div>
-                            <div class="holo-particle"></div>
-                            <div class="holo-particle"></div>
-                            <div class="holo-particle"></div>
-                            <div class="holo-particle"></div>
-                        </div>
-
-                        <!-- ACTIVATION RINGS -->
-                        <div class="activation-rings">
-                            <div class="activation-ring"></div>
-                            <div class="activation-ring"></div>
-                            <div class="activation-ring"></div>
-                        </div>
-
-                        <!-- 3D ROTATING CUBE -->
-                        <div class="cube-transform">
-                            <div class="cube-face front"></div>
-                            <div class="cube-face back"></div>
-                            <div class="cube-face right"></div>
-                            <div class="cube-face left"></div>
-                            <div class="cube-face top"></div>
-                            <div class="cube-face bottom"></div>
-                            <!-- REVEALED PREDICTION GRAPHIC -->
-                            <div class="prediction-image-card" id="predictionCard">
-                                <img id="predictionImg" class="prediction-png-image" src="" alt="Prediction Graphic">
+                                <div class="frequency-spectrum">
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                    <div class="frequency-bar"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="corner-accent"></div>
-                    <div class="corner-accent"></div>
-                    <div class="corner-accent"></div>
-                    <div class="corner-accent"></div>
-
-                    <div class="holo-glow"></div>
-                </label>
-
-                <!-- FREQUENCY SPECTRUM ANALYZER BARS -->
-                <div class="frequency-spectrum">
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                    <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                </div>
-            </div>
-
-            <!-- CALCULATED PREDICTION RESULTS CONTAINER -->
-            <div id="resultContent" style="display: none;">
-                <div class="prediction-content">
-                    <div class="prediction-badges">
-                        <!-- LEFT SIDE: PREDICTION IMAGE -->
-                        <div class="prediction-result-image-wrapper">
-                            <img id="predictionResultImg" class="result-prediction-image" src="" alt="Prediction Result">
-                        </div>
-
-                        <!-- RIGHT SIDE: SCORES, CONFIDENCE & FREQUENCY SPECTRUM -->
-                        <div class="prediction-details-right">
-                            <span id="predictedScores" class="number-badge">Score G: 0 | Score R: 0</span>
-                            <span id="confidenceBadge" class="confidence-badge">AI CONFIDENCE: 0%</span>
-                            
-                            <div class="frequency-spectrum">
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
-                                <div class="frequency-bar"></div><div class="frequency-bar"></div>
+                    <!-- Signal Grid -->
+                    <div class="signals-grid">
+                        <div class="signal-item">
+                            <div class="signal-title">
+                                Explicit Pattern Match
                             </div>
+                            <div class="signal-val" id="sigStreak">--</div>
+                        </div>
+                        <div class="signal-item">
+                            <div class="signal-title">Weighted Recency</div>
+                            <div class="signal-val" id="sigFreq">--</div>
+                        </div>
+                        <div class="signal-item">
+                            <div class="signal-title">
+                                1st Order Markov P(X|Y)
+                            </div>
+                            <div class="signal-val" id="sigTransB">--</div>
+                        </div>
+                        <div class="signal-item">
+                            <div class="signal-title">10-Draw Ratio</div>
+                            <div class="signal-val" id="sigTransS">--</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Signal Grid -->
-                <div class="signals-grid">
-                    <div class="signal-item">
-                        <div class="signal-title">Explicit Pattern Match</div>
-                        <div class="signal-val" id="sigStreak">--</div>
+            <!-- Dual Pattern Displays with Copy Buttons -->
+            <div class="pattern-group">
+                <div class="pattern-row">
+                    <div class="pattern-text-wrap" id="sizePatternDisplay">
+                        SIZE PATTERN: <span id="sizePatternText">--</span>
                     </div>
-                    <div class="signal-item">
-                        <div class="signal-title">Weighted Recency</div>
-                        <div class="signal-val" id="sigFreq">--</div>
+                    <button class="copy-btn" onclick="copyPattern('size')">
+                        📋 COPY
+                    </button>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-text-wrap" id="colorPatternDisplay">
+                        CLR PATTERN: <span id="colorPatternText">--</span>
                     </div>
-                    <div class="signal-item">
-                        <div class="signal-title">1st Order Markov P(X|Y)</div>
-                        <div class="signal-val" id="sigTransB">--</div>
-                    </div>
-                    <div class="signal-item">
-                        <div class="signal-title">10-Draw Ratio</div>
-                        <div class="signal-val" id="sigTransS">--</div>
-                    </div>
+                    <button class="copy-btn" onclick="copyPattern('color')">
+                        📋 COPY
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Dual Pattern Displays with Copy Buttons -->
-        <div class="pattern-group">
-            <div class="pattern-row">
-                <div class="pattern-text-wrap" id="sizePatternDisplay">
-                    SIZE PATTERN: <span id="sizePatternText">--</span>
+            <!-- Numbers Feed Canvas -->
+            <div id="content" class="numbers-container">
+                <div class="loading">
+                    <p
+                        style="
+                            text-align: center;
+                            color: var(--text-muted);
+                            padding: 14px 0;
+                            font-size: 11px;
+                        "
+                    >
+                        INITIALIZING TELEMETRY...
+                    </p>
                 </div>
-                <button class="copy-btn" onclick="copyPattern('size')">📋 COPY</button>
             </div>
-            <div class="pattern-row">
-                <div class="pattern-text-wrap" id="colorPatternDisplay">
-                    CLR PATTERN: <span id="colorPatternText">--</span>
+
+            <!-- History Table Card -->
+            <div class="card history-section">
+                <div class="history-title">
+                    <span>SYSTEM LOG</span>
+                    <button class="clear-btn" onclick="clearHistoryLog()">
+                        🗑️ CLEAR
+                    </button>
                 </div>
-                <button class="copy-btn" onclick="copyPattern('color')">📋 COPY</button>
+                <div class="history-table-wrapper">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Prediction</th>
+                                <th>Actual</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td
+                                    colspan="4"
+                                    style="
+                                        color: var(--text-muted);
+                                        font-size: 10px;
+                                    "
+                                >
+                                    No predictions logged. Tap "GENERATE AI
+                                    PREDICTION".
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <div class="last-updated" id="lastUpdated">LAST UPDATED: --</div>
         </div>
 
-        <!-- Numbers Feed Canvas -->
-        <div id="content" class="numbers-container">
-            <div class="loading">
-                <p style="text-align:center; color: var(--text-muted); padding: 14px 0; font-size: 11px;">INITIALIZING TELEMETRY...</p>
-            </div>
+        <!-- FIXED STICKY BOTTOM PREDICTION BUTTON BAR -->
+        <div class="sticky-bottom-bar">
+            <button class="predict-btn" onclick="triggerManualPrediction()">
+                ⚡ GENERATE AI PREDICTION
+            </button>
         </div>
 
-        <!-- History Table Card -->
-        <div class="card history-section">
-            <div class="history-title">
-                <span>SYSTEM LOG</span>
-                <button class="clear-btn" onclick="clearHistoryLog()">🗑️ CLEAR</button>
-            </div>
-            <div class="history-table-wrapper">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Issue</th>
-                            <th>Prediction</th>
-                            <th>Actual</th>
-                            <th>Result</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTableBody">
-                        <tr>
-                            <td colspan="4" style="color: var(--text-muted); font-size: 10px;">No predictions logged. Tap "GENERATE AI PREDICTION".</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="last-updated" id="lastUpdated">LAST UPDATED: --</div>
-    </div>
-
-    <!-- FIXED STICKY BOTTOM PREDICTION BUTTON BAR -->
-    <div class="sticky-bottom-bar">
-        <button class="predict-btn" onclick="triggerManualPrediction()">⚡ GENERATE AI PREDICTION</button>
-    </div>
-
-    <script>
-        const state = {
-            historyLog: [],
-            sizePatternRaw: "",
-            colorPatternRaw: "",
-            lastPrediction: null,
-            lastResultStatus: null,
-            consecutiveRepeatCount: 0,
-            isManualMode: false,
-            manualDrawList: [] // Stores manual draws chronologically (0: Oldest -> end: Latest)
-        };
-
-        const CONFIG = {
-            PROXIES: [
-                'https://api.allorigins.win/raw?url=',
-                'https://corsproxy.io/?',
-                'https://api.codetabs.com/v1/proxy?quest='
-            ],
-            API_URL: 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json',
-            MAX_RETRIES: 3
-        };
-
-        let countdownInterval = null;
-        let isFetching = false;
-        let retryCount = 0;
-        let lastFetchedMinute = -1;
-        let globalRawList = [];
-        let globalNumberField = 'number';
-        let globalIssueField = 'issue';
-        let globalLatestIssue = null;
-        let manualIssueCounter = 1000;
-
-        // EXPLICIT PATTERN MAP DIRECTORY
-        const EXPLICIT_PATTERN_MAP = [
-            { key: "GRGR", target: "G" },
-            { key: "RGRG", target: "R" },
-            { key: "GRR", target: "G" },
-            { key: "RGG", target: "R" },
-            { key: "GRRR", target: "G" },
-            { key: "RGGG", target: "R" },
-            { key: "GRRRR", target: "G" },
-            { key: "RGGGG", target: "R" },
-            { key: "GGRR", target: "G" },
-            { key: "RRGG", target: "R" },
-            { key: "GGRRR", target: "G" },
-            { key: "RRGGG", target: "R" },
-            { key: "GGRRRR", target: "R" },
-            { key: "RRGGGG", target: "G" },
-            { key: "GGGRRR", target: "G" },
-            { key: "RRRGGG", target: "R" },
-            { key: "GGGRRRR", target: "G" },
-            { key: "RRRGGGG", target: "R" },
-            { key: "GGGGRRRR", target: "G" },
-            { key: "RRRRGGGG", target: "R" },
-            { key: "GGRG", target: "G" },
-            { key: "RRGR", target: "R" },
-            { key: "RGGG", target: "R" },
-            { key: "GRRR", target: "G" },
-            { key: "GGRRG", target: "G" },
-            { key: "RRGGR", target: "R" },
-            { key: "RGGGRGG", target: "R" },
-            { key: "GRRRGRR", target: "G" },
-            { key: "GGGRR", target: "R" },
-            { key: "RRRGG", target: "G" },
-            { key: "GGGRGG", target: "G" },
-            { key: "RRRGRR", target: "R" },
-            { key: "RRGGGRGGR", target: "G" },
-            { key: "GGRRRRRRG", target: "R" },
-            { key: "GGRGRGRGG", target: "G" },
-            { key: "RRGRGRGRR", target: "R" },
-            { key: "RRGGRGGRR", target: "G" },
-            { key: "GGGGG", target: "G" },
-            { key: "RRRRR", target: "R" }
-        ];
-
-        // DOM ELEMENTS
-        const content = document.getElementById('content');
-        const countdownDisplay = document.getElementById('countdown');
-        const countdownWrap = document.getElementById('countdownWrap');
-        const lastUpdatedDisplay = document.getElementById('lastUpdated');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const predictorBox = document.getElementById('predictorBox');
-        const hackingBox = document.getElementById('hackingBox');
-        const holoCheck = document.getElementById('holo-check');
-        const predictionCard = document.getElementById('predictionCard');
-        const predictionImg = document.getElementById('predictionImg');
-        const predictionResultImg = document.getElementById('predictionResultImg');
-        const resultContent = document.getElementById('resultContent');
-        const predictedScores = document.getElementById('predictedScores');
-        const confidenceBadge = document.getElementById('confidenceBadge');
-        const engineTitle = document.getElementById('engineTitle');
-        const engineTag = document.getElementById('engineTag');
-        const nextIssueNumber = document.getElementById('nextIssueNumber');
-        const historyTableBody = document.getElementById('historyTableBody');
-        const modeStatusLabel = document.getElementById('modeStatusLabel');
-        const manualInputContainer = document.getElementById('manualInputContainer');
-        const manualSequenceInput = document.getElementById('manualSequenceInput');
-
-        const sizePatternText = document.getElementById('sizePatternText');
-        const colorPatternText = document.getElementById('colorPatternText');
-
-        const sigStreak = document.getElementById('sigStreak');
-        const sigFreq = document.getElementById('sigFreq');
-        const sigTransB = document.getElementById('sigTransB');
-        const sigTransS = document.getElementById('sigTransS');
-
-        function getISTDate() {
-            const now = new Date();
-            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-            return new Date(utcTime + (3600000 * 5.5));
-        }
-
-        function getNumberSize(num) {
-            const n = Number(num);
-            if (isNaN(n)) return 'Unknown';
-            return n >= 5 ? 'Big' : 'Small';
-        }
-
-        function getNumberColorShort(num) {
-            const n = Number(num);
-            if (n === 0 || n === 5) return (n === 0) ? 'R' : 'G';
-            return (n % 2 === 0) ? 'R' : 'G';
-        }
-
-        function getSizeShort(size) {
-            return size === 'Big' ? 'B' : 'S';
-        }
-
-        // ====================================================
-        // TOGGLE LIVE / MANUAL MODE
-        // ====================================================
-        function toggleOperationMode(isManual) {
-            state.isManualMode = isManual;
-            if (isManual) {
-                modeStatusLabel.textContent = 'MANUAL';
-                modeStatusLabel.className = 'mode-label manual';
-                manualInputContainer.style.display = 'flex';
-                refreshBtn.style.display = 'none';
-                countdownWrap.style.display = 'none';
-                statusDot.className = 'dot';
-                statusText.textContent = 'Manual Input';
-                
-                if (countdownInterval) clearInterval(countdownInterval);
-
-                if (state.manualDrawList.length > 0) {
-                    syncManualDisplay();
-                } else if (globalRawList.length > 0) {
-                    state.manualDrawList = [...globalRawList].slice(0, 10).reverse();
-                    syncManualDisplay();
-                }
-            } else {
-                modeStatusLabel.textContent = 'LIVE';
-                modeStatusLabel.className = 'mode-label';
-                manualInputContainer.style.display = 'none';
-                refreshBtn.style.display = 'inline-block';
-                countdownWrap.style.display = 'inline-block';
-                
-                startISTCountdown();
-                fetchData();
-            }
-        }
-
-        // ====================================================
-        // MANUAL ENTRY ADD / APPEND / SLIDING LOGIC
-        // ====================================================
-        function applyManualNumbers() {
-            const rawVal = manualSequenceInput.value.trim();
-            if (!rawVal) return;
-
-            let newDigits = [];
-            if (/^\d+$/.test(rawVal)) {
-                newDigits = rawVal.split('').map(Number);
-            } else {
-                newDigits = rawVal.split(/[\s,->]+/).filter(v => v !== '' && !isNaN(v)).map(Number);
-            }
-
-            if (newDigits.length === 0) {
-                alert('Invalid number format.');
-                return;
-            }
-
-            // Append each number as the latest entry
-            newDigits.forEach(num => {
-                manualIssueCounter++;
-                state.manualDrawList.push({
-                    issue: String(manualIssueCounter),
-                    number: num
-                });
-            });
-
-            // Maintain exact 10 entries: drop oldest entries from the beginning
-            if (state.manualDrawList.length > 10) {
-                state.manualDrawList = state.manualDrawList.slice(-10);
-            }
-
-            // Clear input field immediately
-            manualSequenceInput.value = '';
-
-            syncManualDisplay();
-            evaluateStateTransition();
-            updateLastUpdated();
-        }
-
-        function syncManualDisplay() {
-            // sortedList: Index 0 is newest for engine processing
-            const sortedList = [...state.manualDrawList].reverse();
-            globalNumberField = 'number';
-            globalIssueField = 'issue';
-            displayNumbers(sortedList);
-            statusDot.className = 'dot';
-            statusText.textContent = `${state.manualDrawList.length}/10 numbers`;
-        }
-
-        function clearManualNumbers() {
-            manualSequenceInput.value = '';
-            state.manualDrawList = [];
-            globalRawList = [];
-            content.innerHTML = `<div class="loading"><p style="text-align:center; color: var(--text-muted); padding: 14px 0; font-size: 11px;">AWAITING MANUAL INPUT...</p></div>`;
-            sizePatternText.textContent = '--';
-            colorPatternText.textContent = '--';
-            nextIssueNumber.textContent = '--';
-            statusText.textContent = 'Awaiting numbers';
-        }
-
-        function clearHistoryLog() {
-            state.historyLog = [];
-            state.lastPrediction = null;
-            state.lastResultStatus = null;
-            state.consecutiveRepeatCount = 0;
-            renderHistoryTable([]);
-        }
-
-        function updateNextIssueDisplay() {
-            if (!globalLatestIssue) {
-                nextIssueNumber.textContent = '--';
-                return;
-            }
-
-            const rawIssueStr = String(globalLatestIssue);
-            try {
-                if (/^\d+$/.test(rawIssueStr)) {
-                    const currentIssue = BigInt(rawIssueStr);
-                    const nextIssue = currentIssue + 1n;
-                    nextIssueNumber.textContent = nextIssue.toString();
-                } else {
-                    nextIssueNumber.textContent = rawIssueStr;
-                }
-            } catch (e) {
-                nextIssueNumber.textContent = rawIssueStr;
-            }
-        }
-
-        function evaluateStateTransition() {
-            if (state.historyLog.length === 0 || !globalRawList || globalRawList.length === 0) return;
-
-            const lastEntry = state.historyLog[0];
-            if (lastEntry.status !== 'PENDING') return;
-
-            const matchedDraw = globalRawList.find(item => String(item[globalIssueField]) === String(lastEntry.issue));
-            if (!matchedDraw) return;
-
-            const actualVal = Number(matchedDraw[globalNumberField]);
-            const actualColorShort = getNumberColorShort(actualVal);
-            const actualColorFull = actualColorShort === 'G' ? 'GREEN' : 'RED';
-
-            lastEntry.actualNum = actualVal;
-            lastEntry.actualSize = actualColorFull;
-
-            let isWin = (lastEntry.predictedValue === actualColorFull);
-            lastEntry.status = isWin ? 'WIN' : 'LOSS';
-
-            state.lastResultStatus = lastEntry.status;
-            renderHistoryTable(state.historyLog);
-        }
-
-        function updatePredictionHistoryTracker(currentNextIssueKey, predData) {
-            let existingEntry = state.historyLog.find(item => item.issue === currentNextIssueKey);
-            if (!existingEntry) {
-                const newEntry = {
-                    issue: currentNextIssueKey,
-                    engineName: predData.engineName,
-                    predictedValue: predData.predictedValue,
-                    predictedNumbers: predData.numbers,
-                    actualNum: null,
-                    actualSize: null,
-                    status: 'PENDING'
-                };
-                state.historyLog.unshift(newEntry);
-            }
-
-            state.historyLog = state.historyLog.slice(0, 10);
-            renderHistoryTable(state.historyLog);
-        }
-
-        function renderHistoryTable(historyLog) {
-            if (!historyLog || historyLog.length === 0) {
-                historyTableBody.innerHTML = `<tr><td colspan="4" style="color: var(--text-muted); font-size: 10px;">No predictions logged. Tap "GENERATE AI PREDICTION".</td></tr>`;
-                return;
-            }
-
-            let html = '';
-            historyLog.forEach(entry => {
-                const shortIssue = entry.issue.length > 6 ? '...' + entry.issue.slice(-6) : entry.issue;
-                const valLower = String(entry.predictedValue).toLowerCase();
-
-                let actualText = '--';
-                if (entry.actualNum !== null && entry.actualNum !== undefined) {
-                    actualText = `${entry.actualNum}(${entry.actualSize[0]})`;
-                }
-
-                let statusTag = `<span class="result-tag pending">PENDING</span>`;
-                if (entry.status === 'WIN') {
-                    statusTag = `<span class="result-tag win">WIN</span>`;
-                } else if (entry.status === 'LOSS') {
-                    statusTag = `<span class="result-tag loss">LOSS</span>`;
-                }
-
-                html += `
-                    <tr>
-                        <td><strong>${shortIssue}</strong></td>
-                        <td>
-                            <div class="pred-cell">
-                                <span class="pred-value ${valLower}">${entry.predictedValue}</span>
-                            </div>
-                        </td>
-                        <td>${actualText}</td>
-                        <td>${statusTag}</td>
-                    </tr>
-                `;
-            });
-
-            historyTableBody.innerHTML = html;
-        }
-
-        function copyPattern(type) {
-            let textToCopy = "";
-            if (type === 'size') {
-                textToCopy = `SIZE PATTERN: ${state.sizePatternRaw}`;
-            } else if (type === 'color') {
-                textToCopy = `CLR PATTERN: ${state.colorPatternRaw}`;
-            }
-
-            if (!textToCopy) return;
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    alert(`Copied to clipboard!\n${textToCopy}`);
-                }).catch(() => {
-                    fallbackCopyText(textToCopy);
-                });
-            } else {
-                fallbackCopyText(textToCopy);
-            }
-        }
-
-        function fallbackCopyText(text) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    alert(`Copied to clipboard!\n${text}`);
-                } else {
-                    alert(`Pattern Text:\n${text}`);
-                }
-            } catch (err) {
-                alert(`Pattern Text:\n${text}`);
-            }
-            document.body.removeChild(textArea);
-        }
-
-        // ====================================================
-        // EXPLICIT PATTERN COMPARISON & PREDICTION ENGINE
-        // ====================================================
-        function runCustomUserLogic(draws, nextIssueKey) {
-            if (!draws || draws.length < 10) return null;
-
-            const recent10Draws = draws.slice(0, 10);
-            const numList = recent10Draws.map(d => Number(d[globalNumberField]));
-            
-            // Chronological colors: Index 0 = Oldest, Index 9 = Newest
-            const chronologicalColors = recent10Draws.map(d => getNumberColorShort(d[globalNumberField])).reverse();
-            const fullHistoryString = chronologicalColors.join('');
-
-            let scoreG = 0;
-            let scoreR = 0;
-            let matchedPatternName = "MARKOV RECURSIVE ENGINE";
-            let explicitMatchedTarget = null;
-
-            // 1. MATCH EXPLICIT PATTERN MAP
-            for (let windowLen = Math.min(9, fullHistoryString.length); windowLen >= 3; windowLen--) {
-                const tailSubStr = fullHistoryString.slice(-windowLen);
-
-                const directMatch = EXPLICIT_PATTERN_MAP.find(item => {
-                    const cleanKey = item.key.replace(/\s+/g, '');
-                    return cleanKey === tailSubStr;
-                });
-
-                if (directMatch) {
-                    explicitMatchedTarget = directMatch.target;
-                    const formattedSub = tailSubStr.split('').join(' → ');
-                    matchedPatternName = `EXPLICIT MATCH: [${formattedSub}] → PREDICT [${explicitMatchedTarget}]`;
-                    break;
-                }
-            }
-
-            if (explicitMatchedTarget === 'G') {
-                scoreG += 8.0;
-            } else if (explicitMatchedTarget === 'R') {
-                scoreR += 8.0;
-            }
-
-            // 2. EXPONENTIAL RECENCY WEIGHTING
-            const colorList = [...chronologicalColors].reverse();
-            const recencyWeights = [5, 4, 3, 2, 1];
-            let weightedG = 0;
-            let weightedR = 0;
-
-            for (let i = 0; i < 5; i++) {
-                if (colorList[i] === 'G') weightedG += recencyWeights[i];
-                else weightedR += recencyWeights[i];
-            }
-
-            scoreG += (weightedG * 0.15);
-            scoreR += (weightedR * 0.15);
-            let recencyMsg = `W-G:${weightedG.toFixed(1)} | W-R:${weightedR.toFixed(1)}`;
-
-            // 3. MARKOV TRANSITION PROBABILITY
-            let gToG = 0, gToR = 0, rToG = 0, rToR = 0;
-            for (let i = 0; i < chronologicalColors.length - 1; i++) {
-                const cur = chronologicalColors[i];
-                const next = chronologicalColors[i + 1];
-                if (cur === 'G' && next === 'G') gToG++;
-                if (cur === 'G' && next === 'R') gToR++;
-                if (cur === 'R' && next === 'G') rToG++;
-                if (cur === 'R' && next === 'R') rToR++;
-            }
-
-            const latestColor = colorList[0];
-            let markovMsg = "";
-            if (latestColor === 'G') {
-                const probG = (gToG + 1) / Math.max(1, (gToG + gToR + 2));
-                if (gToG >= gToR) scoreG += 1.2;
-                else scoreR += 1.2;
-                markovMsg = `P(G|G)=${(probG * 100).toFixed(0)}%`;
-            } else {
-                const probR = (rToR + 1) / Math.max(1, (rToG + rToR + 2));
-                if (rToR >= rToG) scoreR += 1.2;
-                else scoreG += 1.2;
-                markovMsg = `P(R|R)=${(probR * 100).toFixed(0)}%`;
-            }
-
-            // 4. COLOR DENSITY BALANCING
-            const gCount = colorList.filter(x => x === 'G').length;
-            const rCount = 10 - gCount;
-
-            if (gCount >= 8) scoreR += 2.5;
-            else if (rCount >= 8) scoreG += 2.5;
-
-            // 5. ANTI-LOOPING & POST-LOSS FLIP GUARDRAILS
-            if (state.lastResultStatus === 'LOSS' && state.lastPrediction) {
-                if (state.lastPrediction === 'GREEN') {
-                    scoreR += 4.5;
-                    matchedPatternName = "POST-LOSS FLIP → RED";
-                } else if (state.lastPrediction === 'RED') {
-                    scoreG += 4.5;
-                    matchedPatternName = "POST-LOSS FLIP → GREEN";
-                }
-            }
-
-            let initialPrediction = scoreG >= scoreR ? 'GREEN' : 'RED';
-
-            if (state.lastPrediction === initialPrediction) {
-                state.consecutiveRepeatCount++;
-                if (state.consecutiveRepeatCount >= 2) {
-                    initialPrediction = initialPrediction === 'GREEN' ? 'RED' : 'GREEN';
-                    matchedPatternName = "ANTI-LOOP CAP TRIGGERED";
-                    state.consecutiveRepeatCount = 0;
-                }
-            } else {
-                state.consecutiveRepeatCount = 1;
-            }
-
-            state.lastPrediction = initialPrediction;
-            const finalPrediction = initialPrediction;
-
-            const total = scoreG + scoreR;
-            const scoreDiff = Math.abs(scoreG - scoreR);
-            let confidence = total > 0 ? Math.round(62 + (scoreDiff / Math.max(1, total)) * 33) : 65;
-            confidence = Math.min(96, Math.max(62, confidence));
-
-            const candidatePool = finalPrediction === 'GREEN' ? [1, 3, 5, 7, 9] : [0, 2, 4, 6, 8];
-            const digitScores = Array(10).fill(0);
-
-            candidatePool.forEach(d => {
-                const freq = numList.filter(n => n === d).length;
-                const lastIdx = numList.indexOf(d);
-
-                if (freq === 0) digitScores[d] += 20;
-                else digitScores[d] += freq * 6;
-
-                if (lastIdx >= 2 && lastIdx <= 5) digitScores[d] += 12;
-            });
-
-            const top2Numbers = candidatePool.sort((a, b) => digitScores[b] - digitScores[a]).slice(0, 2);
-
-            return {
-                engineName: 'QUANTUM HOLO-COMPARATOR',
-                tagText: explicitMatchedTarget ? 'EXPLICIT MATCHED' : 'CALIBRATED',
-                tagClass: 'surewin',
-                predictionType: 'Color',
-                predictedValue: finalPrediction,
-                displayPrediction: finalPrediction,
-                numbers: top2Numbers,
-                scoreG: scoreG.toFixed(1),
-                scoreR: scoreR.toFixed(1),
-                confidence: confidence,
-                patternMatchMsg: matchedPatternName,
-                recencyMsg: recencyMsg,
-                markovMsg: markovMsg,
-                gCount: gCount,
-                rCount: rCount
+        <script>
+            const state = {
+                historyLog: [],
+                sizePatternRaw: "",
+                colorPatternRaw: "",
+                lastPrediction: null,
+                lastResultStatus: null,
+                consecutiveRepeatCount: 0,
+                isManualMode: false,
+                manualDrawList: [],
+                currentIssuePrediction: null, // Holds the fixed prediction for current issue
+                activePredictedIssue: null, // Issue key to check if prediction is already calculated
             };
-        }
 
-        // TRIGGER MANUAL PREDICTION WITH HOLOGRAPHIC QUANTUM CUBE REVEAL
-        function triggerManualPrediction() {
-            if (!globalRawList || globalRawList.length < 10) {
-                alert(`Insufficient telemetry data (${globalRawList.length}/10 entries loaded). Please add at least 10 numbers or wait for live stream.`);
-                return;
+            const CONFIG = {
+                PROXIES: [
+                    "https://api.allorigins.win/raw?url=",
+                    "https://corsproxy.io/?",
+                    "https://api.codetabs.com/v1/proxy?quest=",
+                ],
+                API_URL:
+                    "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json",
+                MAX_RETRIES: 3,
+            };
+
+            let countdownInterval = null;
+            let isFetching = false;
+            let retryCount = 0;
+            let lastFetchedMinute = -1;
+            let globalRawList = [];
+            let globalNumberField = "number";
+            let globalIssueField = "issue";
+            let globalLatestIssue = null;
+            let manualIssueCounter = 1000;
+
+            // EXPLICIT PATTERN MAP DIRECTORY
+            const EXPLICIT_PATTERN_MAP = [
+                { key: "GRGR", target: "G" },
+                { key: "RGRG", target: "R" },
+                { key: "GRR", target: "G" },
+                { key: "RGG", target: "R" },
+                { key: "GRRR", target: "G" },
+                { key: "RGGG", target: "R" },
+                { key: "GRRRR", target: "G" },
+                { key: "RGGGG", target: "R" },
+                { key: "GGRR", target: "G" },
+                { key: "RRGG", target: "R" },
+                { key: "GGRRR", target: "G" },
+                { key: "RRGGG", target: "R" },
+                { key: "GGRRRR", target: "R" },
+                { key: "RRGGGG", target: "G" },
+                { key: "GGGRRR", target: "G" },
+                { key: "RRRGGG", target: "R" },
+                { key: "GGGRRRR", target: "G" },
+                { key: "RRRGGGG", target: "R" },
+                { key: "GGGGRRRR", target: "G" },
+                { key: "RRRRGGGG", target: "R" },
+                { key: "GGRG", target: "G" },
+                { key: "RRGR", target: "R" },
+                { key: "RGGG", target: "R" },
+                { key: "GRRR", target: "G" },
+                { key: "GGRRG", target: "G" },
+                { key: "RRGGR", target: "R" },
+                { key: "RGGGRGG", target: "R" },
+                { key: "GRRRGRR", target: "G" },
+                { key: "GGGRR", target: "R" },
+                { key: "RRRGG", target: "G" },
+                { key: "GGGRGG", target: "G" },
+                { key: "RRRGRR", target: "R" },
+                { key: "RRGGGRGGR", target: "G" },
+                { key: "GGRRRRRRG", target: "R" },
+                { key: "GGRGRGRGG", target: "G" },
+                { key: "RRGRGRGRR", target: "R" },
+                { key: "RRGGRGGRR", target: "G" },
+                { key: "GGGGG", target: "G" },
+                { key: "RRRRR", target: "R" },
+            ];
+
+            // DOM ELEMENTS
+            const content = document.getElementById("content");
+            const countdownDisplay = document.getElementById("countdown");
+            const countdownWrap = document.getElementById("countdownWrap");
+            const lastUpdatedDisplay = document.getElementById("lastUpdated");
+            const statusDot = document.getElementById("statusDot");
+            const statusText = document.getElementById("statusText");
+            const refreshBtn = document.getElementById("refreshBtn");
+            const predictorBox = document.getElementById("predictorBox");
+            const hackingBox = document.getElementById("hackingBox");
+            const holoCheck = document.getElementById("holo-check");
+            const predictionCard = document.getElementById("predictionCard");
+            const predictionImg = document.getElementById("predictionImg");
+            const predictionResultImg = document.getElementById(
+                "predictionResultImg",
+            );
+            const resultContent = document.getElementById("resultContent");
+            const predictedScores = document.getElementById("predictedScores");
+            const confidenceBadge = document.getElementById("confidenceBadge");
+            const engineTitle = document.getElementById("engineTitle");
+            const engineTag = document.getElementById("engineTag");
+            const nextIssueNumber = document.getElementById("nextIssueNumber");
+            const historyTableBody =
+                document.getElementById("historyTableBody");
+            const modeStatusLabel = document.getElementById("modeStatusLabel");
+            const manualInputContainer = document.getElementById(
+                "manualInputContainer",
+            );
+            const manualSequenceInput = document.getElementById(
+                "manualSequenceInput",
+            );
+
+            const sizePatternText = document.getElementById("sizePatternText");
+            const colorPatternText =
+                document.getElementById("colorPatternText");
+
+            const sigStreak = document.getElementById("sigStreak");
+            const sigFreq = document.getElementById("sigFreq");
+            const sigTransB = document.getElementById("sigTransB");
+            const sigTransS = document.getElementById("sigTransS");
+
+            function getISTDate() {
+                const now = new Date();
+                const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+                return new Date(utcTime + 3600000 * 5.5);
             }
 
-            // Clear input if anything was left in it
-            if (manualSequenceInput) manualSequenceInput.value = '';
+            function getNumberSize(num) {
+                const n = Number(num);
+                if (isNaN(n)) return "Unknown";
+                return n >= 5 ? "Big" : "Small";
+            }
 
-            resultContent.style.display = 'none';
-            hackingBox.style.display = 'flex';
+            function getNumberColorShort(num) {
+                const n = Number(num);
+                if (n === 0 || n === 5) return n === 0 ? "R" : "G";
+                return n % 2 === 0 ? "R" : "G";
+            }
 
-            if (holoCheck) holoCheck.checked = true;
+            function getSizeShort(size) {
+                return size === "Big" ? "B" : "S";
+            }
 
-            updateNextIssueDisplay();
-            const currentNextIssueKey = nextIssueNumber.textContent;
-            const predData = runCustomUserLogic(globalRawList, currentNextIssueKey);
+            // ====================================================
+            // TOGGLE LIVE / MANUAL MODE
+            // ====================================================
+            function toggleOperationMode(isManual) {
+                state.isManualMode = isManual;
+                // Invalidate current prediction cache on switch
+                state.activePredictedIssue = null;
+                state.currentIssuePrediction = null;
 
-            setTimeout(() => {
-                if (predData && predictionImg) {
-                    if (predData.predictedValue === 'GREEN') {
-                        predictionImg.src = 'images/Green.png';
-                    } else {
-                        predictionImg.src = 'images/Red.png';
+                if (isManual) {
+                    modeStatusLabel.textContent = "MANUAL";
+                    modeStatusLabel.className = "mode-label manual";
+                    manualInputContainer.style.display = "flex";
+                    refreshBtn.style.display = "none";
+                    countdownWrap.style.display = "none";
+                    statusDot.className = "dot";
+                    statusText.textContent = "Manual Input";
+
+                    if (countdownInterval) clearInterval(countdownInterval);
+
+                    if (state.manualDrawList.length > 0) {
+                        syncManualDisplay();
+                    } else if (globalRawList.length > 0) {
+                        state.manualDrawList = [...globalRawList]
+                            .slice(0, 10)
+                            .reverse();
+                        syncManualDisplay();
                     }
-                    if (predictionCard) {
-                        predictionCard.className = `prediction-image-card ${predData.predictedValue.toLowerCase()} show`;
-                    }
-                }
-            }, 1800);
-
-            setTimeout(() => {
-                if (predData) {
-                    applyUIState(predData);
-                    updatePredictionHistoryTracker(currentNextIssueKey, predData);
-                }
-            }, 3500);
-        }
-
-        function applyUIState(predData) {
-            hackingBox.style.display = 'none';
-            resultContent.style.display = 'block';
-
-            engineTitle.textContent = predData.engineName || 'QUANTUM HOLO-COMPARATOR';
-            engineTag.textContent = predData.tagText || 'CALIBRATED';
-            engineTag.className = `auto-tag ${predData.tagClass || ''}`;
-            
-            const predVal = String(predData.displayPrediction || '--').toUpperCase();
-            
-            if (predictionResultImg) {
-                if (predVal === 'GREEN' || predVal === 'G') {
-                    predictionResultImg.src = 'images/Green.png';
                 } else {
-                    predictionResultImg.src = 'images/Red.png';
-                }
-            }
-            
-            predictedScores.textContent = `Score G: ${predData.scoreG} | Score R: ${predData.scoreR}`;
-            
-            const conf = predData.confidence || 0;
-            confidenceBadge.textContent = `AI CONFIDENCE: ${conf}%`;
+                    modeStatusLabel.textContent = "LIVE";
+                    modeStatusLabel.className = "mode-label";
+                    manualInputContainer.style.display = "none";
+                    refreshBtn.style.display = "inline-block";
+                    countdownWrap.style.display = "inline-block";
 
-            sigStreak.textContent = predData.patternMatchMsg;
-            sigFreq.textContent = predData.recencyMsg;
-            sigTransB.textContent = predData.markovMsg;
-            sigTransS.textContent = `G:${predData.gCount} | R:${predData.rCount}`;
-        }
-
-        async function fetchWithProxy(url, proxyIndex = 0) {
-            if (proxyIndex >= CONFIG.PROXIES.length) throw new Error('All proxies failed');
-            const proxy = CONFIG.PROXIES[proxyIndex];
-            try {
-                const response = await fetch(proxy + encodeURIComponent(url), {
-                    headers: { 'Accept': 'application/json' },
-                    signal: AbortSignal.timeout(10000)
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                return fetchWithProxy(url, proxyIndex + 1);
-            }
-        }
-
-        async function fetchData() {
-            if (isFetching || state.isManualMode) return;
-            isFetching = true;
-            refreshBtn.disabled = true;
-            statusDot.className = 'dot loading';
-            statusText.textContent = 'Fetching...';
-            
-            try {
-                let data;
-                try {
-                    const directResponse = await fetch(`${CONFIG.API_URL}?ts=${Date.now()}`, {
-                        headers: { 'Accept': 'application/json' },
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    if (directResponse.ok) data = await directResponse.json();
-                    else throw new Error('Direct fetch failed');
-                } catch (directError) {
-                    data = await fetchWithProxy(`${CONFIG.API_URL}?ts=${Date.now()}`);
-                }
-
-                let list = data?.data?.list || data?.list || (Array.isArray(data) ? data : []);
-
-                if (list && list.length > 0) {
-                    displayNumbers(list);
-                    updateLastUpdated();
-                    evaluateStateTransition();
-                    retryCount = 0;
-                    statusDot.className = 'dot';
-                    statusText.textContent = `${list.length} numbers`;
-                } else {
-                    throw new Error('No data');
-                }
-            } catch (error) {
-                console.error('Fetch error:', error);
-                content.innerHTML = `<div class="error-message">Failed to load data</div>`;
-                statusDot.className = 'dot error';
-                statusText.textContent = 'Error';
-            } finally {
-                isFetching = false;
-                refreshBtn.disabled = false;
-            }
-        }
-
-        function displayNumbers(numbers) {
-            const firstItem = numbers[0];
-            const possibleNumberFields = ['number', 'value', 'result', 'num', 'winningNumber', 'winNumber', 'code', 'digit'];
-            const possibleIssueFields = ['issue', 'id', 'round', 'drawId', 'period', 'no'];
-            
-            let numberField = possibleNumberFields.find(field => firstItem?.[field] !== undefined);
-            let issueField = possibleIssueFields.find(field => firstItem?.[field] !== undefined);
-
-            if (!numberField && firstItem) {
-                for (const key of Object.keys(firstItem)) {
-                    if (typeof firstItem[key] === 'number' || !isNaN(firstItem[key])) {
-                        numberField = key;
-                        break;
-                    }
-                }
-            }
-
-            if (!issueField && firstItem) {
-                for (const key of Object.keys(firstItem)) {
-                    if (key.toLowerCase().includes('issue') || key.toLowerCase().includes('period') || key.toLowerCase().includes('id')) {
-                        issueField = key;
-                        break;
-                    }
-                }
-            }
-
-            const sortedNumbers = [...numbers].sort((a, b) => {
-                const issueA = issueField ? BigInt(a[issueField] || 0) : 0n;
-                const issueB = issueField ? BigInt(b[issueField] || 0) : 0n;
-                if (issueB > issueA) return 1;
-                if (issueB < issueA) return -1;
-                return 0;
-            });
-
-            if (sortedNumbers.length > 0 && issueField) {
-                globalLatestIssue = sortedNumbers[0][issueField];
-                updateNextIssueDisplay();
-            }
-
-            const latest10 = sortedNumbers.slice(0, 10);
-            const displayList = latest10.reverse();
-
-            globalRawList = sortedNumbers;
-            globalNumberField = numberField || 'number';
-            globalIssueField = issueField || 'issue';
-
-            const sizePatternArray = displayList.map(item => getSizeShort(getNumberSize(item[globalNumberField])));
-            const colorPatternArray = displayList.map(item => getNumberColorShort(item[globalNumberField]));
-
-            state.sizePatternRaw = sizePatternArray.join(' → ');
-            state.colorPatternRaw = colorPatternArray.join(' → ');
-
-            sizePatternText.textContent = state.sizePatternRaw;
-            colorPatternText.textContent = state.colorPatternRaw;
-
-            let html = `
-                <div class="direction-label">Live History (Oldest <span class="arrow">→</span> Latest)</div>
-                <div class="numbers-container">
-                    <div class="numbers-wrapper">
-            `;
-            
-            displayList.forEach((item, index) => {
-                const numberValue = item[globalNumberField] ?? '?';
-                const isLatest = (index === displayList.length - 1);
-                const type = getNumberSize(numberValue) === 'Big' ? 'big' : 'small';
-                const highlightStyle = isLatest ? 'transform: scale(1.05);' : '';
-                
-                html += `
-                    <div class="number-card ${type}" style="${highlightStyle}">
-                        <span class="number">${numberValue}</span>
-                    </div>
-                `;
-            });
-
-            html += `</div></div>`;
-            content.innerHTML = html;
-            
-            setTimeout(() => {
-                const container = document.querySelector('.numbers-container');
-                if (container) container.scrollLeft = container.scrollWidth;
-            }, 100);
-        }
-
-        function updateLastUpdated() {
-            const istNow = getISTDate();
-            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-            if (lastUpdatedDisplay) {
-                lastUpdatedDisplay.textContent = `LAST UPDATED: ${istNow.toLocaleString('en-IN', options)} IST`;
-            }
-        }
-
-        function startISTCountdown() {
-            if (countdownInterval) clearInterval(countdownInterval);
-
-            const updateTimer = () => {
-                if (state.isManualMode) return;
-                const istNow = getISTDate();
-                const secondsRemaining = 60 - istNow.getSeconds();
-                countdownDisplay.textContent = secondsRemaining === 60 ? '00' : (secondsRemaining < 10 ? `0${secondsRemaining}` : secondsRemaining);
-
-                if ((secondsRemaining === 60 || secondsRemaining === 0) && lastFetchedMinute !== istNow.getMinutes()) {
-                    lastFetchedMinute = istNow.getMinutes();
+                    startISTCountdown();
                     fetchData();
                 }
+            }
+
+            // ====================================================
+            // MANUAL ENTRY PARSER
+            // ====================================================
+            function applyManualNumbers() {
+                const rawVal = manualSequenceInput.value.trim();
+                if (!rawVal) return;
+
+                let newDigits = [];
+                if (/^\d+$/.test(rawVal)) {
+                    newDigits = rawVal.split("").map(Number);
+                } else {
+                    newDigits = rawVal
+                        .split(/[\s,->]+/)
+                        .filter((v) => v !== "" && !isNaN(v))
+                        .map(Number);
+                }
+
+                if (newDigits.length === 0) {
+                    alert("Invalid number format.");
+                    return;
+                }
+
+                // Invalidate previous cache because data has changed
+                state.activePredictedIssue = null;
+                state.currentIssuePrediction = null;
+
+                newDigits.forEach((num) => {
+                    manualIssueCounter++;
+                    state.manualDrawList.push({
+                        issue: String(manualIssueCounter),
+                        number: num,
+                    });
+                });
+
+                if (state.manualDrawList.length > 10) {
+                    state.manualDrawList = state.manualDrawList.slice(-10);
+                }
+
+                manualSequenceInput.value = "";
+
+                syncManualDisplay();
+                evaluateStateTransition();
+                updateLastUpdated();
+            }
+
+            function syncManualDisplay() {
+                const sortedList = [...state.manualDrawList].reverse();
+                globalNumberField = "number";
+                globalIssueField = "issue";
+                displayNumbers(sortedList);
+                statusDot.className = "dot";
+                statusText.textContent = `${state.manualDrawList.length}/10 numbers`;
+            }
+
+            function clearManualNumbers() {
+                manualSequenceInput.value = "";
+                state.manualDrawList = [];
+                globalRawList = [];
+                state.activePredictedIssue = null;
+                state.currentIssuePrediction = null;
+                content.innerHTML = `<div class="loading"><p style="text-align:center; color: var(--text-muted); padding: 14px 0; font-size: 11px;">AWAITING MANUAL INPUT...</p></div>`;
+                sizePatternText.textContent = "--";
+                colorPatternText.textContent = "--";
+                nextIssueNumber.textContent = "--";
+                statusText.textContent = "Awaiting numbers";
+            }
+
+            function clearHistoryLog() {
+                state.historyLog = [];
+                state.lastPrediction = null;
+                state.lastResultStatus = null;
+                state.consecutiveRepeatCount = 0;
+                state.activePredictedIssue = null;
+                state.currentIssuePrediction = null;
+                renderHistoryTable([]);
+            }
+
+            function updateNextIssueDisplay() {
+                if (!globalLatestIssue) {
+                    nextIssueNumber.textContent = "--";
+                    return;
+                }
+
+                const rawIssueStr = String(globalLatestIssue);
+                try {
+                    if (/^\d+$/.test(rawIssueStr)) {
+                        const currentIssue = BigInt(rawIssueStr);
+                        const nextIssue = currentIssue + 1n;
+                        nextIssueNumber.textContent = nextIssue.toString();
+                    } else {
+                        nextIssueNumber.textContent = rawIssueStr;
+                    }
+                } catch (e) {
+                    nextIssueNumber.textContent = rawIssueStr;
+                }
+            }
+
+            function evaluateStateTransition() {
+                if (
+                    state.historyLog.length === 0 ||
+                    !globalRawList ||
+                    globalRawList.length === 0
+                )
+                    return;
+
+                const lastEntry = state.historyLog[0];
+                if (lastEntry.status !== "PENDING") return;
+
+                const matchedDraw = globalRawList.find(
+                    (item) =>
+                        String(item[globalIssueField]) ===
+                        String(lastEntry.issue),
+                );
+                if (!matchedDraw) return;
+
+                const actualVal = Number(matchedDraw[globalNumberField]);
+                const actualColorShort = getNumberColorShort(actualVal);
+                const actualColorFull =
+                    actualColorShort === "G" ? "GREEN" : "RED";
+
+                lastEntry.actualNum = actualVal;
+                lastEntry.actualSize = actualColorFull;
+
+                let isWin = lastEntry.predictedValue === actualColorFull;
+                lastEntry.status = isWin ? "WIN" : "LOSS";
+
+                state.lastResultStatus = lastEntry.status;
+                renderHistoryTable(state.historyLog);
+            }
+
+            function updatePredictionHistoryTracker(
+                currentNextIssueKey,
+                predData,
+            ) {
+                let existingEntry = state.historyLog.find(
+                    (item) => item.issue === currentNextIssueKey,
+                );
+                if (!existingEntry) {
+                    const newEntry = {
+                        issue: currentNextIssueKey,
+                        engineName: predData.engineName,
+                        predictedValue: predData.predictedValue,
+                        predictedNumbers: predData.numbers,
+                        actualNum: null,
+                        actualSize: null,
+                        status: "PENDING",
+                    };
+                    state.historyLog.unshift(newEntry);
+                }
+
+                state.historyLog = state.historyLog.slice(0, 10);
+                renderHistoryTable(state.historyLog);
+            }
+
+            function renderHistoryTable(historyLog) {
+                if (!historyLog || historyLog.length === 0) {
+                    historyTableBody.innerHTML = `<tr><td colspan="4" style="color: var(--text-muted); font-size: 10px;">No predictions logged. Tap "GENERATE AI PREDICTION".</td></tr>`;
+                    return;
+                }
+
+                let html = "";
+                historyLog.forEach((entry) => {
+                    const shortIssue =
+                        entry.issue.length > 6
+                            ? "..." + entry.issue.slice(-6)
+                            : entry.issue;
+                    const valLower = String(entry.predictedValue).toLowerCase();
+
+                    let actualText = "--";
+                    if (
+                        entry.actualNum !== null &&
+                        entry.actualNum !== undefined
+                    ) {
+                        actualText = `${entry.actualNum}(${entry.actualSize[0]})`;
+                    }
+
+                    let statusTag = `<span class="result-tag pending">PENDING</span>`;
+                    if (entry.status === "WIN") {
+                        statusTag = `<span class="result-tag win">WIN</span>`;
+                    } else if (entry.status === "LOSS") {
+                        statusTag = `<span class="result-tag loss">LOSS</span>`;
+                    }
+
+                    html += `
+                <tr>
+                    <td><strong>${shortIssue}</strong></td>
+                    <td>
+                        <div class="pred-cell">
+                            <span class="pred-value ${valLower}">${entry.predictedValue}</span>
+                        </div>
+                    </td>
+                    <td>${actualText}</td>
+                    <td>${statusTag}</td>
+                </tr>
+            `;
+                });
+
+                historyTableBody.innerHTML = html;
+            }
+
+            function copyPattern(type) {
+                let textToCopy = "";
+                if (type === "size") {
+                    textToCopy = `SIZE PATTERN: ${state.sizePatternRaw}`;
+                } else if (type === "color") {
+                    textToCopy = `CLR PATTERN: ${state.colorPatternRaw}`;
+                }
+
+                if (!textToCopy) return;
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard
+                        .writeText(textToCopy)
+                        .then(() => {
+                            alert(`Copied to clipboard!\n${textToCopy}`);
+                        })
+                        .catch(() => {
+                            fallbackCopyText(textToCopy);
+                        });
+                } else {
+                    fallbackCopyText(textToCopy);
+                }
+            }
+
+            function fallbackCopyText(text) {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+                textArea.style.opacity = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    const successful = document.execCommand("copy");
+                    if (successful) {
+                        alert(`Copied to clipboard!\n${text}`);
+                    } else {
+                        alert(`Pattern Text:\n${text}`);
+                    }
+                } catch (err) {
+                    alert(`Pattern Text:\n${text}`);
+                }
+                document.body.removeChild(textArea);
+            }
+
+            // ====================================================
+            // PURE & CONSTANT PREDICTION ENGINE
+            // ====================================================
+            function runCustomUserLogic(draws, nextIssueKey) {
+                if (!draws || draws.length < 10) return null;
+
+                const recent10Draws = draws.slice(0, 10);
+                const numList = recent10Draws.map((d) =>
+                    Number(d[globalNumberField]),
+                );
+
+                // Chronological colors: Index 0 = Oldest, Index 9 = Newest
+                const chronologicalColors = recent10Draws
+                    .map((d) => getNumberColorShort(d[globalNumberField]))
+                    .reverse();
+                const fullHistoryString = chronologicalColors.join("");
+
+                let scoreG = 0;
+                let scoreR = 0;
+                let matchedPatternName = "MARKOV RECURSIVE ENGINE";
+                let explicitMatchedTarget = null;
+
+                // 1. MATCH EXPLICIT PATTERN MAP
+                for (
+                    let windowLen = Math.min(9, fullHistoryString.length);
+                    windowLen >= 3;
+                    windowLen--
+                ) {
+                    const tailSubStr = fullHistoryString.slice(-windowLen);
+
+                    const directMatch = EXPLICIT_PATTERN_MAP.find((item) => {
+                        const cleanKey = item.key.replace(/\s+/g, "");
+                        return cleanKey === tailSubStr;
+                    });
+
+                    if (directMatch) {
+                        explicitMatchedTarget = directMatch.target;
+                        const formattedSub = tailSubStr.split("").join(" → ");
+                        matchedPatternName = `EXPLICIT MATCH: [${formattedSub}] → PREDICT [${explicitMatchedTarget}]`;
+                        break;
+                    }
+                }
+
+                if (explicitMatchedTarget === "G") {
+                    scoreG += 8.0;
+                } else if (explicitMatchedTarget === "R") {
+                    scoreR += 8.0;
+                }
+
+                // 2. EXPONENTIAL RECENCY WEIGHTING
+                const colorList = [...chronologicalColors].reverse();
+                const recencyWeights = [5, 4, 3, 2, 1];
+                let weightedG = 0;
+                let weightedR = 0;
+
+                for (let i = 0; i < 5; i++) {
+                    if (colorList[i] === "G") weightedG += recencyWeights[i];
+                    else weightedR += recencyWeights[i];
+                }
+
+                scoreG += weightedG * 0.15;
+                scoreR += weightedR * 0.15;
+                let recencyMsg = `W-G:${weightedG.toFixed(1)} | W-R:${weightedR.toFixed(1)}`;
+
+                // 3. MARKOV TRANSITION PROBABILITY
+                let gToG = 0,
+                    gToR = 0,
+                    rToG = 0,
+                    rToR = 0;
+                for (let i = 0; i < chronologicalColors.length - 1; i++) {
+                    const cur = chronologicalColors[i];
+                    const next = chronologicalColors[i + 1];
+                    if (cur === "G" && next === "G") gToG++;
+                    if (cur === "G" && next === "R") gToR++;
+                    if (cur === "R" && next === "G") rToG++;
+                    if (cur === "R" && next === "R") rToR++;
+                }
+
+                const latestColor = colorList[0];
+                let markovMsg = "";
+                if (latestColor === "G") {
+                    const probG = (gToG + 1) / Math.max(1, gToG + gToR + 2);
+                    if (gToG >= gToR) scoreG += 1.2;
+                    else scoreR += 1.2;
+                    markovMsg = `P(G|G)=${(probG * 100).toFixed(0)}%`;
+                } else {
+                    const probR = (rToR + 1) / Math.max(1, rToG + rToR + 2);
+                    if (rToR >= rToG) scoreR += 1.2;
+                    else scoreG += 1.2;
+                    markovMsg = `P(R|R)=${(probR * 100).toFixed(0)}%`;
+                }
+
+                // 4. COLOR DENSITY BALANCING
+                const gCount = colorList.filter((x) => x === "G").length;
+                const rCount = 10 - gCount;
+
+                if (gCount >= 8) scoreR += 2.5;
+                else if (rCount >= 8) scoreG += 2.5;
+
+                // Pure calculation based solely on input data
+                const finalPrediction = scoreG >= scoreR ? "GREEN" : "RED";
+
+                const total = scoreG + scoreR;
+                const scoreDiff = Math.abs(scoreG - scoreR);
+                let confidence =
+                    total > 0
+                        ? Math.round(62 + (scoreDiff / Math.max(1, total)) * 33)
+                        : 65;
+                confidence = Math.min(96, Math.max(62, confidence));
+
+                const candidatePool =
+                    finalPrediction === "GREEN"
+                        ? [1, 3, 5, 7, 9]
+                        : [0, 2, 4, 6, 8];
+                const digitScores = Array(10).fill(0);
+
+                candidatePool.forEach((d) => {
+                    const freq = numList.filter((n) => n === d).length;
+                    const lastIdx = numList.indexOf(d);
+
+                    if (freq === 0) digitScores[d] += 20;
+                    else digitScores[d] += freq * 6;
+
+                    if (lastIdx >= 2 && lastIdx <= 5) digitScores[d] += 12;
+                });
+
+                const top2Numbers = candidatePool
+                    .sort((a, b) => digitScores[b] - digitScores[a])
+                    .slice(0, 2);
+
+                return {
+                    engineName: "QUANTUM HOLO-COMPARATOR",
+                    tagText: explicitMatchedTarget
+                        ? "EXPLICIT MATCHED"
+                        : "CALIBRATED",
+                    tagClass: "surewin",
+                    predictionType: "Color",
+                    predictedValue: finalPrediction,
+                    displayPrediction: finalPrediction,
+                    numbers: top2Numbers,
+                    scoreG: scoreG.toFixed(1),
+                    scoreR: scoreR.toFixed(1),
+                    confidence: confidence,
+                    patternMatchMsg: matchedPatternName,
+                    recencyMsg: recencyMsg,
+                    markovMsg: markovMsg,
+                    gCount: gCount,
+                    rCount: rCount,
+                };
+            }
+
+            // TRIGGER MANUAL PREDICTION WITH DETERMINISTIC CACHING
+            function triggerManualPrediction() {
+                if (!globalRawList || globalRawList.length < 10) {
+                    alert(
+                        `Insufficient telemetry data (${globalRawList.length}/10 entries loaded). Please enter at least 10 numbers or wait for live stream.`,
+                    );
+                    return;
+                }
+
+                if (manualSequenceInput) manualSequenceInput.value = "";
+
+                updateNextIssueDisplay();
+                const currentNextIssueKey = nextIssueNumber.textContent;
+
+                // Constant cache check: If prediction was already calculated for this issue, reuse it!
+                let predData;
+                if (
+                    state.activePredictedIssue === currentNextIssueKey &&
+                    state.currentIssuePrediction
+                ) {
+                    predData = state.currentIssuePrediction;
+                } else {
+                    predData = runCustomUserLogic(
+                        globalRawList,
+                        currentNextIssueKey,
+                    );
+                    state.activePredictedIssue = currentNextIssueKey;
+                    state.currentIssuePrediction = predData;
+                }
+
+                resultContent.style.display = "none";
+                hackingBox.style.display = "flex";
+
+                if (holoCheck) holoCheck.checked = true;
+
+                setTimeout(() => {
+                    if (predData && predictionImg) {
+                        if (predData.predictedValue === "GREEN") {
+                            predictionImg.src = "images/Green.png";
+                        } else {
+                            predictionImg.src = "images/Red.png";
+                        }
+                        if (predictionCard) {
+                            predictionCard.className = `prediction-image-card ${predData.predictedValue.toLowerCase()} show`;
+                        }
+                    }
+                }, 1800);
+
+                setTimeout(() => {
+                    if (predData) {
+                        applyUIState(predData);
+                        updatePredictionHistoryTracker(
+                            currentNextIssueKey,
+                            predData,
+                        );
+                    }
+                }, 3500);
+            }
+
+            function applyUIState(predData) {
+                hackingBox.style.display = "none";
+                resultContent.style.display = "block";
+
+                engineTitle.textContent =
+                    predData.engineName || "QUANTUM HOLO-COMPARATOR";
+                engineTag.textContent = predData.tagText || "CALIBRATED";
+                engineTag.className = `auto-tag ${predData.tagClass || ""}`;
+
+                const predVal = String(
+                    predData.displayPrediction || "--",
+                ).toUpperCase();
+
+                if (predictionResultImg) {
+                    if (predVal === "GREEN" || predVal === "G") {
+                        predictionResultImg.src = "images/Green.png";
+                    } else {
+                        predictionResultImg.src = "images/Red.png";
+                    }
+                }
+
+                predictedScores.textContent = `Score G: ${predData.scoreG} | Score R: ${predData.scoreR}`;
+
+                const conf = predData.confidence || 0;
+                confidenceBadge.textContent = `AI CONFIDENCE: ${conf}%`;
+
+                sigStreak.textContent = predData.patternMatchMsg;
+                sigFreq.textContent = predData.recencyMsg;
+                sigTransB.textContent = predData.markovMsg;
+                sigTransS.textContent = `G:${predData.gCount} | R:${predData.rCount}`;
+            }
+
+            async function fetchWithProxy(url, proxyIndex = 0) {
+                if (proxyIndex >= CONFIG.PROXIES.length)
+                    throw new Error("All proxies failed");
+                const proxy = CONFIG.PROXIES[proxyIndex];
+                try {
+                    const response = await fetch(
+                        proxy + encodeURIComponent(url),
+                        {
+                            headers: { Accept: "application/json" },
+                            signal: AbortSignal.timeout(10000),
+                        },
+                    );
+                    if (!response.ok)
+                        throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    return fetchWithProxy(url, proxyIndex + 1);
+                }
+            }
+
+            async function fetchData() {
+                if (isFetching || state.isManualMode) return;
+                isFetching = true;
+                refreshBtn.disabled = true;
+                statusDot.className = "dot loading";
+                statusText.textContent = "Fetching...";
+
+                try {
+                    let data;
+                    try {
+                        const directResponse = await fetch(
+                            `${CONFIG.API_URL}?ts=${Date.now()}`,
+                            {
+                                headers: { Accept: "application/json" },
+                                signal: AbortSignal.timeout(5000),
+                            },
+                        );
+                        if (directResponse.ok)
+                            data = await directResponse.json();
+                        else throw new Error("Direct fetch failed");
+                    } catch (directError) {
+                        data = await fetchWithProxy(
+                            `${CONFIG.API_URL}?ts=${Date.now()}`,
+                        );
+                    }
+
+                    let list =
+                        data?.data?.list ||
+                        data?.list ||
+                        (Array.isArray(data) ? data : []);
+
+                    if (list && list.length > 0) {
+                        displayNumbers(list);
+                        updateLastUpdated();
+                        evaluateStateTransition();
+                        retryCount = 0;
+                        statusDot.className = "dot";
+                        statusText.textContent = `${list.length} numbers`;
+                    } else {
+                        throw new Error("No data");
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    content.innerHTML = `<div class="error-message">Failed to load data</div>`;
+                    statusDot.className = "dot error";
+                    statusText.textContent = "Error";
+                } finally {
+                    isFetching = false;
+                    refreshBtn.disabled = false;
+                }
+            }
+
+            function displayNumbers(numbers) {
+                const firstItem = numbers[0];
+                const possibleNumberFields = [
+                    "number",
+                    "value",
+                    "result",
+                    "num",
+                    "winningNumber",
+                    "winNumber",
+                    "code",
+                    "digit",
+                ];
+                const possibleIssueFields = [
+                    "issue",
+                    "id",
+                    "round",
+                    "drawId",
+                    "period",
+                    "no",
+                ];
+
+                let numberField = possibleNumberFields.find(
+                    (field) => firstItem?.[field] !== undefined,
+                );
+                let issueField = possibleIssueFields.find(
+                    (field) => firstItem?.[field] !== undefined,
+                );
+
+                if (!numberField && firstItem) {
+                    for (const key of Object.keys(firstItem)) {
+                        if (
+                            typeof firstItem[key] === "number" ||
+                            !isNaN(firstItem[key])
+                        ) {
+                            numberField = key;
+                            break;
+                        }
+                    }
+                }
+
+                if (!issueField && firstItem) {
+                    for (const key of Object.keys(firstItem)) {
+                        if (
+                            key.toLowerCase().includes("issue") ||
+                            key.toLowerCase().includes("period") ||
+                            key.toLowerCase().includes("id")
+                        ) {
+                            issueField = key;
+                            break;
+                        }
+                    }
+                }
+
+                const sortedNumbers = [...numbers].sort((a, b) => {
+                    const issueA = issueField ? BigInt(a[issueField] || 0) : 0n;
+                    const issueB = issueField ? BigInt(b[issueField] || 0) : 0n;
+                    if (issueB > issueA) return 1;
+                    if (issueB < issueA) return -1;
+                    return 0;
+                });
+
+                if (sortedNumbers.length > 0 && issueField) {
+                    const previousIssue = globalLatestIssue;
+                    globalLatestIssue = sortedNumbers[0][issueField];
+
+                    // Invalidate cache if a new live draw has arrived
+                    if (
+                        previousIssue &&
+                        String(previousIssue) !== String(globalLatestIssue)
+                    ) {
+                        state.activePredictedIssue = null;
+                        state.currentIssuePrediction = null;
+                    }
+                    updateNextIssueDisplay();
+                }
+
+                const latest10 = sortedNumbers.slice(0, 10);
+                const displayList = latest10.reverse();
+
+                globalRawList = sortedNumbers;
+                globalNumberField = numberField || "number";
+                globalIssueField = issueField || "issue";
+
+                const sizePatternArray = displayList.map((item) =>
+                    getSizeShort(getNumberSize(item[globalNumberField])),
+                );
+                const colorPatternArray = displayList.map((item) =>
+                    getNumberColorShort(item[globalNumberField]),
+                );
+
+                state.sizePatternRaw = sizePatternArray.join(" → ");
+                state.colorPatternRaw = colorPatternArray.join(" → ");
+
+                sizePatternText.textContent = state.sizePatternRaw;
+                colorPatternText.textContent = state.colorPatternRaw;
+
+                let html = `
+            <div class="direction-label">Live History (Oldest <span class="arrow">→</span> Latest)</div>
+            <div class="numbers-container">
+                <div class="numbers-wrapper">
+        `;
+
+                displayList.forEach((item, index) => {
+                    const numberValue = item[globalNumberField] ?? "?";
+                    const isLatest = index === displayList.length - 1;
+                    const type =
+                        getNumberSize(numberValue) === "Big" ? "big" : "small";
+                    const highlightStyle = isLatest
+                        ? "transform: scale(1.05);"
+                        : "";
+
+                    html += `
+                <div class="number-card ${type}" style="${highlightStyle}">
+                    <span class="number">${numberValue}</span>
+                </div>
+            `;
+                });
+
+                html += `</div></div>`;
+                content.innerHTML = html;
+
+                setTimeout(() => {
+                    const container =
+                        document.querySelector(".numbers-container");
+                    if (container) container.scrollLeft = container.scrollWidth;
+                }, 100);
+            }
+
+            function updateLastUpdated() {
+                const istNow = getISTDate();
+                const options = {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                };
+                if (lastUpdatedDisplay) {
+                    lastUpdatedDisplay.textContent = `LAST UPDATED: ${istNow.toLocaleString("en-IN", options)} IST`;
+                }
+            }
+
+            function startISTCountdown() {
+                if (countdownInterval) clearInterval(countdownInterval);
+
+                const updateTimer = () => {
+                    if (state.isManualMode) return;
+                    const istNow = getISTDate();
+                    const secondsRemaining = 60 - istNow.getSeconds();
+                    countdownDisplay.textContent =
+                        secondsRemaining === 60
+                            ? "00"
+                            : secondsRemaining < 10
+                              ? `0${secondsRemaining}`
+                              : secondsRemaining;
+
+                    if (
+                        (secondsRemaining === 60 || secondsRemaining === 0) &&
+                        lastFetchedMinute !== istNow.getMinutes()
+                    ) {
+                        lastFetchedMinute = istNow.getMinutes();
+                        fetchData();
+                    }
+                };
+
+                updateTimer();
+                countdownInterval = setInterval(updateTimer, 1000);
+            }
+
+            window.refreshData = function () {
+                if (isFetching || state.isManualMode) return;
+                retryCount = 0;
+                fetchData();
             };
 
-            updateTimer();
-            countdownInterval = setInterval(updateTimer, 1000);
-        }
+            async function init() {
+                await fetchData();
+                startISTCountdown();
+            }
 
-        window.refreshData = function() {
-            if (isFetching || state.isManualMode) return;
-            retryCount = 0;
-            fetchData();
-        };
-
-        async function init() {
-            await fetchData();
-            startISTCountdown();
-        }
-
-        init();
-    </script>
-</body>
+            init();
+        </script>
+    </body>
 </html>
