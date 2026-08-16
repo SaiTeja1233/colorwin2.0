@@ -1032,7 +1032,7 @@
             }
 
             // =========================================================================
-            // 2. LIVE MODE ENGINE (ADAPTIVE HARMONIC & BOUNDARY OSCILLATION PREDICTOR)
+            // 2. LIVE MODE ENGINE (LIVE NUMBER-DRIVEN STEP DYNAMICS & STATE MACHINE)
             // =========================================================================
             function runLiveSizePrediction(draws, nextIssueKey) {
                 if (!draws || draws.length < 3) return null;
@@ -1049,76 +1049,64 @@
                     .map((d) => Number(d[globalNumberField]));
                 const len = numbers.length;
 
-                const n0 = numbers[len - 1]; // Latest
-                const n1 = numbers[len - 2]; // 1 draw back
-                const n2 = numbers[len - 3]; // 2 draws back
-                const n3 = len >= 4 ? numbers[len - 4] : null;
+                const n0 = numbers[len - 1]; // Current Latest Digit
+                const n1 = numbers[len - 2]; // 1 Draw Previous
+                const n2 = numbers[len - 3]; // 2 Draws Previous
+                const delta = n0 - n1;
 
-                const digitScores = Array(10).fill(0);
+                const digitScores = Array(10).fill(5.0);
 
-                // 1. Single Spike Inversion & High Boundary Drop (e.g. 0 -> 8 -> 2 / 0 -> 8 -> 1)
-                if (n1 <= 2 && n0 >= 7) {
-                    // Isolated high jump after low baseline immediately rebounds to Small band
-                    [0, 1, 2, 3, 4].forEach((d) => {
-                        digitScores[d] += 22.0;
-                    });
-                    const dropCompanion = (10 - n0) % 10;
-                    digitScores[dropCompanion] += 15.0;
-                }
-                // 2. Deep Baseline Drop Inversion (e.g. 8 -> 0 or 9 -> 1 rebounds to Big)
-                else if (n1 >= 7 && n0 <= 1) {
+                // 1. Direct Delta Velocity & Trajectory Projection
+                let forwardTarget = (n0 + delta + 10) % 10;
+                let counterTarget = (n0 - delta + 10) % 10;
+                digitScores[forwardTarget] += 18.0;
+                digitScores[counterTarget] += 12.0;
+
+                // 2. Dynamic Centroid Evaluation (Mean of Last 5 Draws)
+                const last5 = numbers.slice(-5);
+                const mean5 =
+                    last5.reduce((sum, val) => sum + val, 0) / last5.length;
+
+                if (mean5 <= 3.8) {
+                    // Mean in lower quadrant: Strong gravitational pull toward Big (5-9)
                     [5, 6, 7, 8, 9].forEach((d) => {
-                        digitScores[d] += 22.0;
+                        digitScores[d] += (4.5 - mean5) * 12.0;
                     });
-                    const riseCompanion = (n0 + 7) % 10;
-                    digitScores[riseCompanion] += 15.0;
+                } else if (mean5 >= 5.2) {
+                    // Mean in upper quadrant: Strong gravitational pull toward Small (0-4)
+                    [0, 1, 2, 3, 4].forEach((d) => {
+                        digitScores[d] += (mean5 - 4.5) * 12.0;
+                    });
                 }
 
-                // 3. Ping-Pong High/Low Alternation Tracker (e.g. Big -> Small -> Big -> Small)
-                const s0 = n0 >= 5 ? "B" : "S";
-                const s1 = n1 >= 5 ? "B" : "S";
-                const s2 = n2 >= 5 ? "B" : "S";
-                const s3 = n3 !== null ? (n3 >= 5 ? "B" : "S") : null;
+                // 3. Companion & Symmetry Pairs (N + 5 mod 10 & 9 - N)
+                const companion5 = (n0 + 5) % 10;
+                const mirror9 = 9 - n0;
+                digitScores[companion5] += 14.0;
+                digitScores[mirror9] += 10.0;
 
-                const isAlternating =
-                    (s0 !== s1 && s1 === s2 && s2 !== s3) ||
-                    (s0 !== s1 && s1 !== s2);
-                if (isAlternating) {
-                    // Alternating wave: ride the counter-step
-                    if (s0 === "B") {
-                        [0, 1, 2, 3, 4].forEach((d) => {
-                            digitScores[d] += 16.0;
-                        });
-                    } else {
-                        [5, 6, 7, 8, 9].forEach((d) => {
-                            digitScores[d] += 16.0;
-                        });
-                    }
-                }
-
-                // 4. Duplicate Anchor Breakouts ([0,0] -> Rise, [2,2] -> Decay/Bounce)
-                if (n2 === n1) {
-                    if (n1 <= 3) {
-                        // Low doublet momentum continues or bounces up
-                        const nextStep = (n0 + 1) % 10;
-                        digitScores[nextStep] += 12.0;
-                    }
-                }
-
-                // 5. Delta Trajectory & Modular Leap
-                const delta = (n0 - n1 + 10) % 10;
-                const projectedTarget = (n0 + delta) % 10;
-                digitScores[projectedTarget] += 10.0;
-
-                // 6. 1st-Order Historical Transitions in Active Buffer
+                // 4. Historical Transition Mapping on the Active Stream
                 for (let i = 0; i < len - 1; i++) {
                     if (numbers[i] === n0) {
-                        const nextSeen = numbers[i + 1];
-                        digitScores[nextSeen] += 14.0;
+                        const followDigit = numbers[i + 1];
+                        digitScores[followDigit] += 16.0;
+                    }
+                    if (
+                        i < len - 2 &&
+                        numbers[i] === n1 &&
+                        numbers[i + 1] === n0
+                    ) {
+                        const followPair = numbers[i + 2];
+                        digitScores[followPair] += 22.0;
                     }
                 }
 
-                // Score Totals
+                // 5. Anti-Repeat Penalty (Suppress immediate previous digit from false echo)
+                if (n0 !== n1) {
+                    digitScores[n0] -= 14.0;
+                }
+
+                // 6. Aggregate Cumulative Size Scores
                 let bigScore = 0;
                 let smallScore = 0;
                 for (let d = 0; d <= 9; d++) {
@@ -1127,13 +1115,21 @@
                     else smallScore += sc;
                 }
 
-                const sortedDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(
-                    (a, b) => digitScores[b] - digitScores[a],
-                );
-                const primaryDigit = sortedDigits[0];
-                const secondaryDigit = sortedDigits[1];
-
                 const predictedSize = bigScore >= smallScore ? "BIG" : "SMALL";
+
+                // 7. Select Target Number dynamically matching the predicted size band
+                const targetBand =
+                    predictedSize === "BIG" ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
+                const altBand =
+                    predictedSize === "BIG" ? [0, 1, 2, 3, 4] : [5, 6, 7, 8, 9];
+
+                targetBand.sort((a, b) => digitScores[b] - digitScores[a]);
+                altBand.sort((a, b) => digitScores[b] - digitScores[a]);
+
+                const primaryDigit = targetBand[0];
+                const secondaryDigit =
+                    targetBand[1] !== undefined ? targetBand[1] : altBand[0];
+
                 const totalScore = bigScore + smallScore;
                 const scoreDiff = Math.abs(bigScore - smallScore);
                 const confidence =
@@ -1147,11 +1143,13 @@
                                   ),
                               ),
                           )
-                        : 80;
+                        : 82;
+
+                const deltaDisplay = delta >= 0 ? `+${delta}` : `${delta}`;
 
                 return {
-                    engineName: "ADAPTIVE HARMONIC SIZE ENGINE",
-                    tagText: "BOUNDARY & WAVE CALIBRATED",
+                    engineName: "LIVE DYNAMIC NUMERIC ENGINE",
+                    tagText: `VELOCITY: ${deltaDisplay} | MEAN: ${mean5.toFixed(1)}`,
                     tagClass: "surewin",
                     predictionType: "SIZE",
                     predictedValue: predictedSize,
@@ -1163,9 +1161,9 @@
                     scoreLabelA: "BIG",
                     scoreLabelB: "SMALL",
                     confidence: confidence,
-                    patternMatchMsg: `ADAPTIVE WAVE: [Last: #${n0} (Δ+${delta}) ➔ Top Target: #${primaryDigit} (${predictedSize})]`,
-                    recencyMsg: `DIGIT CHAIN: ${numbers.slice(-6).join(" → ")}`,
-                    markovMsg: `SCORES => Big: ${bigScore.toFixed(1)} | Small: ${smallScore.toFixed(1)}`,
+                    patternMatchMsg: `STATE VECTOR: [Latest: #${n0} (Δ${deltaDisplay}) ➔ Target Digit: #${primaryDigit} (${predictedSize})]`,
+                    recencyMsg: `DIGIT STREAM: ${numbers.slice(-6).join(" → ")}`,
+                    markovMsg: `PREDICTED DIGITS => Primary: #${primaryDigit} | Secondary: #${secondaryDigit}`,
                     gCount: numbers.filter((x) => x % 2 !== 0).length,
                     rCount: numbers.filter((x) => x % 2 === 0).length,
                 };
