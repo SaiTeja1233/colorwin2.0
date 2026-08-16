@@ -216,7 +216,7 @@
                         type="text"
                         id="manualSequenceInput"
                         class="manual-input"
-                        placeholder="Enter number(s) e.g. 1245324 or 7"
+                        placeholder="Enter number(s) e.g. 48521 or 7"
                         onkeydown="
                             if (event.key === 'Enter') applyManualNumbers();
                         "
@@ -237,7 +237,7 @@
             <div id="predictorBox" class="card predictor-box">
                 <div class="predictor-header-row">
                     <div class="predictor-header">
-                        <span id="engineTitle">QUANTUM HOLO-COMPARATOR</span>
+                        <span id="engineTitle">COMBINATORIAL MATH ENGINE</span>
                         <span id="engineTag" class="auto-tag">CALIBRATED</span>
                     </div>
                     <div class="issue-badge">
@@ -247,7 +247,6 @@
 
                 <!-- HOLOGRAPHIC SCANNING & QUANTUM TRANSFORM CONTAINER -->
                 <div id="hackingBox" class="checkbox-container">
-                    <!-- HIDDEN CHECKBOX CONTROLLED BY AI TRIGGER -->
                     <input
                         class="holo-checkbox-input"
                         id="holo-check"
@@ -349,7 +348,7 @@
                             <!-- RIGHT SIDE: SCORES, CONFIDENCE & FREQUENCY SPECTRUM -->
                             <div class="prediction-details-right">
                                 <span id="predictedScores" class="number-badge"
-                                    >Score G: 0 | Score R: 0</span
+                                    >Target: #0 | BIG: 0 | SMALL: 0</span
                                 >
                                 <span
                                     id="confidenceBadge"
@@ -387,22 +386,22 @@
                     <div class="signals-grid">
                         <div class="signal-item">
                             <div class="signal-title">
-                                Explicit Pattern Match
+                                Mental Math Pair Combos
                             </div>
                             <div class="signal-val" id="sigStreak">--</div>
                         </div>
                         <div class="signal-item">
-                            <div class="signal-title">Weighted Recency</div>
+                            <div class="signal-title">Triples Math Combos</div>
                             <div class="signal-val" id="sigFreq">--</div>
                         </div>
                         <div class="signal-item">
-                            <div class="signal-title">
-                                1st Order Markov P(X|Y)
-                            </div>
+                            <div class="signal-title">Mathematical Target</div>
                             <div class="signal-val" id="sigTransB">--</div>
                         </div>
                         <div class="signal-item">
-                            <div class="signal-title">10-Draw Ratio</div>
+                            <div class="signal-title">
+                                Unique Digits Evaluated
+                            </div>
                             <div class="signal-val" id="sigTransS">--</div>
                         </div>
                     </div>
@@ -498,11 +497,10 @@
                 colorPatternRaw: "",
                 lastPrediction: null,
                 lastResultStatus: null,
-                consecutiveRepeatCount: 0,
                 isManualMode: false,
                 manualDrawList: [],
-                currentIssuePrediction: null, // Holds the fixed prediction for current issue
-                activePredictedIssue: null, // Issue key to check if prediction is already calculated
+                currentIssuePrediction: null,
+                activePredictedIssue: null,
             };
 
             const CONFIG = {
@@ -525,49 +523,6 @@
             let globalIssueField = "issue";
             let globalLatestIssue = null;
             let manualIssueCounter = 1000;
-
-            // EXPLICIT PATTERN MAP DIRECTORY
-            const EXPLICIT_PATTERN_MAP = [
-                { key: "GRGR", target: "G" },
-                { key: "RGRG", target: "R" },
-                { key: "GRR", target: "G" },
-                { key: "RGG", target: "R" },
-                { key: "GRRR", target: "G" },
-                { key: "RGGG", target: "R" },
-                { key: "GRRRR", target: "G" },
-                { key: "RGGGG", target: "R" },
-                { key: "GGRR", target: "G" },
-                { key: "RRGG", target: "R" },
-                { key: "GGRRR", target: "G" },
-                { key: "RRGGG", target: "R" },
-                { key: "GGRRRR", target: "R" },
-                { key: "RRGGGG", target: "G" },
-                { key: "GGGRRR", target: "G" },
-                { key: "RRRGGG", target: "R" },
-                { key: "GGGRRRR", target: "G" },
-                { key: "RRRGGGG", target: "R" },
-                { key: "GGGGRRRR", target: "G" },
-                { key: "RRRRGGGG", target: "R" },
-                { key: "GGRG", target: "G" },
-                { key: "RRGR", target: "R" },
-                { key: "RGGG", target: "R" },
-                { key: "GRRR", target: "G" },
-                { key: "GGRRG", target: "G" },
-                { key: "RRGGR", target: "R" },
-                { key: "RGGGRGG", target: "R" },
-                { key: "GRRRGRR", target: "G" },
-                { key: "GGGRR", target: "R" },
-                { key: "RRRGG", target: "G" },
-                { key: "GGGRGG", target: "G" },
-                { key: "RRRGRR", target: "R" },
-                { key: "RRGGGRGGR", target: "G" },
-                { key: "GGRRRRRRG", target: "R" },
-                { key: "GGRGRGRGG", target: "G" },
-                { key: "RRGRGRGRR", target: "R" },
-                { key: "RRGGRGGRR", target: "G" },
-                { key: "GGGGG", target: "G" },
-                { key: "RRRRR", target: "R" },
-            ];
 
             // DOM ELEMENTS
             const content = document.getElementById("content");
@@ -624,7 +579,7 @@
 
             function getNumberColorShort(num) {
                 const n = Number(num);
-                if (n === 0 || n === 5) return n === 0 ? "R" : "G";
+                if (isNaN(n)) return "Unknown";
                 return n % 2 === 0 ? "R" : "G";
             }
 
@@ -633,11 +588,10 @@
             }
 
             // ====================================================
-            // TOGGLE LIVE / MANUAL MODE
+            // MODE SWITCHING & 20-ENTRY BUFFER
             // ====================================================
             function toggleOperationMode(isManual) {
                 state.isManualMode = isManual;
-                // Invalidate current prediction cache on switch
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
 
@@ -656,7 +610,7 @@
                         syncManualDisplay();
                     } else if (globalRawList.length > 0) {
                         state.manualDrawList = [...globalRawList]
-                            .slice(0, 10)
+                            .slice(0, 20)
                             .reverse();
                         syncManualDisplay();
                     }
@@ -672,9 +626,6 @@
                 }
             }
 
-            // ====================================================
-            // MANUAL ENTRY PARSER
-            // ====================================================
             function applyManualNumbers() {
                 const rawVal = manualSequenceInput.value.trim();
                 if (!rawVal) return;
@@ -684,7 +635,7 @@
                     newDigits = rawVal.split("").map(Number);
                 } else {
                     newDigits = rawVal
-                        .split(/[\s,->]+/)
+                        .split(/[\s,->\n\r]+/)
                         .filter((v) => v !== "" && !isNaN(v))
                         .map(Number);
                 }
@@ -694,7 +645,6 @@
                     return;
                 }
 
-                // Invalidate previous cache because data has changed
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
 
@@ -706,12 +656,11 @@
                     });
                 });
 
-                if (state.manualDrawList.length > 10) {
-                    state.manualDrawList = state.manualDrawList.slice(-10);
+                if (state.manualDrawList.length > 20) {
+                    state.manualDrawList = state.manualDrawList.slice(-20);
                 }
 
                 manualSequenceInput.value = "";
-
                 syncManualDisplay();
                 evaluateStateTransition();
                 updateLastUpdated();
@@ -723,7 +672,7 @@
                 globalIssueField = "issue";
                 displayNumbers(sortedList);
                 statusDot.className = "dot";
-                statusText.textContent = `${state.manualDrawList.length}/10 numbers`;
+                statusText.textContent = `${state.manualDrawList.length}/20 numbers loaded`;
             }
 
             function clearManualNumbers() {
@@ -743,7 +692,6 @@
                 state.historyLog = [];
                 state.lastPrediction = null;
                 state.lastResultStatus = null;
-                state.consecutiveRepeatCount = 0;
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
                 renderHistoryTable([]);
@@ -788,17 +736,27 @@
                 if (!matchedDraw) return;
 
                 const actualVal = Number(matchedDraw[globalNumberField]);
-                const actualColorShort = getNumberColorShort(actualVal);
-                const actualColorFull =
-                    actualColorShort === "G" ? "GREEN" : "RED";
+                const actualColor =
+                    getNumberColorShort(actualVal) === "R" ? "RED" : "GREEN";
+                const actualSize = getNumberSize(actualVal).toUpperCase();
 
                 lastEntry.actualNum = actualVal;
-                lastEntry.actualSize = actualColorFull;
+                lastEntry.actualSize = `${actualSize}/${actualColor[0]}`;
 
-                let isWin = lastEntry.predictedValue === actualColorFull;
+                let isWin = false;
+                if (lastEntry.predictionType === "SIZE") {
+                    isWin = String(lastEntry.predictedValue)
+                        .toUpperCase()
+                        .includes(actualSize);
+                } else {
+                    isWin = String(lastEntry.predictedValue)
+                        .toUpperCase()
+                        .includes(actualColor);
+                }
+
                 lastEntry.status = isWin ? "WIN" : "LOSS";
-
                 state.lastResultStatus = lastEntry.status;
+
                 renderHistoryTable(state.historyLog);
             }
 
@@ -813,7 +771,8 @@
                     const newEntry = {
                         issue: currentNextIssueKey,
                         engineName: predData.engineName,
-                        predictedValue: predData.predictedValue,
+                        predictionType: predData.predictionType,
+                        predictedValue: `${predData.predictedValue} (#${predData.primaryNumber})`,
                         predictedNumbers: predData.numbers,
                         actualNum: null,
                         actualSize: null,
@@ -838,14 +797,17 @@
                         entry.issue.length > 6
                             ? "..." + entry.issue.slice(-6)
                             : entry.issue;
-                    const valLower = String(entry.predictedValue).toLowerCase();
+                    const isGreenOrBig =
+                        String(entry.predictedValue).includes("GREEN") ||
+                        String(entry.predictedValue).includes("BIG");
+                    const colorClass = isGreenOrBig ? "green" : "red";
 
                     let actualText = "--";
                     if (
                         entry.actualNum !== null &&
                         entry.actualNum !== undefined
                     ) {
-                        actualText = `${entry.actualNum}(${entry.actualSize[0]})`;
+                        actualText = `${entry.actualNum} (${entry.actualSize})`;
                     }
 
                     let statusTag = `<span class="result-tag pending">PENDING</span>`;
@@ -860,7 +822,7 @@
                     <td><strong>${shortIssue}</strong></td>
                     <td>
                         <div class="pred-cell">
-                            <span class="pred-value ${valLower}">${entry.predictedValue}</span>
+                            <span class="pred-value ${colorClass}">${entry.predictedValue}</span>
                         </div>
                     </td>
                     <td>${actualText}</td>
@@ -885,12 +847,10 @@
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard
                         .writeText(textToCopy)
-                        .then(() => {
-                            alert(`Copied to clipboard!\n${textToCopy}`);
-                        })
-                        .catch(() => {
-                            fallbackCopyText(textToCopy);
-                        });
+                        .then(() =>
+                            alert(`Copied to clipboard!\n${textToCopy}`),
+                        )
+                        .catch(() => fallbackCopyText(textToCopy));
                 } else {
                     fallbackCopyText(textToCopy);
                 }
@@ -909,173 +869,315 @@
 
                 try {
                     const successful = document.execCommand("copy");
-                    if (successful) {
-                        alert(`Copied to clipboard!\n${text}`);
-                    } else {
-                        alert(`Pattern Text:\n${text}`);
-                    }
+                    if (successful) alert(`Copied to clipboard!\n${text}`);
+                    else alert(`Pattern Text:\n${text}`);
                 } catch (err) {
                     alert(`Pattern Text:\n${text}`);
                 }
                 document.body.removeChild(textArea);
             }
 
-            // ====================================================
-            // PURE & CONSTANT PREDICTION ENGINE
-            // ====================================================
+            // =========================================================================
+            // 1. MANUAL MODE ENGINE (ANTI-REPEAT EXHAUSTION & PROGRESSIVE DRIFT)
+            // =========================================================================
             function runCustomUserLogic(draws, nextIssueKey) {
-                if (!draws || draws.length < 10) return null;
+                if (!draws || draws.length < 2) return null;
 
-                const recent10Draws = draws.slice(0, 10);
-                const numList = recent10Draws.map((d) =>
-                    Number(d[globalNumberField]),
-                );
-
-                // Chronological colors: Index 0 = Oldest, Index 9 = Newest
-                const chronologicalColors = recent10Draws
-                    .map((d) => getNumberColorShort(d[globalNumberField]))
+                const recentDraws = draws.slice(0, Math.min(20, draws.length));
+                const chronologicalNumbers = recentDraws
+                    .map((d) => Number(d[globalNumberField]))
                     .reverse();
-                const fullHistoryString = chronologicalColors.join("");
+                const totalNumbers = chronologicalNumbers.length;
 
-                let scoreG = 0;
-                let scoreR = 0;
-                let matchedPatternName = "MARKOV RECURSIVE ENGINE";
-                let explicitMatchedTarget = null;
+                const latestNumber = chronologicalNumbers[totalNumbers - 1];
+                const previousNumber = chronologicalNumbers[totalNumbers - 2];
+                const latestDelta = latestNumber - previousNumber;
 
-                // 1. MATCH EXPLICIT PATTERN MAP
-                for (
-                    let windowLen = Math.min(9, fullHistoryString.length);
-                    windowLen >= 3;
-                    windowLen--
-                ) {
-                    const tailSubStr = fullHistoryString.slice(-windowLen);
+                const steps = [];
+                const transitionPairCounts = {};
+                const numberFrequency = {};
 
-                    const directMatch = EXPLICIT_PATTERN_MAP.find((item) => {
-                        const cleanKey = item.key.replace(/\s+/g, "");
-                        return cleanKey === tailSubStr;
+                for (let i = 0; i < totalNumbers - 1; i++) {
+                    const from = chronologicalNumbers[i];
+                    const to = chronologicalNumbers[i + 1];
+                    const pairKey = `${from}→${to}`;
+
+                    transitionPairCounts[pairKey] =
+                        (transitionPairCounts[pairKey] || 0) + 1;
+                    numberFrequency[to] = (numberFrequency[to] || 0) + 1;
+
+                    steps.push({
+                        from,
+                        to,
+                        delta: to - from,
+                        rangeDistance: Math.abs(to - from),
                     });
+                }
 
-                    if (directMatch) {
-                        explicitMatchedTarget = directMatch.target;
-                        const formattedSub = tailSubStr.split("").join(" → ");
-                        matchedPatternName = `EXPLICIT MATCH: [${formattedSub}] → PREDICT [${explicitMatchedTarget}]`;
-                        break;
+                const digitScores = Array(10).fill(0);
+
+                const primaryCompanion = (latestNumber + 5) % 10;
+                const stepNeighbor1 = (latestNumber + 3) % 10;
+                const stepNeighbor2 = (latestNumber - 3 + 10) % 10;
+
+                digitScores[primaryCompanion] += 12.0;
+                digitScores[stepNeighbor1] += 8.0;
+                digitScores[stepNeighbor2] += 8.0;
+
+                for (let d = 0; d <= 9; d++) {
+                    const currentPairKey = `${latestNumber}→${d}`;
+                    const timesSeen = transitionPairCounts[currentPairKey] || 0;
+
+                    if (timesSeen >= 2) {
+                        digitScores[d] -= 25.0;
+                    } else if (timesSeen === 1) {
+                        digitScores[d] -= 10.0;
+                    }
+
+                    if (!chronologicalNumbers.includes(d)) {
+                        digitScores[d] += 10.0;
                     }
                 }
 
-                if (explicitMatchedTarget === "G") {
-                    scoreG += 8.0;
-                } else if (explicitMatchedTarget === "R") {
-                    scoreR += 8.0;
-                }
-
-                // 2. EXPONENTIAL RECENCY WEIGHTING
-                const colorList = [...chronologicalColors].reverse();
-                const recencyWeights = [5, 4, 3, 2, 1];
-                let weightedG = 0;
-                let weightedR = 0;
-
-                for (let i = 0; i < 5; i++) {
-                    if (colorList[i] === "G") weightedG += recencyWeights[i];
-                    else weightedR += recencyWeights[i];
-                }
-
-                scoreG += weightedG * 0.15;
-                scoreR += weightedR * 0.15;
-                let recencyMsg = `W-G:${weightedG.toFixed(1)} | W-R:${weightedR.toFixed(1)}`;
-
-                // 3. MARKOV TRANSITION PROBABILITY
-                let gToG = 0,
-                    gToR = 0,
-                    rToG = 0,
-                    rToR = 0;
-                for (let i = 0; i < chronologicalColors.length - 1; i++) {
-                    const cur = chronologicalColors[i];
-                    const next = chronologicalColors[i + 1];
-                    if (cur === "G" && next === "G") gToG++;
-                    if (cur === "G" && next === "R") gToR++;
-                    if (cur === "R" && next === "G") rToG++;
-                    if (cur === "R" && next === "R") rToR++;
-                }
-
-                const latestColor = colorList[0];
-                let markovMsg = "";
-                if (latestColor === "G") {
-                    const probG = (gToG + 1) / Math.max(1, gToG + gToR + 2);
-                    if (gToG >= gToR) scoreG += 1.2;
-                    else scoreR += 1.2;
-                    markovMsg = `P(G|G)=${(probG * 100).toFixed(0)}%`;
-                } else {
-                    const probR = (rToR + 1) / Math.max(1, rToG + rToR + 2);
-                    if (rToR >= rToG) scoreR += 1.2;
-                    else scoreG += 1.2;
-                    markovMsg = `P(R|R)=${(probR * 100).toFixed(0)}%`;
-                }
-
-                // 4. COLOR DENSITY BALANCING
-                const gCount = colorList.filter((x) => x === "G").length;
-                const rCount = 10 - gCount;
-
-                if (gCount >= 8) scoreR += 2.5;
-                else if (rCount >= 8) scoreG += 2.5;
-
-                // Pure calculation based solely on input data
-                const finalPrediction = scoreG >= scoreR ? "GREEN" : "RED";
-
-                const total = scoreG + scoreR;
-                const scoreDiff = Math.abs(scoreG - scoreR);
-                let confidence =
-                    total > 0
-                        ? Math.round(62 + (scoreDiff / Math.max(1, total)) * 33)
-                        : 65;
-                confidence = Math.min(96, Math.max(62, confidence));
-
-                const candidatePool =
-                    finalPrediction === "GREEN"
-                        ? [1, 3, 5, 7, 9]
-                        : [0, 2, 4, 6, 8];
-                const digitScores = Array(10).fill(0);
-
-                candidatePool.forEach((d) => {
-                    const freq = numList.filter((n) => n === d).length;
-                    const lastIdx = numList.indexOf(d);
-
-                    if (freq === 0) digitScores[d] += 20;
-                    else digitScores[d] += freq * 6;
-
-                    if (lastIdx >= 2 && lastIdx <= 5) digitScores[d] += 12;
+                const recent3 = chronologicalNumbers.slice(-3);
+                recent3.forEach((num) => {
+                    digitScores[num] -= 12.0;
                 });
 
-                const top2Numbers = candidatePool
-                    .sort((a, b) => digitScores[b] - digitScores[a])
-                    .slice(0, 2);
+                const averageDelta =
+                    Math.round(
+                        steps.reduce((acc, s) => acc + s.rangeDistance, 0) /
+                            steps.length,
+                    ) || 2;
+                const targetDrift1 = (latestNumber + averageDelta) % 10;
+                const targetDrift2 = (latestNumber - averageDelta + 10) % 10;
+                digitScores[targetDrift1] += 5.0;
+                digitScores[targetDrift2] += 5.0;
+
+                let sortedDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(
+                    (a, b) => digitScores[b] - digitScores[a],
+                );
+                let primaryPredictedNumber = sortedDigits[0];
+                let secondaryPredictedNumber = sortedDigits[1];
+
+                const targetColor =
+                    primaryPredictedNumber % 2 !== 0 ? "GREEN" : "RED";
+                const targetSize =
+                    primaryPredictedNumber >= 5 ? "BIG" : "SMALL";
+                const hasDirectRepeat = latestNumber === previousNumber;
+
+                let finalPredictionValue = "";
+                let predictionType = "";
+                let scoreA = 0;
+                let scoreB = 0;
+                let scoreLabelA = "";
+                let scoreLabelB = "";
+
+                if (hasDirectRepeat) {
+                    predictionType = "SIZE";
+                    finalPredictionValue = targetSize;
+                    for (let d = 0; d <= 9; d++) {
+                        if (d >= 5) scoreA += Math.max(0, digitScores[d]);
+                        else scoreB += Math.max(0, digitScores[d]);
+                    }
+                    scoreLabelA = "BIG";
+                    scoreLabelB = "SMALL";
+                } else {
+                    predictionType = "COLOR";
+                    finalPredictionValue = targetColor;
+                    for (let d = 0; d <= 9; d++) {
+                        if (d % 2 !== 0) scoreA += Math.max(0, digitScores[d]);
+                        else scoreB += Math.max(0, digitScores[d]);
+                    }
+                    scoreLabelA = "Score G";
+                    scoreLabelB = "Score R";
+                }
+
+                const scoreDiff = Math.abs(scoreA - scoreB);
+                const totalScore = scoreA + scoreB;
+                let confidence =
+                    totalScore > 0
+                        ? Math.round(74 + (scoreDiff / totalScore) * 20)
+                        : 78;
+                confidence = Math.min(96, Math.max(70, confidence));
+
+                const deltaFormatted =
+                    latestDelta >= 0 ? `+${latestDelta}` : `${latestDelta}`;
+                const fullStepChain = steps
+                    .map((s) => `${s.from}→${s.to}`)
+                    .join(" | ");
 
                 return {
-                    engineName: "QUANTUM HOLO-COMPARATOR",
-                    tagText: explicitMatchedTarget
-                        ? "EXPLICIT MATCHED"
-                        : "CALIBRATED",
+                    engineName: "NON-REPETITIVE PROGRESSION ENGINE",
+                    tagText: "ANTI-ECHO FILTER ACTIVE",
                     tagClass: "surewin",
-                    predictionType: "Color",
-                    predictedValue: finalPrediction,
-                    displayPrediction: finalPrediction,
-                    numbers: top2Numbers,
-                    scoreG: scoreG.toFixed(1),
-                    scoreR: scoreR.toFixed(1),
+                    predictionType: predictionType,
+                    predictedValue: finalPredictionValue,
+                    primaryNumber: primaryPredictedNumber,
+                    displayPrediction: finalPredictionValue,
+                    numbers: [primaryPredictedNumber, secondaryPredictedNumber],
+                    scoreA: scoreA.toFixed(1),
+                    scoreB: scoreB.toFixed(1),
+                    scoreLabelA: scoreLabelA,
+                    scoreLabelB: scoreLabelB,
                     confidence: confidence,
-                    patternMatchMsg: matchedPatternName,
-                    recencyMsg: recencyMsg,
-                    markovMsg: markovMsg,
-                    gCount: gCount,
-                    rCount: rCount,
+                    patternMatchMsg: `STEP PROGRESSION: [Latest #${latestNumber} (${deltaFormatted}) ➔ Target #${primaryPredictedNumber}]`,
+                    recencyMsg: `STEPS (${steps.length}): ${fullStepChain}`,
+                    markovMsg: `TARGET: #${primaryPredictedNumber} (${finalPredictionValue}) | ALT: #${secondaryPredictedNumber}`,
+                    gCount: chronologicalNumbers.filter((x) => x % 2 !== 0)
+                        .length,
+                    rCount: chronologicalNumbers.filter((x) => x % 2 === 0)
+                        .length,
                 };
             }
 
-            // TRIGGER MANUAL PREDICTION WITH DETERMINISTIC CACHING
+            // =========================================================================
+            // 2. LIVE MODE ENGINE (ADAPTIVE HARMONIC & BOUNDARY OSCILLATION PREDICTOR)
+            // =========================================================================
+            function runLiveSizePrediction(draws, nextIssueKey) {
+                if (!draws || draws.length < 3) return null;
+
+                // Ensure chronological order: Oldest -> Latest
+                const sorted = [...draws].sort((a, b) => {
+                    const issueA = BigInt(a[globalIssueField] || 0);
+                    const issueB = BigInt(b[globalIssueField] || 0);
+                    return issueA > issueB ? 1 : -1;
+                });
+
+                const numbers = sorted
+                    .slice(-20)
+                    .map((d) => Number(d[globalNumberField]));
+                const len = numbers.length;
+
+                const n0 = numbers[len - 1]; // Latest
+                const n1 = numbers[len - 2]; // 1 draw back
+                const n2 = numbers[len - 3]; // 2 draws back
+                const n3 = len >= 4 ? numbers[len - 4] : null;
+
+                const digitScores = Array(10).fill(0);
+
+                // 1. Single Spike Inversion & High Boundary Drop (e.g. 0 -> 8 -> 2 / 0 -> 8 -> 1)
+                if (n1 <= 2 && n0 >= 7) {
+                    // Isolated high jump after low baseline immediately rebounds to Small band
+                    [0, 1, 2, 3, 4].forEach((d) => {
+                        digitScores[d] += 22.0;
+                    });
+                    const dropCompanion = (10 - n0) % 10;
+                    digitScores[dropCompanion] += 15.0;
+                }
+                // 2. Deep Baseline Drop Inversion (e.g. 8 -> 0 or 9 -> 1 rebounds to Big)
+                else if (n1 >= 7 && n0 <= 1) {
+                    [5, 6, 7, 8, 9].forEach((d) => {
+                        digitScores[d] += 22.0;
+                    });
+                    const riseCompanion = (n0 + 7) % 10;
+                    digitScores[riseCompanion] += 15.0;
+                }
+
+                // 3. Ping-Pong High/Low Alternation Tracker (e.g. Big -> Small -> Big -> Small)
+                const s0 = n0 >= 5 ? "B" : "S";
+                const s1 = n1 >= 5 ? "B" : "S";
+                const s2 = n2 >= 5 ? "B" : "S";
+                const s3 = n3 !== null ? (n3 >= 5 ? "B" : "S") : null;
+
+                const isAlternating =
+                    (s0 !== s1 && s1 === s2 && s2 !== s3) ||
+                    (s0 !== s1 && s1 !== s2);
+                if (isAlternating) {
+                    // Alternating wave: ride the counter-step
+                    if (s0 === "B") {
+                        [0, 1, 2, 3, 4].forEach((d) => {
+                            digitScores[d] += 16.0;
+                        });
+                    } else {
+                        [5, 6, 7, 8, 9].forEach((d) => {
+                            digitScores[d] += 16.0;
+                        });
+                    }
+                }
+
+                // 4. Duplicate Anchor Breakouts ([0,0] -> Rise, [2,2] -> Decay/Bounce)
+                if (n2 === n1) {
+                    if (n1 <= 3) {
+                        // Low doublet momentum continues or bounces up
+                        const nextStep = (n0 + 1) % 10;
+                        digitScores[nextStep] += 12.0;
+                    }
+                }
+
+                // 5. Delta Trajectory & Modular Leap
+                const delta = (n0 - n1 + 10) % 10;
+                const projectedTarget = (n0 + delta) % 10;
+                digitScores[projectedTarget] += 10.0;
+
+                // 6. 1st-Order Historical Transitions in Active Buffer
+                for (let i = 0; i < len - 1; i++) {
+                    if (numbers[i] === n0) {
+                        const nextSeen = numbers[i + 1];
+                        digitScores[nextSeen] += 14.0;
+                    }
+                }
+
+                // Score Totals
+                let bigScore = 0;
+                let smallScore = 0;
+                for (let d = 0; d <= 9; d++) {
+                    const sc = Math.max(0, digitScores[d]);
+                    if (d >= 5) bigScore += sc;
+                    else smallScore += sc;
+                }
+
+                const sortedDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(
+                    (a, b) => digitScores[b] - digitScores[a],
+                );
+                const primaryDigit = sortedDigits[0];
+                const secondaryDigit = sortedDigits[1];
+
+                const predictedSize = bigScore >= smallScore ? "BIG" : "SMALL";
+                const totalScore = bigScore + smallScore;
+                const scoreDiff = Math.abs(bigScore - smallScore);
+                const confidence =
+                    totalScore > 0
+                        ? Math.min(
+                              96,
+                              Math.max(
+                                  75,
+                                  Math.round(
+                                      72 + (scoreDiff / totalScore) * 26,
+                                  ),
+                              ),
+                          )
+                        : 80;
+
+                return {
+                    engineName: "ADAPTIVE HARMONIC SIZE ENGINE",
+                    tagText: "BOUNDARY & WAVE CALIBRATED",
+                    tagClass: "surewin",
+                    predictionType: "SIZE",
+                    predictedValue: predictedSize,
+                    primaryNumber: primaryDigit,
+                    displayPrediction: predictedSize,
+                    numbers: [primaryDigit, secondaryDigit],
+                    scoreA: bigScore.toFixed(1),
+                    scoreB: smallScore.toFixed(1),
+                    scoreLabelA: "BIG",
+                    scoreLabelB: "SMALL",
+                    confidence: confidence,
+                    patternMatchMsg: `ADAPTIVE WAVE: [Last: #${n0} (Δ+${delta}) ➔ Top Target: #${primaryDigit} (${predictedSize})]`,
+                    recencyMsg: `DIGIT CHAIN: ${numbers.slice(-6).join(" → ")}`,
+                    markovMsg: `SCORES => Big: ${bigScore.toFixed(1)} | Small: ${smallScore.toFixed(1)}`,
+                    gCount: numbers.filter((x) => x % 2 !== 0).length,
+                    rCount: numbers.filter((x) => x % 2 === 0).length,
+                };
+            }
+
+            // =========================================================================
+            // 3. ON-DEMAND PREDICTION TRIGGER (CLICK ONLY)
+            // =========================================================================
             function triggerManualPrediction() {
-                if (!globalRawList || globalRawList.length < 10) {
+                if (!globalRawList || globalRawList.length < 2) {
                     alert(
-                        `Insufficient telemetry data (${globalRawList.length}/10 entries loaded). Please enter at least 10 numbers or wait for live stream.`,
+                        `Insufficient data (${globalRawList.length} numbers). Please input numbers.`,
                     );
                     return;
                 }
@@ -1085,7 +1187,6 @@
                 updateNextIssueDisplay();
                 const currentNextIssueKey = nextIssueNumber.textContent;
 
-                // Constant cache check: If prediction was already calculated for this issue, reuse it!
                 let predData;
                 if (
                     state.activePredictedIssue === currentNextIssueKey &&
@@ -1093,10 +1194,18 @@
                 ) {
                     predData = state.currentIssuePrediction;
                 } else {
-                    predData = runCustomUserLogic(
-                        globalRawList,
-                        currentNextIssueKey,
-                    );
+                    // Mode-specific routing on click
+                    if (state.isManualMode) {
+                        predData = runCustomUserLogic(
+                            globalRawList,
+                            currentNextIssueKey,
+                        );
+                    } else {
+                        predData = runLiveSizePrediction(
+                            globalRawList,
+                            currentNextIssueKey,
+                        );
+                    }
                     state.activePredictedIssue = currentNextIssueKey;
                     state.currentIssuePrediction = predData;
                 }
@@ -1108,11 +1217,17 @@
 
                 setTimeout(() => {
                     if (predData && predictionImg) {
-                        if (predData.predictedValue === "GREEN") {
-                            predictionImg.src = "images/Green.png";
-                        } else {
-                            predictionImg.src = "images/Red.png";
-                        }
+                        let imgSrc = "images/Green.png";
+                        if (predData.predictedValue === "RED")
+                            imgSrc = "images/Red.png";
+                        else if (predData.predictedValue === "BIG")
+                            imgSrc = "images/Big.png";
+                        else if (predData.predictedValue === "SMALL")
+                            imgSrc = "images/Small.png";
+
+                        predictionImg.src = imgSrc;
+                        predictionImg.style.display = "block";
+
                         if (predictionCard) {
                             predictionCard.className = `prediction-image-card ${predData.predictedValue.toLowerCase()} show`;
                         }
@@ -1134,8 +1249,7 @@
                 hackingBox.style.display = "none";
                 resultContent.style.display = "block";
 
-                engineTitle.textContent =
-                    predData.engineName || "QUANTUM HOLO-COMPARATOR";
+                engineTitle.textContent = `${predData.engineName} [#${predData.primaryNumber}]`;
                 engineTag.textContent = predData.tagText || "CALIBRATED";
                 engineTag.className = `auto-tag ${predData.tagClass || ""}`;
 
@@ -1144,22 +1258,21 @@
                 ).toUpperCase();
 
                 if (predictionResultImg) {
-                    if (predVal === "GREEN" || predVal === "G") {
-                        predictionResultImg.src = "images/Green.png";
-                    } else {
-                        predictionResultImg.src = "images/Red.png";
-                    }
+                    let imgSrc = "images/Green.png";
+                    if (predVal === "RED") imgSrc = "images/Red.png";
+                    else if (predVal === "BIG") imgSrc = "images/Big.png";
+                    else if (predVal === "SMALL") imgSrc = "images/Small.png";
+                    predictionResultImg.src = imgSrc;
+                    predictionResultImg.style.display = "block";
                 }
 
-                predictedScores.textContent = `Score G: ${predData.scoreG} | Score R: ${predData.scoreR}`;
-
-                const conf = predData.confidence || 0;
-                confidenceBadge.textContent = `AI CONFIDENCE: ${conf}%`;
+                predictedScores.textContent = `Target: #${predData.primaryNumber} & Alt: #${predData.numbers[1]} | ${predData.scoreLabelA}: ${predData.scoreA} | ${predData.scoreLabelB}: ${predData.scoreB}`;
+                confidenceBadge.textContent = `AI CONFIDENCE: ${predData.confidence}%`;
 
                 sigStreak.textContent = predData.patternMatchMsg;
                 sigFreq.textContent = predData.recencyMsg;
                 sigTransB.textContent = predData.markovMsg;
-                sigTransS.textContent = `G:${predData.gCount} | R:${predData.rCount}`;
+                sigTransS.textContent = `Green:${predData.gCount} | Red:${predData.rCount}`;
             }
 
             async function fetchWithProxy(url, proxyIndex = 0) {
@@ -1299,7 +1412,6 @@
                     const previousIssue = globalLatestIssue;
                     globalLatestIssue = sortedNumbers[0][issueField];
 
-                    // Invalidate cache if a new live draw has arrived
                     if (
                         previousIssue &&
                         String(previousIssue) !== String(globalLatestIssue)
@@ -1310,8 +1422,8 @@
                     updateNextIssueDisplay();
                 }
 
-                const latest10 = sortedNumbers.slice(0, 10);
-                const displayList = latest10.reverse();
+                const latestDraws = sortedNumbers.slice(0, 20);
+                const displayList = latestDraws.reverse();
 
                 globalRawList = sortedNumbers;
                 globalNumberField = numberField || "number";
@@ -1331,7 +1443,7 @@
                 colorPatternText.textContent = state.colorPatternRaw;
 
                 let html = `
-            <div class="direction-label">Live History (Oldest <span class="arrow">→</span> Latest)</div>
+            <div class="direction-label">Live History (${displayList.length} draws: Oldest <span class="arrow">→</span> Latest)</div>
             <div class="numbers-container">
                 <div class="numbers-wrapper">
         `;
@@ -1342,7 +1454,7 @@
                     const type =
                         getNumberSize(numberValue) === "Big" ? "big" : "small";
                     const highlightStyle = isLatest
-                        ? "transform: scale(1.05);"
+                        ? "transform: scale(1.08); border: 1px solid #38bdf8;"
                         : "";
 
                     html += `
