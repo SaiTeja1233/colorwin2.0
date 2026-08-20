@@ -214,7 +214,7 @@
                         type="text"
                         id="manualSequenceInput"
                         class="manual-input"
-                        placeholder="Enter 5+ numbers e.g. 5673498125"
+                        placeholder="Enter numbers e.g. 5673498125"
                         onkeydown="
                             if (event.key === 'Enter') applyManualNumbers();
                         "
@@ -235,7 +235,7 @@
             <div id="predictorBox" class="card predictor-box">
                 <div class="predictor-header-row">
                     <div class="predictor-header">
-                        <span id="engineTitle">WINGO 5-NUMBER ANALYZER</span>
+                        <span id="engineTitle">WG100 COMBINATION ANALYZER</span>
                         <span id="engineTag" class="auto-tag">CALIBRATED</span>
                     </div>
                     <div class="issue-badge">
@@ -383,11 +383,11 @@
                     <!-- Signal Grid -->
                     <div class="signals-grid">
                         <div class="signal-item">
-                            <div class="signal-title">Evaluated 5-Draw Window</div>
+                            <div class="signal-title">Evaluated 3-Draw Window</div>
                             <div class="signal-val" id="sigStreak">--</div>
                         </div>
                         <div class="signal-item">
-                            <div class="signal-title">Imbalance Analysis</div>
+                            <div class="signal-title">CSV Combination Status</div>
                             <div class="signal-val" id="sigFreq">--</div>
                         </div>
                         <div class="signal-item">
@@ -465,7 +465,8 @@
                                         font-size: 10px;
                                     "
                                 >
-                                    No predictions logged. Tap "GENERATE AI PREDICTION".
+                                    No predictions logged. Tap "GENERATE AI
+                                    PREDICTION".
                                 </td>
                             </tr>
                         </tbody>
@@ -494,6 +495,9 @@
                 manualDrawList: [],
                 currentIssuePrediction: null,
                 activePredictedIssue: null,
+                consecutiveLosses: 0,
+                skipNextRound: false,
+                combinationsLookup: {},
             };
 
             const CONFIG = {
@@ -504,6 +508,7 @@
                 ],
                 API_URL:
                     "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json",
+                CSV_PATH: "wingo_wg100_all_combinations.csv",
                 MAX_RETRIES: 3,
             };
 
@@ -558,6 +563,35 @@
             const sigTransB = document.getElementById("sigTransB");
             const sigTransS = document.getElementById("sigTransS");
 
+            // ASYNC CSV PARSER & LOADER
+            async function loadCombinationsCSV() {
+                try {
+                    const response = await fetch(CONFIG.CSV_PATH);
+                    if (!response.ok) throw new Error("Failed to fetch CSV file.");
+                    const csvText = await response.text();
+                    const lines = csvText.trim().split(/\r?\n/).slice(1);
+
+                    lines.forEach((line) => {
+                        const cols = line.split(",").map((s) => s.replace(/["\s]/g, ""));
+                        if (cols.length >= 6) {
+                            const n1 = parseInt(cols[1], 10);
+                            const n2 = parseInt(cols[2], 10);
+                            const n3 = parseInt(cols[3], 10);
+                            const predNum = parseInt(cols[4], 10);
+                            const predColor = cols[5];
+                            const key = `${n1},${n2},${n3}`;
+                            state.combinationsLookup[key] = {
+                                num: predNum,
+                                color: predColor,
+                            };
+                        }
+                    });
+                    console.log(`Loaded ${Object.keys(state.combinationsLookup).length} combinations from CSV.`);
+                } catch (e) {
+                    console.warn("CSV load fallback active:", e);
+                }
+            }
+
             function getISTDate() {
                 const now = new Date();
                 const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -580,167 +614,130 @@
                 return size === "Big" ? "B" : "S";
             }
 
-            // =========================================================================
-            // CORE 5-NUMBER PREDICTION ALGORITHM
-            // =========================================================================
-            function predictWingo(numbers) {
-                if (!Array.isArray(numbers) || numbers.length !== 5) {
-                    throw new Error("Enter exactly 5 numbers.");
+            // DYNAMIC CANDIDATE SELECTOR FOR SAME-SIZE SECOND NUMBER
+            function getBestSecondCandidate(targetNum, recentDraws, targetSize) {
+                const pool = targetSize === "BIG" ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
+                
+                // Exclude the primary number
+                const remainingInGroup = pool.filter((n) => n !== targetNum);
+                
+                // Check recent history to prioritize cold / unrepeated numbers in the group
+                const recentSet = new Set(recentDraws.slice(-5).map(Number));
+                const unusedInGroup = remainingInGroup.filter((n) => !recentSet.has(n));
+
+                if (unusedInGroup.length > 0) {
+                    return unusedInGroup[0];
                 }
 
-                numbers = numbers.map(Number);
+                // Fallback: Pick candidate with opposite parity (odd/even balance)
+                const oppositeParity = remainingInGroup.find((n) => (n % 2) !== (targetNum % 2));
+                return oppositeParity !== undefined ? oppositeParity : remainingInGroup[0];
+            }
 
-                if (numbers.some(n => !Number.isInteger(n) || n < 0 || n > 9)) {
-                    throw new Error("Numbers must be between 0 and 9.");
+            // CORE CSV-BASED PREDICTION ENGINE
+            function predictWingoCombinations(draws) {
+                if (!Array.isArray(draws) || draws.length < 3) {
+                    throw new Error("Enter at least 3 numbers.");
                 }
 
-                // Basic mappings
-                const getColor = n => n % 2 === 0 ? "RED" : "GREEN";
-                const getSize = n => n >= 5 ? "BIG" : "SMALL";
+                const numbers = draws.map(Number);
+                const last3 = numbers.slice(-3);
+                const key = `${last3[0]},${last3[1]},${last3[2]}`;
 
-                const colors = numbers.map(getColor);
-                const sizes = numbers.map(getSize);
+                let targetNum = null;
+                let targetColor = null;
+                let isFromLookup = false;
 
-                // Counts
-                const redCount = colors.filter(c => c === "RED").length;
-                const greenCount = colors.filter(c => c === "GREEN").length;
+                // Match exact combination from CSV table
+                if (state.combinationsLookup && state.combinationsLookup[key]) {
+                    targetNum = Number(state.combinationsLookup[key].num);
+                    targetColor = state.combinationsLookup[key].color.toUpperCase();
+                    isFromLookup = true;
+                } else {
+                    targetNum = (last3[0] + last3[1] + last3[2]) % 10;
+                    targetColor = targetNum % 2 === 0 ? "RED" : "GREEN";
+                }
 
-                const bigCount = sizes.filter(s => s === "BIG").length;
-                const smallCount = sizes.filter(s => s === "SMALL").length;
+                // Size is strictly bound to the target number
+                const targetSize = targetNum >= 5 ? "BIG" : "SMALL";
+                const secondNum = getBestSecondCandidate(targetNum, numbers, targetSize);
 
-                // Odd / Even
-                const evenCount = numbers.filter(n => n % 2 === 0).length;
-                const oddCount = numbers.filter(n => n % 2 !== 0).length;
-
-                // Repetition
-                const frequency = {};
-                numbers.forEach(n => {
-                    frequency[n] = (frequency[n] || 0) + 1;
-                });
-
-                const repeatedNumbers = Object.keys(frequency)
-                    .filter(n => frequency[n] > 1)
-                    .map(Number);
-
-                // Recent movement
                 const differences = [];
-                for (let i = 1; i < numbers.length; i++) {
-                    differences.push(numbers[i] - numbers[i - 1]);
-                }
-
-                // COLOR scoring
-                let colorScore = 0;
-                if (redCount >= 4) colorScore += 2;
-                if (greenCount >= 4) colorScore += 2;
-                if (evenCount >= 4) colorScore += 1;
-                if (oddCount >= 4) colorScore += 1;
-
-                // SIZE scoring
-                let sizeScore = 0;
-                if (bigCount >= 4) sizeScore += 2;
-                if (smallCount >= 4) sizeScore += 2;
-                if (repeatedNumbers.length > 0) sizeScore += 1;
-
-                // Choose prediction type
-                let predictionType;
-                if (colorScore > sizeScore) {
-                    predictionType = "COLOR";
-                } else if (sizeScore > colorScore) {
-                    predictionType = "SIZE";
-                } else {
-                    predictionType = numbers[4] % 2 === 0 ? "COLOR" : "SIZE";
-                }
-
-                // Candidate numbers
-                let candidates;
-                if (predictionType === "COLOR") {
-                    const predictedColor = redCount > greenCount ? "GREEN" : "RED";
-                    candidates = predictedColor === "RED" ? [0, 2, 4, 6, 8] : [1, 3, 5, 7, 9];
-                } else {
-                    const predictedSize = bigCount > smallCount ? "SMALL" : "BIG";
-                    candidates = predictedSize === "BIG" ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
-                }
-
-                // Choose 2 numbers
-                const unused = candidates.filter(n => !numbers.includes(n));
-                const possibleNumbers = unused.length >= 2 ? unused.slice(0, 2) : candidates.slice(0, 2);
-
-                // Final prediction
-                let prediction;
-                if (predictionType === "COLOR") {
-                    prediction = possibleNumbers.every(n => n % 2 === 0) ? "RED" : "GREEN";
-                } else {
-                    prediction = possibleNumbers.every(n => n >= 5) ? "BIG" : "SMALL";
+                for (let i = 1; i < last3.length; i++) {
+                    differences.push(last3[i] - last3[i - 1]);
                 }
 
                 return {
-                    input: numbers,
-                    predictionType,
-                    prediction,
-                    possibleNumbers,
-                    analysis: {
-                        colors,
-                        sizes,
-                        redCount,
-                        greenCount,
-                        bigCount,
-                        smallCount,
-                        evenCount,
-                        oddCount,
-                        repeatedNumbers,
-                        differences
-                    }
+                    input: last3,
+                    predictionType: "COMBINATION",
+                    prediction: targetSize,
+                    predictedColor: targetColor,
+                    primaryNumber: targetNum,
+                    altNumber: secondNum,
+                    possibleNumbers: [targetNum, secondNum],
+                    isFromLookup: isFromLookup,
+                    differences: differences,
                 };
             }
 
-            // =========================================================================
-            // SHARED DISPATCHER (EXTRACTS LAST 5 NUMBERS FOR MANUAL & LIVE)
-            // =========================================================================
+            // SHARED DISPATCHER (INCLUDES 2-CONSECUTIVE LOSS RISK RULE)
             function executePredictWingo(draws, nextIssueKey) {
-                if (!draws || draws.length < 5) return null;
+                if (!draws || draws.length < 3) return null;
 
-                // Sort chronological: Oldest -> Latest
+                if (state.skipNextRound) {
+                    state.skipNextRound = false;
+                    return {
+                        engineName: "WINGO RISK CONTROLLER",
+                        tagText: "COOLDOWN PAUSE",
+                        tagClass: "loss",
+                        predictionType: "SKIP",
+                        predictedValue: "SKIP",
+                        primaryNumber: "-",
+                        displayPrediction: "SKIP",
+                        predictedColor: "NONE",
+                        numbers: ["-", "-"],
+                        scoreA: "-",
+                        scoreB: "-",
+                        confidence: 0,
+                        patternMatchMsg:
+                            "2 Consecutive Losses Detected. Round Skipped to preserve capital.",
+                        recencyMsg: "Cool-down active for this draw window.",
+                        markovMsg: "STATUS: RISK COOLDOWN TRIGGERED",
+                        diffMsg: "Resume on next issue.",
+                        isSkipped: true,
+                    };
+                }
+
                 const sorted = [...draws].sort((a, b) => {
                     const issueA = BigInt(a[globalIssueField] || 0);
                     const issueB = BigInt(b[globalIssueField] || 0);
                     return issueA > issueB ? 1 : -1;
                 });
 
-                // Take newest 5 numbers (e.g., from [5,6,7,3,4,9,8,1,2,5] it takes [9,8,1,2,5])
-                const last5Numbers = sorted
-                    .slice(-5)
-                    .map((d) => Number(d[globalNumberField]));
-
-                const result = predictWingo(last5Numbers);
-                const primaryDigit = result.possibleNumbers[0];
-                const secondaryDigit = result.possibleNumbers[1];
+                const lastNumbers = sorted.map((d) => Number(d[globalNumberField]));
+                const result = predictWingoCombinations(lastNumbers);
 
                 return {
-                    engineName: "WINGO 5-NUMBER ANALYZER",
-                    tagText: `${result.predictionType} ORIENTED`,
+                    engineName: "WG100 COMBINATION ANALYZER",
+                    tagText: result.isFromLookup ? "CSV MATCHED" : "HEURISTIC",
                     tagClass: "surewin",
-                    predictionType: result.predictionType,
+                    predictionType: "COMBINATION",
                     predictedValue: result.prediction,
-                    primaryNumber: primaryDigit,
+                    predictedColor: result.predictedColor,
+                    primaryNumber: result.primaryNumber,
                     displayPrediction: result.prediction,
-                    numbers: [primaryDigit, secondaryDigit],
-                    scoreA: `${result.possibleNumbers[0]}`,
-                    scoreB: `${result.possibleNumbers[1]}`,
-                    scoreLabelA: "Target",
-                    scoreLabelB: "Alt",
-                    confidence: 85,
-                    patternMatchMsg: `LAST 5: [${result.input.join(", ")}] ➔ Predicted: ${result.prediction}`,
-                    recencyMsg: `R:${result.analysis.redCount} G:${result.analysis.greenCount} | B:${result.analysis.bigCount} S:${result.analysis.smallCount}`,
-                    markovMsg: `TARGET: #${primaryDigit} (${result.prediction}) | ALT: #${secondaryDigit}`,
-                    diffMsg: `Δ: [${result.analysis.differences.join(", ")}]`,
-                    gCount: result.analysis.greenCount,
-                    rCount: result.analysis.redCount,
+                    numbers: [result.primaryNumber, result.altNumber],
+                    scoreA: `${result.primaryNumber}`,
+                    scoreB: `${result.altNumber}`,
+                    confidence: result.isFromLookup ? 92 : 78,
+                    patternMatchMsg: `LAST 3: [${result.input.join(", ")}] ➔ Key: "${result.input.join(",")}"`,
+                    recencyMsg: `CSV Match: ${result.isFromLookup ? "EXACT COMBINATION" : "ALGORITHMIC FALLBACK"}`,
+                    markovMsg: `TARGET: #${result.primaryNumber} (${result.predictedColor} / ${result.prediction}) | ALT: #${result.altNumber}`,
+                    diffMsg: `Δ: [${result.differences.join(", ")}]`,
+                    isSkipped: false,
                 };
             }
 
-            // ====================================================
-            // MODE SWITCHING & BUFFER MANAGEMENT
-            // ====================================================
             function toggleOperationMode(isManual) {
                 state.isManualMode = isManual;
                 state.activePredictedIssue = null;
@@ -832,6 +829,8 @@
                 globalRawList = [];
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
+                state.consecutiveLosses = 0;
+                state.skipNextRound = false;
                 content.innerHTML = `<div class="loading"><p style="text-align:center; color: var(--text-muted); padding: 14px 0; font-size: 11px;">AWAITING MANUAL INPUT...</p></div>`;
                 sizePatternText.textContent = "--";
                 colorPatternText.textContent = "--";
@@ -845,6 +844,8 @@
                 state.lastResultStatus = null;
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
+                state.consecutiveLosses = 0;
+                state.skipNextRound = false;
                 renderHistoryTable([]);
             }
 
@@ -894,19 +895,26 @@
                 lastEntry.actualNum = actualVal;
                 lastEntry.actualSize = `${actualSize}/${actualColor[0]}`;
 
-                let isWin = false;
-                if (lastEntry.predictionType === "COLOR") {
-                    isWin = String(lastEntry.predictedValue)
-                        .toUpperCase()
-                        .includes(actualColor);
+                if (lastEntry.predictionType === "SKIP") {
+                    lastEntry.status = "SKIPPED";
+                    state.lastResultStatus = "SKIPPED";
+                    state.consecutiveLosses = 0;
                 } else {
-                    isWin = String(lastEntry.predictedValue)
+                    const isWin = String(lastEntry.predictedValue)
                         .toUpperCase()
                         .includes(actualSize);
+                    if (isWin) {
+                        lastEntry.status = "WIN";
+                        state.consecutiveLosses = 0;
+                    } else {
+                        lastEntry.status = "LOSS";
+                        state.consecutiveLosses += 1;
+                        if (state.consecutiveLosses >= 2) {
+                            state.skipNextRound = true;
+                        }
+                    }
+                    state.lastResultStatus = lastEntry.status;
                 }
-
-                lastEntry.status = isWin ? "WIN" : "LOSS";
-                state.lastResultStatus = lastEntry.status;
 
                 renderHistoryTable(state.historyLog);
             }
@@ -923,7 +931,9 @@
                         issue: currentNextIssueKey,
                         engineName: predData.engineName,
                         predictionType: predData.predictionType,
-                        predictedValue: `${predData.predictedValue} (#${predData.primaryNumber})`,
+                        predictedValue: predData.isSkipped
+                            ? "SKIP"
+                            : `${predData.predictedValue} (#${predData.primaryNumber})`,
                         predictedNumbers: predData.numbers,
                         actualNum: null,
                         actualSize: null,
@@ -948,11 +958,13 @@
                         entry.issue.length > 6
                             ? "..." + entry.issue.slice(-6)
                             : entry.issue;
-
-                    const isGreenOrBig =
-                        String(entry.predictedValue).includes("GREEN") ||
-                        String(entry.predictedValue).includes("BIG");
-                    const colorClass = isGreenOrBig ? "green" : "red";
+                    const isBig = String(entry.predictedValue).includes("BIG");
+                    const colorClass =
+                        entry.predictedValue === "SKIP"
+                            ? ""
+                            : isBig
+                              ? "green"
+                              : "red";
 
                     let actualText = "--";
                     if (
@@ -963,24 +975,25 @@
                     }
 
                     let statusTag = `<span class="result-tag pending">PENDING</span>`;
-                    if (entry.status === "WIN") {
+                    if (entry.status === "WIN")
                         statusTag = `<span class="result-tag win">WIN</span>`;
-                    } else if (entry.status === "LOSS") {
+                    else if (entry.status === "LOSS")
                         statusTag = `<span class="result-tag loss">LOSS</span>`;
-                    }
+                    else if (entry.status === "SKIPPED")
+                        statusTag = `<span class="result-tag pending">SKIPPED</span>`;
 
                     html += `
-                        <tr>
-                            <td><strong>${shortIssue}</strong></td>
-                            <td>
-                                <div class="pred-cell">
-                                    <span class="pred-value ${colorClass}">${entry.predictedValue}</span>
-                                </div>
-                            </td>
-                            <td>${actualText}</td>
-                            <td>${statusTag}</td>
-                        </tr>
-                    `;
+                <tr>
+                    <td><strong>${shortIssue}</strong></td>
+                    <td>
+                        <div class="pred-cell">
+                            <span class="pred-value ${colorClass}">${entry.predictedValue}</span>
+                        </div>
+                    </td>
+                    <td>${actualText}</td>
+                    <td>${statusTag}</td>
+                </tr>
+            `;
                 });
 
                 historyTableBody.innerHTML = html;
@@ -988,18 +1001,19 @@
 
             function copyPattern(type) {
                 let textToCopy = "";
-                if (type === "size") {
+                if (type === "size")
                     textToCopy = `SIZE PATTERN: ${state.sizePatternRaw}`;
-                } else if (type === "color") {
+                else if (type === "color")
                     textToCopy = `CLR PATTERN: ${state.colorPatternRaw}`;
-                }
 
                 if (!textToCopy) return;
 
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard
                         .writeText(textToCopy)
-                        .then(() => alert(`Copied to clipboard!\n${textToCopy}`))
+                        .then(() =>
+                            alert(`Copied to clipboard!\n${textToCopy}`),
+                        )
                         .catch(() => fallbackCopyText(textToCopy));
                 } else {
                     fallbackCopyText(textToCopy);
@@ -1027,14 +1041,13 @@
                 document.body.removeChild(textArea);
             }
 
-            // =========================================================================
-            // ON-DEMAND PREDICTION TRIGGER (CLICK ONLY)
-            // =========================================================================
             function triggerManualPrediction() {
-                const drawSource = state.isManualMode ? state.manualDrawList : globalRawList;
-                if (!drawSource || drawSource.length < 5) {
+                const drawSource = state.isManualMode
+                    ? state.manualDrawList
+                    : globalRawList;
+                if (!drawSource || drawSource.length < 3) {
                     alert(
-                        `Requires at least 5 numbers (Current: ${drawSource ? drawSource.length : 0}). Please provide numbers.`,
+                        `Requires at least 3 numbers (Current: ${drawSource ? drawSource.length : 0}). Please provide numbers.`,
                     );
                     return;
                 }
@@ -1051,7 +1064,10 @@
                 ) {
                     predData = state.currentIssuePrediction;
                 } else {
-                    predData = executePredictWingo(drawSource, currentNextIssueKey);
+                    predData = executePredictWingo(
+                        drawSource,
+                        currentNextIssueKey,
+                    );
                     state.activePredictedIssue = currentNextIssueKey;
                     state.currentIssuePrediction = predData;
                 }
@@ -1063,19 +1079,20 @@
 
                 setTimeout(() => {
                     if (predData && predictionImg) {
-                        let imgSrc = "images/Green.png";
-                        if (predData.predictedValue === "RED")
-                            imgSrc = "images/Red.png";
-                        else if (predData.predictedValue === "BIG")
-                            imgSrc = "images/Big.png";
-                        else if (predData.predictedValue === "SMALL")
+                        let imgSrc = "images/Big.png";
+                        if (predData.predictedValue === "SMALL")
                             imgSrc = "images/Small.png";
+                        else if (predData.predictedValue === "SKIP")
+                            imgSrc = "";
 
-                        predictionImg.src = imgSrc;
-                        predictionImg.style.display = "block";
-
-                        if (predictionCard) {
-                            predictionCard.className = `prediction-image-card ${predData.predictedValue.toLowerCase()} show`;
+                        if (imgSrc) {
+                            predictionImg.src = imgSrc;
+                            predictionImg.style.display = "block";
+                            if (predictionCard) {
+                                predictionCard.className = `prediction-image-card ${predData.predictedValue.toLowerCase()} show`;
+                            }
+                        } else {
+                            predictionImg.style.display = "none";
                         }
                     }
                 }, 1800);
@@ -1104,16 +1121,25 @@
                 ).toUpperCase();
 
                 if (predictionResultImg) {
-                    let imgSrc = "images/Green.png";
-                    if (predVal === "RED") imgSrc = "images/Red.png";
-                    else if (predVal === "BIG") imgSrc = "images/Big.png";
-                    else if (predVal === "SMALL") imgSrc = "images/Small.png";
-                    predictionResultImg.src = imgSrc;
-                    predictionResultImg.style.display = "block";
+                    let imgSrc = "images/Big.png";
+                    if (predVal === "SMALL") imgSrc = "images/Small.png";
+                    else if (predVal === "SKIP") imgSrc = "";
+
+                    if (imgSrc) {
+                        predictionResultImg.src = imgSrc;
+                        predictionResultImg.style.display = "block";
+                    } else {
+                        predictionResultImg.style.display = "none";
+                    }
                 }
 
-                predictedScores.textContent = `Target: #${predData.primaryNumber} | Alt: #${predData.numbers[1]}`;
-                confidenceBadge.textContent = `AI CONFIDENCE: ${predData.confidence}%`;
+                predictedScores.textContent = predData.isSkipped
+                    ? "Target: SKIP | Alt: SKIP"
+                    : `Target: #${predData.primaryNumber} | Alt: #${predData.numbers[1]}`;
+
+                confidenceBadge.textContent = predData.isSkipped
+                    ? "RISK PAUSE ACTIVE"
+                    : `AI CONFIDENCE: ${predData.confidence}%`;
 
                 sigStreak.textContent = predData.patternMatchMsg;
                 sigFreq.textContent = predData.recencyMsg;
@@ -1370,6 +1396,7 @@
             };
 
             async function init() {
+                await loadCombinationsCSV();
                 await fetchData();
                 startISTCountdown();
             }
