@@ -293,7 +293,10 @@
                                         alt="Prediction Result"
                                     />
                                 </div>
-                                <div>
+                                <div class="lftnumber">
+                                     <span id="predictedScores" class="number-badge"
+                                    >Target: 0 | ALT: 0</span
+                                >
                                     <div class="frequency-spectrum">
                                         <div class="frequency-bar"></div>
                                         <div class="frequency-bar"></div>
@@ -320,9 +323,7 @@
                             </div>
                             <!-- RIGHT SIDE: SCORES, CONFIDENCE & FREQUENCY SPECTRUM -->
                             <div class="prediction-details-right">
-                                <span id="predictedScores" class="number-badge"
-                                    >Target: 0 | ALT: 0</span
-                                >
+
                                 <span
                                     id="confidenceBadge"
                                     class="confidence-badge"
@@ -1004,7 +1005,7 @@
                 }
                 predictedScores.textContent = predData.isSkipped
                     ? "Target: SKIP | Alt: SKIP"
-                    : `Target: #${predData.primaryNumber} | Alt: #${predData.numbers[1]}`;
+                    : `Target: ${predData.primaryNumber} | Alt: ${predData.numbers[1]}`;
                 confidenceBadge.textContent = predData.isSkipped
                     ? "RISK PAUSE ACTIVE"
                     : `AI CONFIDENCE: ${predData.confidence}%`;
