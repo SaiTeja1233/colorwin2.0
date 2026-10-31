@@ -8,10 +8,10 @@
         />
         <title>WinGo AI Mobile Dashboard</title>
         <!-- Share Tech Mono Font -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="preconnect" href="https\://fonts.googleapis.com" />
+        <link rel="preconnect" href="https\://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap"
+            href="https\://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap"
             rel="stylesheet"
         />
         <!-- EXTERNAL STYLESHEET -->
@@ -25,20 +25,17 @@
                 font-size: 11px;
                 letter-spacing: 1px;
             }
-
             .switch {
                 position: relative;
                 display: inline-block;
                 width: 44px;
                 height: 22px;
             }
-
             .switch input {
                 opacity: 0;
                 width: 0;
                 height: 0;
             }
-
             .slider {
                 position: absolute;
                 cursor: pointer;
@@ -52,7 +49,6 @@
                 transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
             }
-
             .slider:before {
                 position: absolute;
                 content: "";
@@ -65,19 +61,16 @@
                 transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 0 0 6px #38bdf8;
             }
-
             input:checked + .slider {
                 background-color: #0f172a;
                 border-color: #a855f7;
                 box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
             }
-
             input:checked + .slider:before {
                 transform: translateX(22px);
                 background-color: #c084fc;
                 box-shadow: 0 0 6px #c084fc;
             }
-
             .mode-label {
                 color: #38bdf8;
                 font-weight: bold;
@@ -85,11 +78,9 @@
                 text-align: right;
                 transition: color 0.3s;
             }
-
             .mode-label.manual {
                 color: #c084fc;
             }
-
             /* MANUAL INPUT HUD PANEL */
             .manual-input-box {
                 display: none;
@@ -102,12 +93,10 @@
                 border-radius: 8px;
                 box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
             }
-
             .manual-input-row {
                 display: flex;
                 gap: 8px;
             }
-
             .manual-input {
                 flex: 1;
                 background: rgba(2, 6, 23, 0.8);
@@ -119,12 +108,10 @@
                 border-radius: 4px;
                 outline: none;
             }
-
             .manual-input:focus {
                 border-color: #c084fc;
                 box-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
             }
-
             .manual-btn {
                 background: linear-gradient(135deg, #9333ea, #6b21a8);
                 color: #fff;
@@ -137,12 +124,10 @@
                 cursor: pointer;
                 transition: all 0.2s ease;
             }
-
             .manual-btn:hover {
                 box-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
                 transform: scale(1.02);
             }
-
             .manual-btn.clear {
                 background: rgba(239, 68, 68, 0.2);
                 border-color: rgba(239, 68, 68, 0.6);
@@ -159,7 +144,6 @@
             <div class="star-layer"></div>
             <div class="star-layer"></div>
         </div>
-
         <div class="dashboard-container">
             <!-- Header -->
             <header>
@@ -172,10 +156,11 @@
                     "
                 >
                     <div class="title-text">WinGo Numbers</div>
-
                     <!-- LIVE / MANUAL TOGGLE SWITCH -->
                     <div class="mode-toggle-wrapper">
-                        <span id="modeStatusLabel" class="mode-label">LIVE</span>
+                        <span id="modeStatusLabel" class="mode-label"
+                            >LIVE</span
+                        >
                         <label class="switch">
                             <input
                                 type="checkbox"
@@ -186,7 +171,6 @@
                         </label>
                     </div>
                 </div>
-
                 <div class="status-info" style="margin-top: 8px">
                     <div class="status-row">
                         <div class="status-badge">
@@ -201,12 +185,11 @@
                             id="refreshBtn"
                             onclick="refreshData()"
                         >
-                            🔄 REFRESH
+                            REFRESH
                         </button>
                     </div>
                 </div>
             </header>
-
             <!-- MANUAL TELEMETRY INPUT PANEL -->
             <div id="manualInputContainer" class="manual-input-box">
                 <div class="manual-input-row">
@@ -230,7 +213,6 @@
                     </button>
                 </div>
             </div>
-
             <!-- PREDICTOR HUD CARD WITH HOLOGRAPHIC QUANTUM ENGINE -->
             <div id="predictorBox" class="card predictor-box">
                 <div class="predictor-header-row">
@@ -242,7 +224,6 @@
                         NEXT: <span id="nextIssueNumber">--</span>
                     </div>
                 </div>
-
                 <!-- HOLOGRAPHIC SCANNING & QUANTUM TRANSFORM CONTAINER -->
                 <div id="hackingBox" class="checkbox-container">
                     <input
@@ -250,12 +231,10 @@
                         id="holo-check"
                         type="checkbox"
                     />
-
                     <label class="holo-checkbox" for="holo-check">
                         <div class="holo-box">
                             <div class="holo-inner"></div>
                             <div class="scan-effect"></div>
-
                             <!-- QUANTUM FLOATING PARTICLES -->
                             <div class="holo-particles">
                                 <div class="holo-particle"></div>
@@ -265,14 +244,12 @@
                                 <div class="holo-particle"></div>
                                 <div class="holo-particle"></div>
                             </div>
-
                             <!-- ACTIVATION RINGS -->
                             <div class="activation-rings">
                                 <div class="activation-ring"></div>
                                 <div class="activation-ring"></div>
                                 <div class="activation-ring"></div>
                             </div>
-
                             <!-- 3D ROTATING CUBE -->
                             <div class="cube-transform">
                                 <div class="cube-face front"></div>
@@ -295,113 +272,67 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="corner-accent"></div>
                         <div class="corner-accent"></div>
                         <div class="corner-accent"></div>
                         <div class="corner-accent"></div>
-
                         <div class="holo-glow"></div>
                     </label>
-
-                    <!-- FREQUENCY SPECTRUM ANALYZER BARS -->
-                    <div class="frequency-spectrum">
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                        <div class="frequency-bar"></div>
-                    </div>
                 </div>
-
                 <!-- CALCULATED PREDICTION RESULTS CONTAINER -->
                 <div id="resultContent" style="display: none">
                     <div class="prediction-content">
                         <div class="prediction-badges">
                             <!-- LEFT SIDE: PREDICTION IMAGE -->
                             <div class="prediction-result-image-wrapper">
-                                <img
-                                    id="predictionResultImg"
-                                    class="result-prediction-image"
-                                    src=""
-                                    alt="Prediction Result"
-                                />
+                                <div></div>
+                                    <img
+                                        id="predictionResultImg"
+                                        class="result-prediction-image"
+                                        src=""
+                                        alt="Prediction Result"
+                                    />
+                                </div>
+                                <div>
+                                    <div class="frequency-spectrum">
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                        <div class="frequency-bar"></div>
+                                    </div>
+                                </div>
                             </div>
-
                             <!-- RIGHT SIDE: SCORES, CONFIDENCE & FREQUENCY SPECTRUM -->
                             <div class="prediction-details-right">
                                 <span id="predictedScores" class="number-badge"
-                                    >Target: #0 | ALT: #0</span
+                                    >Target: 0 | ALT: 0</span
                                 >
                                 <span
                                     id="confidenceBadge"
                                     class="confidence-badge"
                                     >AI CONFIDENCE: 85%</span
                                 >
-
-                                <div class="frequency-spectrum">
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                    <div class="frequency-bar"></div>
-                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Signal Grid -->
-                    <div class="signals-grid">
-                        <div class="signal-item">
-                            <div class="signal-title">Evaluated 3-Draw Window</div>
-                            <div class="signal-val" id="sigStreak">--</div>
-                        </div>
-                        <div class="signal-item">
-                            <div class="signal-title">CSV Combination Status</div>
-                            <div class="signal-val" id="sigFreq">--</div>
-                        </div>
-                        <div class="signal-item">
-                            <div class="signal-title">Predicted Targets</div>
-                            <div class="signal-val" id="sigTransB">--</div>
-                        </div>
-                        <div class="signal-item">
-                            <div class="signal-title">Step Differences</div>
-                            <div class="signal-val" id="sigTransS">--</div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <!-- Dual Pattern Displays with Copy Buttons -->
             <div class="pattern-group">
                 <div class="pattern-row">
@@ -421,7 +352,6 @@
                     </button>
                 </div>
             </div>
-
             <!-- Numbers Feed Canvas -->
             <div id="content" class="numbers-container">
                 <div class="loading">
@@ -437,7 +367,6 @@
                     </p>
                 </div>
             </div>
-
             <!-- History Table Card -->
             <div class="card history-section">
                 <div class="history-title">
@@ -473,17 +402,14 @@
                     </table>
                 </div>
             </div>
-
             <div class="last-updated" id="lastUpdated">LAST UPDATED: --</div>
         </div>
-
         <!-- FIXED STICKY BOTTOM PREDICTION BUTTON BAR -->
         <div class="sticky-bottom-bar">
             <button class="predict-btn" onclick="triggerManualPrediction()">
                 ⚡ GENERATE AI PREDICTION
             </button>
         </div>
-
         <script>
             const state = {
                 historyLog: [],
@@ -499,19 +425,17 @@
                 skipNextRound: false,
                 combinationsLookup: {},
             };
-
             const CONFIG = {
                 PROXIES: [
-                    "https://api.allorigins.win/raw?url=",
-                    "https://corsproxy.io/?",
-                    "https://api.codetabs.com/v1/proxy?quest=",
+                    "https\://api.allorigins.win/raw?url=",
+                    "https\://corsproxy.io/?",
+                    "https\://api.codetabs.com/v1/proxy?quest=",
                 ],
                 API_URL:
-                    "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json",
+                    "https\://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json",
                 CSV_PATH: "wingo_wg100_all_combinations.csv",
                 MAX_RETRIES: 3,
             };
-
             let countdownInterval = null;
             let isFetching = false;
             let retryCount = 0;
@@ -521,7 +445,6 @@
             let globalIssueField = "issue";
             let globalLatestIssue = null;
             let manualIssueCounter = 1000;
-
             // DOM ELEMENTS
             const content = document.getElementById("content");
             const countdownDisplay = document.getElementById("countdown");
@@ -553,26 +476,25 @@
             const manualSequenceInput = document.getElementById(
                 "manualSequenceInput",
             );
-
             const sizePatternText = document.getElementById("sizePatternText");
             const colorPatternText =
                 document.getElementById("colorPatternText");
-
             const sigStreak = document.getElementById("sigStreak");
             const sigFreq = document.getElementById("sigFreq");
             const sigTransB = document.getElementById("sigTransB");
             const sigTransS = document.getElementById("sigTransS");
-
             // ASYNC CSV PARSER & LOADER
             async function loadCombinationsCSV() {
                 try {
                     const response = await fetch(CONFIG.CSV_PATH);
-                    if (!response.ok) throw new Error("Failed to fetch CSV file.");
+                    if (!response.ok)
+                        throw new Error("Failed to fetch CSV file.");
                     const csvText = await response.text();
                     const lines = csvText.trim().split(/\r?\n/).slice(1);
-
                     lines.forEach((line) => {
-                        const cols = line.split(",").map((s) => s.replace(/["\s]/g, ""));
+                        const cols = line
+                            .split(",")
+                            .map((s) => s.replace(/["\s]/g, ""));
                         if (cols.length >= 6) {
                             const n1 = parseInt(cols[1], 10);
                             const n2 = parseInt(cols[2], 10);
@@ -586,87 +508,89 @@
                             };
                         }
                     });
-                    console.log(`Loaded ${Object.keys(state.combinationsLookup).length} combinations from CSV.`);
+                    console.log(
+                        `Loaded ${Object.keys(state.combinationsLookup).length} combinations from CSV.`,
+                    );
                 } catch (e) {
                     console.warn("CSV load fallback active:", e);
                 }
             }
-
             function getISTDate() {
                 const now = new Date();
                 const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
                 return new Date(utcTime + 3600000 * 5.5);
             }
-
             function getNumberSize(num) {
                 const n = Number(num);
                 if (isNaN(n)) return "Unknown";
                 return n >= 5 ? "Big" : "Small";
             }
-
             function getNumberColorShort(num) {
                 const n = Number(num);
                 if (isNaN(n)) return "Unknown";
                 return n % 2 === 0 ? "R" : "G";
             }
-
             function getSizeShort(size) {
                 return size === "Big" ? "B" : "S";
             }
-
             // DYNAMIC CANDIDATE SELECTOR FOR SAME-SIZE SECOND NUMBER
-            function getBestSecondCandidate(targetNum, recentDraws, targetSize) {
-                const pool = targetSize === "BIG" ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
-                
+            function getBestSecondCandidate(
+                targetNum,
+                recentDraws,
+                targetSize,
+            ) {
+                const pool =
+                    targetSize === "BIG" ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
                 // Exclude the primary number
                 const remainingInGroup = pool.filter((n) => n !== targetNum);
-                
                 // Check recent history to prioritize cold / unrepeated numbers in the group
                 const recentSet = new Set(recentDraws.slice(-5).map(Number));
-                const unusedInGroup = remainingInGroup.filter((n) => !recentSet.has(n));
-
+                const unusedInGroup = remainingInGroup.filter(
+                    (n) => !recentSet.has(n),
+                );
                 if (unusedInGroup.length > 0) {
                     return unusedInGroup[0];
                 }
-
                 // Fallback: Pick candidate with opposite parity (odd/even balance)
-                const oppositeParity = remainingInGroup.find((n) => (n % 2) !== (targetNum % 2));
-                return oppositeParity !== undefined ? oppositeParity : remainingInGroup[0];
+                const oppositeParity = remainingInGroup.find(
+                    (n) => n % 2 !== targetNum % 2,
+                );
+                return oppositeParity !== undefined
+                    ? oppositeParity
+                    : remainingInGroup[0];
             }
-
             // CORE CSV-BASED PREDICTION ENGINE
             function predictWingoCombinations(draws) {
                 if (!Array.isArray(draws) || draws.length < 3) {
                     throw new Error("Enter at least 3 numbers.");
                 }
-
                 const numbers = draws.map(Number);
                 const last3 = numbers.slice(-3);
                 const key = `${last3[0]},${last3[1]},${last3[2]}`;
-
                 let targetNum = null;
                 let targetColor = null;
                 let isFromLookup = false;
-
                 // Match exact combination from CSV table
                 if (state.combinationsLookup && state.combinationsLookup[key]) {
                     targetNum = Number(state.combinationsLookup[key].num);
-                    targetColor = state.combinationsLookup[key].color.toUpperCase();
+                    targetColor =
+                        state.combinationsLookup[key].color.toUpperCase();
                     isFromLookup = true;
                 } else {
                     targetNum = (last3[0] + last3[1] + last3[2]) % 10;
                     targetColor = targetNum % 2 === 0 ? "RED" : "GREEN";
                 }
-
                 // Size is strictly bound to the target number
                 const targetSize = targetNum >= 5 ? "BIG" : "SMALL";
-                const secondNum = getBestSecondCandidate(targetNum, numbers, targetSize);
-
+                const secondNum = getBestSecondCandidate(
+                    targetNum,
+                    numbers,
+                    targetSize,
+                );
                 const differences = [];
                 for (let i = 1; i < last3.length; i++) {
                     differences.push(last3[i] - last3[i - 1]);
                 }
-
                 return {
                     input: last3,
                     predictionType: "COMBINATION",
@@ -679,11 +603,9 @@
                     differences: differences,
                 };
             }
-
             // SHARED DISPATCHER (INCLUDES 2-CONSECUTIVE LOSS RISK RULE)
             function executePredictWingo(draws, nextIssueKey) {
                 if (!draws || draws.length < 3) return null;
-
                 if (state.skipNextRound) {
                     state.skipNextRound = false;
                     return {
@@ -707,16 +629,15 @@
                         isSkipped: true,
                     };
                 }
-
                 const sorted = [...draws].sort((a, b) => {
                     const issueA = BigInt(a[globalIssueField] || 0);
                     const issueB = BigInt(b[globalIssueField] || 0);
                     return issueA > issueB ? 1 : -1;
                 });
-
-                const lastNumbers = sorted.map((d) => Number(d[globalNumberField]));
+                const lastNumbers = sorted.map((d) =>
+                    Number(d[globalNumberField]),
+                );
                 const result = predictWingoCombinations(lastNumbers);
-
                 return {
                     engineName: "WG100 COMBINATION ANALYZER",
                     tagText: result.isFromLookup ? "CSV MATCHED" : "HEURISTIC",
@@ -737,12 +658,10 @@
                     isSkipped: false,
                 };
             }
-
             function toggleOperationMode(isManual) {
                 state.isManualMode = isManual;
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
-
                 if (isManual) {
                     modeStatusLabel.textContent = "MANUAL";
                     modeStatusLabel.className = "mode-label manual";
@@ -751,9 +670,7 @@
                     countdownWrap.style.display = "none";
                     statusDot.className = "dot";
                     statusText.textContent = "Manual Input";
-
                     if (countdownInterval) clearInterval(countdownInterval);
-
                     if (state.manualDrawList.length > 0) {
                         syncManualDisplay();
                     } else if (globalRawList.length > 0) {
@@ -768,16 +685,13 @@
                     manualInputContainer.style.display = "none";
                     refreshBtn.style.display = "inline-block";
                     countdownWrap.style.display = "inline-block";
-
                     startISTCountdown();
                     fetchData();
                 }
             }
-
             function applyManualNumbers() {
                 const rawVal = manualSequenceInput.value.trim();
                 if (!rawVal) return;
-
                 let newDigits = [];
                 if (/^\d+$/.test(rawVal)) {
                     newDigits = rawVal.split("").map(Number);
@@ -787,15 +701,12 @@
                         .filter((v) => v !== "" && !isNaN(v))
                         .map(Number);
                 }
-
                 if (newDigits.length === 0) {
                     alert("Invalid number format.");
                     return;
                 }
-
                 state.activePredictedIssue = null;
                 state.currentIssuePrediction = null;
-
                 newDigits.forEach((num) => {
                     manualIssueCounter++;
                     state.manualDrawList.push({
@@ -803,17 +714,14 @@
                         number: num,
                     });
                 });
-
                 if (state.manualDrawList.length > 20) {
                     state.manualDrawList = state.manualDrawList.slice(-20);
                 }
-
                 manualSequenceInput.value = "";
                 syncManualDisplay();
                 evaluateStateTransition();
                 updateLastUpdated();
             }
-
             function syncManualDisplay() {
                 const sortedList = [...state.manualDrawList].reverse();
                 globalNumberField = "number";
@@ -822,7 +730,6 @@
                 statusDot.className = "dot";
                 statusText.textContent = `${state.manualDrawList.length}/20 numbers loaded`;
             }
-
             function clearManualNumbers() {
                 manualSequenceInput.value = "";
                 state.manualDrawList = [];
@@ -837,7 +744,6 @@
                 nextIssueNumber.textContent = "--";
                 statusText.textContent = "Awaiting numbers";
             }
-
             function clearHistoryLog() {
                 state.historyLog = [];
                 state.lastPrediction = null;
@@ -848,13 +754,11 @@
                 state.skipNextRound = false;
                 renderHistoryTable([]);
             }
-
             function updateNextIssueDisplay() {
                 if (!globalLatestIssue) {
                     nextIssueNumber.textContent = "--";
                     return;
                 }
-
                 const rawIssueStr = String(globalLatestIssue);
                 try {
                     if (/^\d+$/.test(rawIssueStr)) {
@@ -868,7 +772,6 @@
                     nextIssueNumber.textContent = rawIssueStr;
                 }
             }
-
             function evaluateStateTransition() {
                 if (
                     state.historyLog.length === 0 ||
@@ -876,25 +779,20 @@
                     globalRawList.length === 0
                 )
                     return;
-
                 const lastEntry = state.historyLog[0];
                 if (lastEntry.status !== "PENDING") return;
-
                 const matchedDraw = globalRawList.find(
                     (item) =>
                         String(item[globalIssueField]) ===
                         String(lastEntry.issue),
                 );
                 if (!matchedDraw) return;
-
                 const actualVal = Number(matchedDraw[globalNumberField]);
                 const actualColor =
                     getNumberColorShort(actualVal) === "R" ? "RED" : "GREEN";
                 const actualSize = getNumberSize(actualVal).toUpperCase();
-
                 lastEntry.actualNum = actualVal;
                 lastEntry.actualSize = `${actualSize}/${actualColor[0]}`;
-
                 if (lastEntry.predictionType === "SKIP") {
                     lastEntry.status = "SKIPPED";
                     state.lastResultStatus = "SKIPPED";
@@ -915,10 +813,8 @@
                     }
                     state.lastResultStatus = lastEntry.status;
                 }
-
                 renderHistoryTable(state.historyLog);
             }
-
             function updatePredictionHistoryTracker(
                 currentNextIssueKey,
                 predData,
@@ -941,17 +837,14 @@
                     };
                     state.historyLog.unshift(newEntry);
                 }
-
                 state.historyLog = state.historyLog.slice(0, 10);
                 renderHistoryTable(state.historyLog);
             }
-
             function renderHistoryTable(historyLog) {
                 if (!historyLog || historyLog.length === 0) {
                     historyTableBody.innerHTML = `<tr><td colspan="4" style="color: var(--text-muted); font-size: 10px;">No predictions logged. Tap "GENERATE AI PREDICTION".</td></tr>`;
                     return;
                 }
-
                 let html = "";
                 historyLog.forEach((entry) => {
                     const shortIssue =
@@ -965,7 +858,6 @@
                             : isBig
                               ? "green"
                               : "red";
-
                     let actualText = "--";
                     if (
                         entry.actualNum !== null &&
@@ -973,7 +865,6 @@
                     ) {
                         actualText = `${entry.actualNum} (${entry.actualSize})`;
                     }
-
                     let statusTag = `<span class="result-tag pending">PENDING</span>`;
                     if (entry.status === "WIN")
                         statusTag = `<span class="result-tag win">WIN</span>`;
@@ -981,7 +872,6 @@
                         statusTag = `<span class="result-tag loss">LOSS</span>`;
                     else if (entry.status === "SKIPPED")
                         statusTag = `<span class="result-tag pending">SKIPPED</span>`;
-
                     html += `
                 <tr>
                     <td><strong>${shortIssue}</strong></td>
@@ -995,19 +885,15 @@
                 </tr>
             `;
                 });
-
                 historyTableBody.innerHTML = html;
             }
-
             function copyPattern(type) {
                 let textToCopy = "";
                 if (type === "size")
                     textToCopy = `SIZE PATTERN: ${state.sizePatternRaw}`;
                 else if (type === "color")
                     textToCopy = `CLR PATTERN: ${state.colorPatternRaw}`;
-
                 if (!textToCopy) return;
-
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard
                         .writeText(textToCopy)
@@ -1019,7 +905,6 @@
                     fallbackCopyText(textToCopy);
                 }
             }
-
             function fallbackCopyText(text) {
                 const textArea = document.createElement("textarea");
                 textArea.value = text;
@@ -1030,7 +915,6 @@
                 document.body.appendChild(textArea);
                 textArea.focus();
                 textArea.select();
-
                 try {
                     const successful = document.execCommand("copy");
                     if (successful) alert(`Copied to clipboard!\n${text}`);
@@ -1040,7 +924,6 @@
                 }
                 document.body.removeChild(textArea);
             }
-
             function triggerManualPrediction() {
                 const drawSource = state.isManualMode
                     ? state.manualDrawList
@@ -1051,12 +934,9 @@
                     );
                     return;
                 }
-
                 if (manualSequenceInput) manualSequenceInput.value = "";
-
                 updateNextIssueDisplay();
                 const currentNextIssueKey = nextIssueNumber.textContent;
-
                 let predData;
                 if (
                     state.activePredictedIssue === currentNextIssueKey &&
@@ -1071,12 +951,9 @@
                     state.activePredictedIssue = currentNextIssueKey;
                     state.currentIssuePrediction = predData;
                 }
-
                 resultContent.style.display = "none";
                 hackingBox.style.display = "flex";
-
                 if (holoCheck) holoCheck.checked = true;
-
                 setTimeout(() => {
                     if (predData && predictionImg) {
                         let imgSrc = "images/Big.png";
@@ -1084,7 +961,6 @@
                             imgSrc = "images/Small.png";
                         else if (predData.predictedValue === "SKIP")
                             imgSrc = "";
-
                         if (imgSrc) {
                             predictionImg.src = imgSrc;
                             predictionImg.style.display = "block";
@@ -1096,7 +972,6 @@
                         }
                     }
                 }, 1800);
-
                 setTimeout(() => {
                     if (predData) {
                         applyUIState(predData);
@@ -1107,24 +982,19 @@
                     }
                 }, 3500);
             }
-
             function applyUIState(predData) {
                 hackingBox.style.display = "none";
                 resultContent.style.display = "block";
-
                 engineTitle.textContent = `${predData.engineName} [#${predData.primaryNumber}]`;
                 engineTag.textContent = predData.tagText || "CALIBRATED";
                 engineTag.className = `auto-tag ${predData.tagClass || ""}`;
-
                 const predVal = String(
                     predData.displayPrediction || "--",
                 ).toUpperCase();
-
                 if (predictionResultImg) {
                     let imgSrc = "images/Big.png";
                     if (predVal === "SMALL") imgSrc = "images/Small.png";
                     else if (predVal === "SKIP") imgSrc = "";
-
                     if (imgSrc) {
                         predictionResultImg.src = imgSrc;
                         predictionResultImg.style.display = "block";
@@ -1132,21 +1002,17 @@
                         predictionResultImg.style.display = "none";
                     }
                 }
-
                 predictedScores.textContent = predData.isSkipped
                     ? "Target: SKIP | Alt: SKIP"
                     : `Target: #${predData.primaryNumber} | Alt: #${predData.numbers[1]}`;
-
                 confidenceBadge.textContent = predData.isSkipped
                     ? "RISK PAUSE ACTIVE"
                     : `AI CONFIDENCE: ${predData.confidence}%`;
-
                 sigStreak.textContent = predData.patternMatchMsg;
                 sigFreq.textContent = predData.recencyMsg;
                 sigTransB.textContent = predData.markovMsg;
                 sigTransS.textContent = predData.diffMsg;
             }
-
             async function fetchWithProxy(url, proxyIndex = 0) {
                 if (proxyIndex >= CONFIG.PROXIES.length)
                     throw new Error("All proxies failed");
@@ -1166,14 +1032,12 @@
                     return fetchWithProxy(url, proxyIndex + 1);
                 }
             }
-
             async function fetchData() {
                 if (isFetching || state.isManualMode) return;
                 isFetching = true;
                 refreshBtn.disabled = true;
                 statusDot.className = "dot loading";
                 statusText.textContent = "Fetching...";
-
                 try {
                     let data;
                     try {
@@ -1192,12 +1056,10 @@
                             `${CONFIG.API_URL}?ts=${Date.now()}`,
                         );
                     }
-
                     let list =
                         data?.data?.list ||
                         data?.list ||
                         (Array.isArray(data) ? data : []);
-
                     if (list && list.length > 0) {
                         displayNumbers(list);
                         updateLastUpdated();
@@ -1218,7 +1080,6 @@
                     refreshBtn.disabled = false;
                 }
             }
-
             function displayNumbers(numbers) {
                 const firstItem = numbers[0];
                 const possibleNumberFields = [
@@ -1239,14 +1100,12 @@
                     "period",
                     "no",
                 ];
-
                 let numberField = possibleNumberFields.find(
                     (field) => firstItem?.[field] !== undefined,
                 );
                 let issueField = possibleIssueFields.find(
                     (field) => firstItem?.[field] !== undefined,
                 );
-
                 if (!numberField && firstItem) {
                     for (const key of Object.keys(firstItem)) {
                         if (
@@ -1258,7 +1117,6 @@
                         }
                     }
                 }
-
                 if (!issueField && firstItem) {
                     for (const key of Object.keys(firstItem)) {
                         if (
@@ -1271,7 +1129,6 @@
                         }
                     }
                 }
-
                 const sortedNumbers = [...numbers].sort((a, b) => {
                     const issueA = issueField ? BigInt(a[issueField] || 0) : 0n;
                     const issueB = issueField ? BigInt(b[issueField] || 0) : 0n;
@@ -1279,11 +1136,9 @@
                     if (issueB < issueA) return -1;
                     return 0;
                 });
-
                 if (sortedNumbers.length > 0 && issueField) {
                     const previousIssue = globalLatestIssue;
                     globalLatestIssue = sortedNumbers[0][issueField];
-
                     if (
                         previousIssue &&
                         String(previousIssue) !== String(globalLatestIssue)
@@ -1293,33 +1148,26 @@
                     }
                     updateNextIssueDisplay();
                 }
-
                 const latestDraws = sortedNumbers.slice(0, 20);
                 const displayList = latestDraws.reverse();
-
                 globalRawList = sortedNumbers;
                 globalNumberField = numberField || "number";
                 globalIssueField = issueField || "issue";
-
                 const sizePatternArray = displayList.map((item) =>
                     getSizeShort(getNumberSize(item[globalNumberField])),
                 );
                 const colorPatternArray = displayList.map((item) =>
                     getNumberColorShort(item[globalNumberField]),
                 );
-
                 state.sizePatternRaw = sizePatternArray.join(" → ");
                 state.colorPatternRaw = colorPatternArray.join(" → ");
-
                 sizePatternText.textContent = state.sizePatternRaw;
                 colorPatternText.textContent = state.colorPatternRaw;
-
                 let html = `
             <div class="direction-label">Live History (${displayList.length} draws: Oldest <span class="arrow">→</span> Latest)</div>
             <div class="numbers-container">
                 <div class="numbers-wrapper">
         `;
-
                 displayList.forEach((item, index) => {
                     const numberValue = item[globalNumberField] ?? "?";
                     const isLatest = index === displayList.length - 1;
@@ -1328,24 +1176,20 @@
                     const highlightStyle = isLatest
                         ? "transform: scale(1.08); border: 1px solid #38bdf8;"
                         : "";
-
                     html += `
                 <div class="number-card ${type}" style="${highlightStyle}">
                     <span class="number">${numberValue}</span>
                 </div>
             `;
                 });
-
                 html += `</div></div>`;
                 content.innerHTML = html;
-
                 setTimeout(() => {
                     const container =
                         document.querySelector(".numbers-container");
                     if (container) container.scrollLeft = container.scrollWidth;
                 }, 100);
             }
-
             function updateLastUpdated() {
                 const istNow = getISTDate();
                 const options = {
@@ -1361,10 +1205,8 @@
                     lastUpdatedDisplay.textContent = `LAST UPDATED: ${istNow.toLocaleString("en-IN", options)} IST`;
                 }
             }
-
             function startISTCountdown() {
                 if (countdownInterval) clearInterval(countdownInterval);
-
                 const updateTimer = () => {
                     if (state.isManualMode) return;
                     const istNow = getISTDate();
@@ -1375,7 +1217,6 @@
                             : secondsRemaining < 10
                               ? `0${secondsRemaining}`
                               : secondsRemaining;
-
                     if (
                         (secondsRemaining === 60 || secondsRemaining === 0) &&
                         lastFetchedMinute !== istNow.getMinutes()
@@ -1384,23 +1225,19 @@
                         fetchData();
                     }
                 };
-
                 updateTimer();
                 countdownInterval = setInterval(updateTimer, 1000);
             }
-
             window.refreshData = function () {
                 if (isFetching || state.isManualMode) return;
                 retryCount = 0;
                 fetchData();
             };
-
             async function init() {
                 await loadCombinationsCSV();
                 await fetchData();
                 startISTCountdown();
             }
-
             init();
         </script>
     </body>
